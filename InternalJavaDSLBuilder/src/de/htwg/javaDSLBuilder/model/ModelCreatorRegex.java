@@ -7,86 +7,113 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ClassAttribute;
+import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ModelClass;
+
 /**-
- * Defines Meta Model
- * 
- * Given Language/Model Description has to be in REGEX_PATTERN valid form
+ * Defines DSL Meta Model through regular expression 
+ * @author stboeckl
  * 
  *
  */
 public class ModelCreatorRegex {
 	
-	public static final String REGEX_PATTERN= "modelName=\\w+"
+	/* Old one
+	 	REGEX_PATTERN= "modelName=\\w+"
 			+ "((\\.A=\\w+:\\w+)|(\\.A=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
 			+ "((\\.OA=\\w+:\\w+)|(\\.OA=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
 			+ "((\\.LA=\\w+:\\w+)|(\\.LA=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
 			+ "((\\.OLA=\\w+:\\w+)|(\\.OLA=\\w+:\\w+((.A|.OA|.LA|.OLA)=\\{\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})))*"
-			+ "(\\.def:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})*"
+			+ "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})*"
 			+ "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})*"
 			+ "(\\.build=\\w+)*";
+	 */
 	
-	private static final String NO_MATCH = "Given String does not match BuildPatternCreator Regex Pattern: \n" +REGEX_PATTERN;
-	private static final String WRONG_DECLARATION = "Method not declared correctly";
-	private static final String SAME_METHOD_MULTIPLE_TIMES = "A Method can only be declared once in the same class!";
+	private static final String REGEX_DSLNAME = "(?i)modelName=\\w+";
+	private static final String REGEX_ATTRIBUTES = "(\\.A=\\w+:\\w+)";
+	private static final String REGEX_OPT_ATTRIBUTES = "(\\.OA=\\w+:\\w+)";
+	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
+	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
+	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})";
+	private static final String REGEX_CLASS_ATTR_DEFINITION = "{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}";
+	private static final String REGEX_ATTRIBUTE = "(.A|.OA|.LA|.OLA)=\\w+:\\w+";
+	
+	public static final String REGEX_PATTERN= 
+			REGEX_DSLNAME
+//			+ REGEX_ATTRIBUTES +"*"
+//			+ REGEX_OPT_ATTRIBUTES +"*"
+//			+ REGEX_LIST_OF_ATTRIBUTES +"*"
+//			+ REGEX_OPT_LIST_OF_ATTRIBUTES +"*"
+			+ REGEX_CLASS_DEFINITION +"+"
+			;
 	
 	public static final String MODEL_NAME = "modelName=\\w+";
-	public static final String METHODS = "((\\.m=\\w+:\\w+\\{\\w+(\\s?\\,\\s?\\w+)*\\})|\\.om=\\w+:\\w+)+";
-	public static final String PARAMETER_TYPE = ":\\w+";
-	public static final String METHOD_NAME = "=\\w+:";
+	public static final String CLASS_NAME = "class=\\w+";
+	public static final String ATTR = ".A";
+	public static final String OPT_ATTR = ".OA";
+	public static final String LIST_OF_ATTR = ".LA";
+	public static final String OPT_LIST_OF_ATTR = ".OLA";
 	public static final String NEXT_SCOPES = "\\{\\w+(\\s?\\,\\s?\\w+)*\\}";
 	public static final String SINGLE_SCOPE = "\\w+";
 	public static final String EP_SCOPE = "\\{\\w+";
 	public static final String EP_NEXT = "=\\w+";
-	
-	public static final String MANDATORY_ATTRIBUTES = "(\\.A=\\w+:\\w+)|(\\.A=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})";
-	public static final String OPTIONAL_ATTRIBUTES = "(\\.OA=\\w+:\\w+)|(\\.OA=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})";
-//TODO	public static final String LIST_MANDATORY_ATTRIBUTES;
-//TODO	public static final String LIST_OPTIONAL_ATTRIBUTES;
-	public static final String DEFINED_CLASSES = "\\.def:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}";
+	public static final String ATTRIBUTE_NAME = "=\\w+";
+	public static final String NAMING = "=\\w+:";
+	public static final String TYPING = ":\\w+";
 	
 	public static final String BUILD = "\\.build=\\w+";
 	public static final String IMPORT = "\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\}";
 	public static final String IMPORT_PARAMETER = "(\\w+(\\.)?)+";
 	
-	private static final Pattern NAME_PATTERN = Pattern.compile(MODEL_NAME, Pattern.CASE_INSENSITIVE);
-	private static final Pattern EP_SCOPE_PATTERN = Pattern.compile(EP_SCOPE, Pattern.CASE_INSENSITIVE);
-	private static final Pattern EP_NEXT_PATTERN = Pattern.compile(EP_NEXT, Pattern.CASE_INSENSITIVE);
-	private static final Pattern METHOD_PATTERN= Pattern.compile(METHODS, Pattern.CASE_INSENSITIVE);
-	private static final Pattern METHOD_NAME_PATTERN= Pattern.compile(METHOD_NAME, Pattern.CASE_INSENSITIVE);
-	private static final Pattern MANDATORY_METHODS_PATTERN= Pattern.compile(MANDATORY_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
-	private static final Pattern OPTIONAL_METHODS_PATTERN= Pattern.compile(OPTIONAL_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
-	private static final Pattern PARAMETER_TYPE_PATTERN= Pattern.compile(PARAMETER_TYPE, Pattern.CASE_INSENSITIVE);
+	public static final String MANDATORY_ATTRIBUTES = "\\.A=\\w+:\\w+";
+	public static final String OPTIONAL_ATTRIBUTES = "\\.OA=\\w+:\\w+";
+//TODO	public static final String LIST_MANDATORY_ATTRIBUTES;
+//TODO	public static final String LIST_OPTIONAL_ATTRIBUTES;
+	
+	private static final Pattern MODEL_NAME_PATTERN = Pattern.compile(MODEL_NAME, Pattern.CASE_INSENSITIVE);
+	private static final Pattern CLASS_DEFINITION_PATTERN = Pattern.compile(REGEX_CLASS_DEFINITION, Pattern.CASE_INSENSITIVE);
+	private static final Pattern CLASS_NAME_PATTERN= Pattern.compile(CLASS_NAME, Pattern.CASE_INSENSITIVE);
+	private static final Pattern CLASS_ATTRIBUTES_PATTERN= Pattern.compile(REGEX_CLASS_ATTR_DEFINITION, Pattern.CASE_INSENSITIVE);
+	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(REGEX_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
+	private static final Pattern NAMING_PATTERN = Pattern.compile(NAMING, Pattern.CASE_INSENSITIVE);
+	private static final Pattern ATTRIBUTE_NAME_PATTERN= Pattern.compile(ATTRIBUTE_NAME, Pattern.CASE_INSENSITIVE);
+	private static final Pattern MANDATORY_ATTRIBUTES_PATTERN= Pattern.compile(MANDATORY_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
+	private static final Pattern OPTIONAL_ATTRIBUTES_PATTERN= Pattern.compile(OPTIONAL_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
+	private static final Pattern TYPING_PATTERN= Pattern.compile(TYPING, Pattern.CASE_INSENSITIVE);
 	private static final Pattern NEXT_SCOPES_PATTERN= Pattern.compile(NEXT_SCOPES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern SINGLE_SCOPE_PATTERN= Pattern.compile(SINGLE_SCOPE, Pattern.CASE_INSENSITIVE);
+	
+	private static final Pattern EP_SCOPE_PATTERN = Pattern.compile(EP_SCOPE, Pattern.CASE_INSENSITIVE);
+	private static final Pattern EP_NEXT_PATTERN = Pattern.compile(EP_NEXT, Pattern.CASE_INSENSITIVE);
 	private static final Pattern BUILD_PATTERN = Pattern.compile(BUILD, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PATTERN = Pattern.compile(IMPORT, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PARAMETER_PATTERN = Pattern.compile(IMPORT_PARAMETER, Pattern.CASE_INSENSITIVE);
 	
-	private String  languageDescr;
-	private Matcher nameMatcher;
+	private static final String NO_MATCH = "Given String does not match BuildPatternCreator Regex Pattern: \n" +REGEX_PATTERN;
+	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
+	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
+	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
+	
+	private Matcher classDefinitionMatcher;
+	private Matcher modelNameMatcher;
+	private Matcher namingMatcher;
+	private Matcher typingMatcher;
 	private Matcher epMatcher;
-	private Matcher methodMatcher;
-	private Matcher mandatoryMethodMatcher;
-	private Matcher optionalMethodMatcher;
 	private Matcher nextScopesMatcher;
-	private Matcher nextSingleScopeMatcher;
 	private Matcher buildMatcher;
-	private Matcher methodNameMatcher;
 	private Matcher importMatcher;
 	private Matcher importParameterMatcher;
 	
+	private DSLGenerationModel genModel;
+	private String languageDescr;
 	private String dslName;
 	private String entryPointMethod;
-	public List<String> methodDeclarations;
-	private Map<String,String> chainMethods;
-	private Map<String,String> optionalMethods;
-	private Map<String,String> mandatoryMethods;
-	private Map<String,List<String>> nextMethods;
-	private Map<String,List<String>> nextOptionalMethods;
+	public List<String> attributeDeclarations;
 	private String buildMethodName;
 	private List<String> imports;
-	private String firstMethod;
-	private Map<String,String> lastMethods;
+	private String firstAttribute;
+	private Map<String,String> lastAttribute;
+	private List<String> definedClasses= new ArrayList<>();
 	
 	private ModelCreatorRegex(){}
 	
@@ -95,36 +122,147 @@ public class ModelCreatorRegex {
 			throw new IllegalArgumentException(NO_MATCH);
 		}else System.out.println("Correct Description");
 		ModelCreatorRegex creator = new ModelCreatorRegex();
-//		creator.languageDescr = languageDescr;
-//		creator.nameMatcher = NAME_PATTERN.matcher(creator.languageDescr);
+		creator.genModel = new DSLGenerationModel();
+		creator.languageDescr = languageDescr;
+		creator.retrieveDslName();
+		creator.modelNameMatcher = MODEL_NAME_PATTERN.matcher(languageDescr);
+		creator.classDefinitionMatcher = CLASS_DEFINITION_PATTERN.matcher(languageDescr);
 //		creator.epMatcher = EP_PATTERN.matcher(creator.languageDescr);
-//		creator.methodMatcher = METHOD_PATTERN.matcher(creator.languageDescr);
 //		creator.buildMatcher = BUILD_PATTERN.matcher(creator.languageDescr);
 //		creator.importMatcher = IMPORT_PATTERN.matcher(creator.languageDescr);
-//		creator.optionalMethodMatcher = OPTIONAL_METHODS_PATTERN.matcher(creator.languageDescr);
-//		creator.mandatoryMethodMatcher = MANDATORY_METHODS_PATTERN.matcher(creator.languageDescr);
-//			creator.getEntryPointMethod();
-//			creator.getBuildMethodName();
-//			creator.getDslName();
-//		creator.getMethodDeclarations();
-//			creator.getMandatoryMethods();
-//			creator.getOptionalMethods();
-//			creator.getNextMethods();
-//			creator.getNextOptionalMethods();
-//			creator.getImports();
+//		creator.mandatoryAttributeMatcher = MANDATORY_ATTRIBUTES_PATTERN.matcher(creator.languageDescr);
+//		creator.optionalAttributeMatcher = OPTIONAL_ATTRIBUTES_PATTERN.matcher(creator.languageDescr);
+//		creator.getEntryPointMethod();
+//		creator.getBuildMethodName();
+//		creator.getImports();
 		return creator;
 	}
 	
-	public String getDslName(){
-		if(this.dslName == null && this.nameMatcher.find()){
-			String found = nameMatcher.group();
-			this.dslName = found.substring(8);
+	public String retrieveDslName(){
+		if(this.dslName == null && this.modelNameMatcher.find()){
+			String modelNameDef = modelNameMatcher.group();
+			this.genModel.setModelName(getNameOfDefinition(modelNameDef));
 		}
-		return this.dslName;
+		return this.genModel.getModelName();
 	}
 	
-	public Map<String, String> getLastMethods() {
-		return lastMethods;
+	private String getNameOfDefinition(String def){
+		this.namingMatcher = NAMING_PATTERN.matcher(def);
+		if(this.namingMatcher.find()){
+				String naming = modelNameMatcher.group();
+				return naming.substring(1); //without naming operator "="
+		} 
+		else{
+			try {
+				throw new Exception();
+			} catch (Exception e) {
+				// TODO  implement Exception Handling!
+				e.printStackTrace();
+			}
+			return "";
+		}
+	}
+	
+	private String getTypeOfDefinition(String def){
+		this.typingMatcher = TYPING_PATTERN.matcher(def);
+		if(this.typingMatcher.find()){
+				String naming = typingMatcher.group();
+				return naming.substring(1); //without typing operator ":"
+		} 
+		else{
+			return "";
+		}
+	}
+	
+	public void retrieveClassDefinitions(){
+		ClassAttribute lastRequiredAttr = null;
+		while(this.classDefinitionMatcher.find()){
+			String classDef = this.classDefinitionMatcher.group();
+			String className = retrieveClassName(classDef);
+			addClassDef(className);
+			ModelClass modelClass = this.genModel.addModelClass(className);
+			List<ClassAttribute> classAttributes = retrieveAttributes(classDef,modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
+			lastRequiredAttr = setAttributeOrderInClass(lastRequiredAttr,classAttributes);
+		}
+	}
+	
+	private void addClassDef(String className){
+		if(this.definedClasses.contains(className))
+			throw new IllegalArgumentException("Failed to define class of name: "+className+ ". "
+			+ CLASS_DEFINED_MULTIPLE_TIMES);
+		else this.definedClasses.add(className);
+	}
+	
+	private List<ClassAttribute> retrieveAttributes(String classDef, ModelClass modelClass) {
+		List<ClassAttribute> attributes = new ArrayList<ClassAttribute>();
+		Matcher attrDefMatcher = CLASS_ATTRIBUTES_PATTERN.matcher(classDef);
+		while(attrDefMatcher.find()){
+			Matcher singleAttrMatcher = ATTRIBUTE_PATTERN.matcher(attrDefMatcher.group());
+			while(singleAttrMatcher.find()){
+				ClassAttribute currentAttr = genModel.new ClassAttribute();
+				String attrDef = singleAttrMatcher.group();
+				AttributeKind kind = getType(attrDef);
+				currentAttr.setAttributeKind(kind);
+				String attrName = getNameOfDefinition(attrDef);
+				currentAttr.setAttributeName(attrName);
+				String attrType = getTypeOfDefinition(attrDef);
+				currentAttr.setType(attrType);
+				attributes.add(currentAttr);
+			}
+		}
+		return attributes;
+		
+	}
+	
+	//TODO Order has to be confirmed, and nextClass and nextOptionalClass must be set somwhere
+	private ClassAttribute setAttributeOrderInClass(ClassAttribute lastRequiredAttr, List<ClassAttribute> classAttributes) {
+		ClassAttribute firstRequiredAttr = null;
+		ClassAttribute previousRequiredAttr = null;
+		List<ClassAttribute> firstOptionalAttribiutes = new ArrayList<ClassAttribute>();
+		for (ClassAttribute currentAtt : classAttributes) {
+			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // if its a mandatory attribute
+			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
+				if(firstRequiredAttr==null)
+							firstRequiredAttr = currentAtt;
+						if(previousRequiredAttr==null)
+							previousRequiredAttr = currentAtt;
+						else if(previousRequiredAttr!=null){
+							previousRequiredAttr.setNextAttribute(currentAtt);
+							previousRequiredAttr = currentAtt;
+						}
+			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // if its an optional attribute
+			currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES){
+				if(firstRequiredAttr==null)
+					firstOptionalAttribiutes.add(currentAtt);
+				if(previousRequiredAttr!=null)
+					previousRequiredAttr.addNextOptionalAttribute(currentAtt);
+			}
+		}
+		return previousRequiredAttr;
+	}
+
+
+	private String retrieveClassName(String classDef) {
+		Matcher classNameMatcher = CLASS_NAME_PATTERN.matcher(classDef);
+		if(!classNameMatcher.find())
+			return "";
+		String className = getNameOfDefinition(classNameMatcher.group());
+		return className;
+	}
+	
+	private AttributeKind getType(String attrDef){
+		if(attrDef.startsWith(ATTR))
+			return AttributeKind.ATTRIBUTE;
+		else if (attrDef.startsWith(OPT_ATTR))
+			return AttributeKind.OPTIONAL_ATTRIBUTE;
+		else if (attrDef.startsWith(LIST_OF_ATTR))
+			return AttributeKind.LIST_OF_ATTRIBUTES;
+		else
+			return AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES;
+	}
+
+	public Map<String, String> getLastAttribute() {
+		return lastAttribute;
 	}
 	
 	public String getEntryPointMethod(){
@@ -135,111 +273,11 @@ public class ModelCreatorRegex {
 		return this.entryPointMethod;
 	}
 	
-	public String getFirstMethod() {
-		return firstMethod;
+	public String getFirstAttribute() {
+		return firstAttribute;
 	}
 	
-	public Map<String,String> getMandatoryMethods() {
-		if(this.mandatoryMethods == null){
-			this.mandatoryMethods = new LinkedHashMap<String,String>();
-			while(this.mandatoryMethodMatcher.find())
-				putMethodInMap(mandatoryMethodMatcher.group(), this.mandatoryMethods);
-		}
-		return this.mandatoryMethods;
-	}
 	
-	public Map<String,String> getOptionalMethods() {
-		if(this.optionalMethods == null){
-			this.optionalMethods = new LinkedHashMap<>();
-			while(this.optionalMethodMatcher.find()){
-				String optionalMeth = optionalMethodMatcher.group();
-				putMethodInMap(optionalMeth, this.optionalMethods);
-			}
-		}
-		return this.optionalMethods;
-	}
-	
-	/**
-	 * 
-	 * @return ordered java.util.Map containing methodname parametersType. 
-	 */
-	public List<String> getMethodDeclarations(){
-		if(this.methodDeclarations == null){
-			this.methodDeclarations = new ArrayList<String>();
-			this.lastMethods = new LinkedHashMap<String,String>();
-			if(this.epMatcher.find()){
-				String ep = epMatcher.group();
-				Matcher nameMatcher = EP_NEXT_PATTERN.matcher(ep);
-				if(nameMatcher.find()){
-					this.entryPointMethod = nameMatcher.group().substring(1);
-				}
-				Matcher nextMethod = NEXT_SCOPES_PATTERN.matcher(ep);
-				if(nextMethod.find())
-					this.firstMethod = nextMethod.group().substring(1,nextMethod.group().length()-1);
-			}
-			this.mandatoryMethods = new LinkedHashMap<String,String>();
-			while(this.mandatoryMethodMatcher.find()){
-				String m = mandatoryMethodMatcher.group();
-				putMethodInMap(m, this.mandatoryMethods);
-				this.methodDeclarations.add(m);
-			}
-			this.optionalMethods = new LinkedHashMap<>();
-			while(this.optionalMethodMatcher.find()){
-				String om = optionalMethodMatcher.group();
-				putMethodInMap(om, this.optionalMethods);
-				this.methodDeclarations.add(om);
-			}
-		}
-		return this.methodDeclarations;
-	}
-	
-	public Map<String, List<String>> getNextMethods() {
-		if(this.nextMethods == null){
-			setNextMethods(methodDeclarations);
-		}
-		return this.nextMethods;
-	}
-	
-	public Map<String, List<String>> getNextOptionalMethods() {
-		if(this.nextOptionalMethods == null){
-			setNextMethods(methodDeclarations);
-		}
-		return this.nextOptionalMethods;
-	}
-	
-	private void setNextMethods(List<String> methods) {
-		this.nextMethods = new LinkedHashMap<>();
-		this.nextOptionalMethods = new LinkedHashMap<>();
-		for (String methodDecl: methods) {
-			this.methodNameMatcher = METHOD_NAME_PATTERN.matcher(methodDecl);
-			this.methodNameMatcher.find();
-			String methodName = this.methodNameMatcher.group();
-			methodName = methodName.substring(1,methodName.length()-1);
-			this.nextScopesMatcher = NEXT_SCOPES_PATTERN.matcher(methodDecl);
-			if(this.nextScopesMatcher.find()){
-				String nextScopes = this.nextScopesMatcher.group();
-				this.nextSingleScopeMatcher = SINGLE_SCOPE_PATTERN.matcher(nextScopes);
-				List<String> mandatoryScopes = new ArrayList<>();
-				List<String> optionalScopes = new ArrayList<>();
-				while(this.nextSingleScopeMatcher.find()){
-					String nextScopeName = this.nextSingleScopeMatcher.group();
-					if(nextScopeName.equals(this.buildMethodName)){
-						this.lastMethods.put(methodName,nextScopeName); //TODO Exceptions wenn Methode im Selben Scope mehrfach angegeben wird (auch buildMethod)
-						continue;
-					}
-					if(this.optionalMethods.containsKey(nextScopeName))
-						optionalScopes.add(nextScopeName);
-					else if(this.mandatoryMethods.containsKey(nextScopeName))
-						mandatoryScopes.add(nextScopeName);
-				}
-				if(optionalScopes.size()>0)
-					this.nextOptionalMethods.put(methodName, optionalScopes);
-				if(mandatoryScopes.size()>0)
-					this.nextMethods.put(methodName, mandatoryScopes);
-			}
-		}
-	}
-
 	public String getBuildMethodName(){
 		if(this.buildMethodName == null && this.buildMatcher.find()){
 			String found = buildMatcher.group();
@@ -263,26 +301,4 @@ public class ModelCreatorRegex {
 		return imports;
 	}
 	
-	private void putMethodInMap(String methodDesc, Map<String,String> methodMap){
-		String methodName = "";
-		String type = "";
-		//initialize parameter Matcher with found method description
-		Matcher methodNameMatcher = METHOD_NAME_PATTERN.matcher(methodDesc);
-		if(methodNameMatcher.find()){
-			String tmpName = methodNameMatcher.group();
-			methodName = tmpName.substring(1, tmpName.length()-1);
-		}
-		Matcher parameterTypeMatcher = PARAMETER_TYPE_PATTERN.matcher(methodDesc);
-		if(parameterTypeMatcher.find()){
-			String tmpType = parameterTypeMatcher.group();
-			type = tmpType.substring(1, tmpType.length());
-		}
-		if(methodName.equals("") || type.equals(""))
-			throw new IllegalArgumentException(WRONG_DECLARATION);
-		else if (methodMap.containsKey(methodName))
-			throw new IllegalArgumentException(SAME_METHOD_MULTIPLE_TIMES + " Multiple occurring method: " +methodName);
-		methodMap.put(methodName,type);
-	}
-
-
 }
