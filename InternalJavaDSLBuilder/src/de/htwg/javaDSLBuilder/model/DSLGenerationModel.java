@@ -36,7 +36,7 @@ public class DSLGenerationModel {
 	
 	public ModelClass addModelClass(String className) {
 		if(!classes.containsKey(className))
-			classes.put(className,new ModelClass());
+			classes.put(className,new ModelClass(className));
 		return classes.get(className);
 	}
 
@@ -48,9 +48,10 @@ public class DSLGenerationModel {
 		return classes;
 	}
 	
-	class ModelClass{
+	public class ModelClass{
 		
-		public ModelClass(){
+		public ModelClass(String name){
+			className = name;
 			attributes = new ArrayList<ClassAttribute>();
 		}
 		
@@ -74,8 +75,9 @@ public class DSLGenerationModel {
 		}
 	}
 
-	class ClassAttribute{
+	public class ClassAttribute{
 		private String attributeName;
+		private String attributeFullName;
 		private String type;
 		private boolean optional; //TODO used in EMFCreator
 		private AttributeKind attributeType;
@@ -150,6 +152,15 @@ public class DSLGenerationModel {
 		public void setAttributeKind(AttributeKind kind) {
 			this.attributeType = kind;
 		}
+
+		public String getAttributeFullName() {
+			return attributeFullName;
+		}
+
+		public void setAttributeFullName(String attributeFullName) {
+			this.attributeFullName = attributeFullName;
+		}
+
 	}
 	
 	@Override

@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.model;
+package de.htwg.javaDSLBuilder.creator;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -7,6 +7,8 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.htwg.javaDSLBuilder.model.AttributeKind;
+import de.htwg.javaDSLBuilder.model.DSLGenerationModel;
 import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ClassAttribute;
 import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ModelClass;
 
@@ -16,7 +18,7 @@ import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ModelClass;
  * 
  *
  */
-public class ModelCreatorRegex {
+public class CreatorRegex implements ICreator{
 	
 	/* Old one
 	 	REGEX_PATTERN= "modelName=\\w+"
@@ -34,8 +36,8 @@ public class ModelCreatorRegex {
 	private static final String REGEX_OPT_ATTRIBUTES = "(\\.OA=\\w+:\\w+)";
 	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
 	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
-	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})";
-	private static final String REGEX_CLASS_ATTR_DEFINITION = "{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}";
+	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\})";
+	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\}";
 	private static final String REGEX_ATTRIBUTE = "(.A|.OA|.LA|.OLA)=\\w+:\\w+";
 	
 	public static final String REGEX_PATTERN= 
@@ -48,7 +50,7 @@ public class ModelCreatorRegex {
 			;
 	
 	public static final String MODEL_NAME = "modelName=\\w+";
-	public static final String CLASS_NAME = "class=\\w+";
+	public static final String CLASS_NAME = ".class=\\w+";
 	public static final String ATTR = ".A";
 	public static final String OPT_ATTR = ".OA";
 	public static final String LIST_OF_ATTR = ".LA";
@@ -58,7 +60,7 @@ public class ModelCreatorRegex {
 	public static final String EP_SCOPE = "\\{\\w+";
 	public static final String EP_NEXT = "=\\w+";
 	public static final String ATTRIBUTE_NAME = "=\\w+";
-	public static final String NAMING = "=\\w+:";
+	public static final String NAMING = "=\\w+";
 	public static final String TYPING = ":\\w+";
 	
 	public static final String BUILD = "\\.build=\\w+";
@@ -115,27 +117,26 @@ public class ModelCreatorRegex {
 	private Map<String,String> lastAttribute;
 	private List<String> definedClasses= new ArrayList<>();
 	
-	private ModelCreatorRegex(){}
+	private CreatorRegex(){}
 	
-	public static ModelCreatorRegex getInstance(String languageDescr){
+	public static CreatorRegex getInstance(String languageDescr){
 		if(!languageDescr.matches(REGEX_PATTERN)){
 			throw new IllegalArgumentException(NO_MATCH);
 		}else System.out.println("Correct Description");
-		ModelCreatorRegex creator = new ModelCreatorRegex();
+		CreatorRegex creator = new CreatorRegex();
 		creator.genModel = new DSLGenerationModel();
 		creator.languageDescr = languageDescr;
-		creator.retrieveDslName();
 		creator.modelNameMatcher = MODEL_NAME_PATTERN.matcher(languageDescr);
 		creator.classDefinitionMatcher = CLASS_DEFINITION_PATTERN.matcher(languageDescr);
-//		creator.epMatcher = EP_PATTERN.matcher(creator.languageDescr);
-//		creator.buildMatcher = BUILD_PATTERN.matcher(creator.languageDescr);
-//		creator.importMatcher = IMPORT_PATTERN.matcher(creator.languageDescr);
-//		creator.mandatoryAttributeMatcher = MANDATORY_ATTRIBUTES_PATTERN.matcher(creator.languageDescr);
-//		creator.optionalAttributeMatcher = OPTIONAL_ATTRIBUTES_PATTERN.matcher(creator.languageDescr);
-//		creator.getEntryPointMethod();
-//		creator.getBuildMethodName();
-//		creator.getImports();
+		creator.retrieveDslName();
+		creator.retrieveDefinedClasses();
+		creator.setAttributeOrder();
 		return creator;
+	}
+	
+	@Override
+	public DSLGenerationModel getGenerationModel() {
+		return this.genModel;
 	}
 	
 	public String retrieveDslName(){
@@ -149,16 +150,10 @@ public class ModelCreatorRegex {
 	private String getNameOfDefinition(String def){
 		this.namingMatcher = NAMING_PATTERN.matcher(def);
 		if(this.namingMatcher.find()){
-				String naming = modelNameMatcher.group();
+				String naming = namingMatcher.group();
 				return naming.substring(1); //without naming operator "="
 		} 
 		else{
-			try {
-				throw new Exception();
-			} catch (Exception e) {
-				// TODO  implement Exception Handling!
-				e.printStackTrace();
-			}
 			return "";
 		}
 	}
@@ -174,23 +169,33 @@ public class ModelCreatorRegex {
 		}
 	}
 	
-	public void retrieveClassDefinitions(){
-		ClassAttribute lastRequiredAttr = null;
+	/**
+	 * Retrieves the classes and their attributes defined in the language description and
+	 * adds them to the {@link DSLGenerationModel}. instance
+	 */
+	private void retrieveDefinedClasses(){
 		while(this.classDefinitionMatcher.find()){
 			String classDef = this.classDefinitionMatcher.group();
 			String className = retrieveClassName(classDef);
+			System.out.println("ClassName:'"+className+"'");
 			addClassDef(className);
 			ModelClass modelClass = this.genModel.addModelClass(className);
-			List<ClassAttribute> classAttributes = retrieveAttributes(classDef,modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
-			lastRequiredAttr = setAttributeOrderInClass(lastRequiredAttr,classAttributes);
+			retrieveAttributes(classDef,modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
 		}
 	}
 	
 	private void addClassDef(String className){
-		if(this.definedClasses.contains(className))
+		if(isClassDefined(className))
 			throw new IllegalArgumentException("Failed to define class of name: "+className+ ". "
 			+ CLASS_DEFINED_MULTIPLE_TIMES);
 		else this.definedClasses.add(className);
+	}
+	
+	private boolean isClassDefined(String className){
+		if(this.definedClasses.contains(className)){
+			return true;
+		}else
+			return false;
 	}
 	
 	private List<ClassAttribute> retrieveAttributes(String classDef, ModelClass modelClass) {
@@ -201,35 +206,55 @@ public class ModelCreatorRegex {
 			while(singleAttrMatcher.find()){
 				ClassAttribute currentAttr = genModel.new ClassAttribute();
 				String attrDef = singleAttrMatcher.group();
-				AttributeKind kind = getType(attrDef);
+				AttributeKind kind = getKind(attrDef);
 				currentAttr.setAttributeKind(kind);
 				String attrName = getNameOfDefinition(attrDef);
 				currentAttr.setAttributeName(attrName);
+				currentAttr.setAttributeFullName(modelClass.getClassName()+"."+attrName);
 				String attrType = getTypeOfDefinition(attrDef);
 				currentAttr.setType(attrType);
 				attributes.add(currentAttr);
+				modelClass.addAttribute(currentAttr);
 			}
 		}
 		return attributes;
 		
 	}
 	
-	//TODO Order has to be confirmed, and nextClass and nextOptionalClass must be set somwhere
-	private ClassAttribute setAttributeOrderInClass(ClassAttribute lastRequiredAttr, List<ClassAttribute> classAttributes) {
+	private void setAttributeOrder() {
+		ModelClass firstClass = null;
+		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
+			String className = classEntry.getKey();
+			ModelClass modelClass = classEntry.getValue();
+			if(firstClass == null) //works because Map is LinkedHasMap which has Order saved
+				firstClass = modelClass; 
+			setAttributeOrderInClass(modelClass);
+		}
+		
+	}
+	
+	/**
+	 * Sets the attribute order in a ModelClass
+	 * @param modelClass The ModelClass object to order attributes in
+	 * @return returns the last required attribute of the model class
+	 */
+	private ClassAttribute setAttributeOrderInClass(ModelClass modelClass) {
 		ClassAttribute firstRequiredAttr = null;
 		ClassAttribute previousRequiredAttr = null;
 		List<ClassAttribute> firstOptionalAttribiutes = new ArrayList<ClassAttribute>();
-		for (ClassAttribute currentAtt : classAttributes) {
+		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // if its a mandatory attribute
 			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
 				if(firstRequiredAttr==null)
-							firstRequiredAttr = currentAtt;
-						if(previousRequiredAttr==null)
-							previousRequiredAttr = currentAtt;
-						else if(previousRequiredAttr!=null){
-							previousRequiredAttr.setNextAttribute(currentAtt);
-							previousRequiredAttr = currentAtt;
-						}
+					firstRequiredAttr = currentAtt;
+				if(previousRequiredAttr==null)
+					previousRequiredAttr = currentAtt;
+				else if(previousRequiredAttr!=null){
+					if(isClassDefined(currentAtt.getType())) //If current Attribute is a Reference to defined Class set Next Class else its a normal attribute
+						previousRequiredAttr.addNextClass(currentAtt.getType());
+					else previousRequiredAttr.setNextAttribute(currentAtt);
+					previousRequiredAttr = currentAtt;
+				}
 			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // if its an optional attribute
 			currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES){
 				if(firstRequiredAttr==null)
@@ -243,14 +268,15 @@ public class ModelCreatorRegex {
 
 
 	private String retrieveClassName(String classDef) {
+		System.out.println(classDef);
 		Matcher classNameMatcher = CLASS_NAME_PATTERN.matcher(classDef);
-		if(!classNameMatcher.find())
-			return "";
-		String className = getNameOfDefinition(classNameMatcher.group());
+		String className = "";
+		if(classNameMatcher.find())
+			className = getNameOfDefinition(classNameMatcher.group());
 		return className;
 	}
 	
-	private AttributeKind getType(String attrDef){
+	private AttributeKind getKind(String attrDef){
 		if(attrDef.startsWith(ATTR))
 			return AttributeKind.ATTRIBUTE;
 		else if (attrDef.startsWith(OPT_ATTR))
@@ -300,5 +326,5 @@ public class ModelCreatorRegex {
 		}
 		return imports;
 	}
-	
+
 }
