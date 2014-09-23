@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.htwg.javaDSLBuilder.model.AttributeKind;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ClassAttribute;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ModelClass;
+import de.htwg.javaDSLBuilder.dslmodel.AttributeKind;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ClassAttribute;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
 
 /**-
  * Defines DSL Meta Model through regular expression 
@@ -36,9 +36,10 @@ public class CreatorRegex implements ICreator{
 	private static final String REGEX_OPT_ATTRIBUTES = "(\\.OA=\\w+:\\w+)";
 	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
 	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
-	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\})";
+	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\})"; //Must start with mandatory Attribute
 	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\}";
 	private static final String REGEX_ATTRIBUTE = "(.A|.OA|.LA|.OLA)=\\w+:\\w+";
+	public static final String REGEX_IMPORT = "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})";
 	
 	public static final String REGEX_PATTERN= 
 			REGEX_DSLNAME
@@ -47,6 +48,7 @@ public class CreatorRegex implements ICreator{
 //			+ REGEX_LIST_OF_ATTRIBUTES +"*"
 //			+ REGEX_OPT_LIST_OF_ATTRIBUTES +"*"
 			+ REGEX_CLASS_DEFINITION +"+"
+			+ REGEX_IMPORT + "?"
 			;
 	
 	public static final String MODEL_NAME = "modelName=\\w+";
@@ -64,7 +66,6 @@ public class CreatorRegex implements ICreator{
 	public static final String TYPING = ":\\w+";
 	
 	public static final String BUILD = "\\.build=\\w+";
-	public static final String IMPORT = "\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\}";
 	public static final String IMPORT_PARAMETER = "(\\w+(\\.)?)+";
 	
 	public static final String MANDATORY_ATTRIBUTES = "\\.A=\\w+:\\w+";
@@ -78,6 +79,8 @@ public class CreatorRegex implements ICreator{
 	private static final Pattern CLASS_ATTRIBUTES_PATTERN= Pattern.compile(REGEX_CLASS_ATTR_DEFINITION, Pattern.CASE_INSENSITIVE);
 	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(REGEX_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
 	private static final Pattern NAMING_PATTERN = Pattern.compile(NAMING, Pattern.CASE_INSENSITIVE);
+	private static final Pattern IMPORT_PATTERN = Pattern.compile(REGEX_IMPORT, Pattern.CASE_INSENSITIVE);
+	//old ones
 	private static final Pattern ATTRIBUTE_NAME_PATTERN= Pattern.compile(ATTRIBUTE_NAME, Pattern.CASE_INSENSITIVE);
 	private static final Pattern MANDATORY_ATTRIBUTES_PATTERN= Pattern.compile(MANDATORY_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern OPTIONAL_ATTRIBUTES_PATTERN= Pattern.compile(OPTIONAL_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
@@ -88,9 +91,9 @@ public class CreatorRegex implements ICreator{
 	private static final Pattern EP_SCOPE_PATTERN = Pattern.compile(EP_SCOPE, Pattern.CASE_INSENSITIVE);
 	private static final Pattern EP_NEXT_PATTERN = Pattern.compile(EP_NEXT, Pattern.CASE_INSENSITIVE);
 	private static final Pattern BUILD_PATTERN = Pattern.compile(BUILD, Pattern.CASE_INSENSITIVE);
-	private static final Pattern IMPORT_PATTERN = Pattern.compile(IMPORT, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PARAMETER_PATTERN = Pattern.compile(IMPORT_PARAMETER, Pattern.CASE_INSENSITIVE);
 	
+	//Error Messages
 	private static final String NO_MATCH = "Given String does not match BuildPatternCreator Regex Pattern: \n" +REGEX_PATTERN;
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
 	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
@@ -128,8 +131,10 @@ public class CreatorRegex implements ICreator{
 		creator.languageDescr = languageDescr;
 		creator.modelNameMatcher = MODEL_NAME_PATTERN.matcher(languageDescr);
 		creator.classDefinitionMatcher = CLASS_DEFINITION_PATTERN.matcher(languageDescr);
+		creator.importMatcher = IMPORT_PATTERN.matcher(languageDescr);
 		creator.retrieveDslName();
 		creator.retrieveDefinedClasses();
+		creator.retireveImports();
 		creator.setAttributeOrder();
 		return creator;
 	}
@@ -177,7 +182,6 @@ public class CreatorRegex implements ICreator{
 		while(this.classDefinitionMatcher.find()){
 			String classDef = this.classDefinitionMatcher.group();
 			String className = retrieveClassName(classDef);
-			System.out.println("ClassName:'"+className+"'");
 			addClassDef(className);
 			ModelClass modelClass = this.genModel.addModelClass(className);
 			retrieveAttributes(classDef,modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
@@ -214,6 +218,10 @@ public class CreatorRegex implements ICreator{
 				String attrType = getTypeOfDefinition(attrDef);
 				currentAttr.setType(attrType);
 				attributes.add(currentAttr);
+				if(!isClassDefined(attrType)){
+					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE || kind == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES)
+						modelClass.addOptionalAttribute(currentAttr);
+				}
 				modelClass.addAttribute(currentAttr);
 			}
 		}
@@ -228,7 +236,8 @@ public class CreatorRegex implements ICreator{
 			ModelClass modelClass = classEntry.getValue();
 			if(firstClass == null) //works because Map is LinkedHasMap which has Order saved
 				firstClass = modelClass; 
-			setAttributeOrderInClass(modelClass);
+			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
+			removeOptionalAttributes(optionalAttrs, modelClass);
 		}
 		
 	}
@@ -236,39 +245,51 @@ public class CreatorRegex implements ICreator{
 	/**
 	 * Sets the attribute order in a ModelClass
 	 * @param modelClass The ModelClass object to order attributes in
-	 * @return returns the last required attribute of the model class
+	 * @return a List<ClassAttribute> with the optionalAttributes
 	 */
-	private ClassAttribute setAttributeOrderInClass(ModelClass modelClass) {
-		ClassAttribute firstRequiredAttr = null;
+	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) {
+		List<ClassAttribute> optionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
-		List<ClassAttribute> firstOptionalAttribiutes = new ArrayList<ClassAttribute>();
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // if its a mandatory attribute
 			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
-				if(firstRequiredAttr==null)
-					firstRequiredAttr = currentAtt;
 				if(previousRequiredAttr==null)
 					previousRequiredAttr = currentAtt;
 				else if(previousRequiredAttr!=null){
-					if(isClassDefined(currentAtt.getType())) //If current Attribute is a Reference to defined Class set Next Class else its a normal attribute
-						previousRequiredAttr.addNextClass(currentAtt.getType());
-					else previousRequiredAttr.setNextAttribute(currentAtt);
+					if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set nextClass
+						currentAtt.setReference(true);
+					}
+					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 					previousRequiredAttr = currentAtt;
 				}
 			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // if its an optional attribute
 			currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES){
-				if(firstRequiredAttr==null)
-					firstOptionalAttribiutes.add(currentAtt);
-				if(previousRequiredAttr!=null)
-					previousRequiredAttr.addNextOptionalAttribute(currentAtt);
+				if(previousRequiredAttr!=null){
+					if(isClassDefined(currentAtt.getType())){
+						currentAtt.setReference(true);
+						currentAtt.setOptional(true);
+						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
+						previousRequiredAttr = currentAtt;
+					}else{
+						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
+						optionalAttrs.add(currentAtt);
+					}
+				}
 			}
 		}
-		return previousRequiredAttr;
+		previousRequiredAttr.setLastAttribute(true);
+		return optionalAttrs;
 	}
 
+	
+	private void removeOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
+		for (ClassAttribute classAttribute : optionalAttrs) {
+			modelClass.getAttributes().remove(classAttribute);
+		}
+		
+	}
 
 	private String retrieveClassName(String classDef) {
-		System.out.println(classDef);
 		Matcher classNameMatcher = CLASS_NAME_PATTERN.matcher(classDef);
 		String className = "";
 		if(classNameMatcher.find())
@@ -307,12 +328,12 @@ public class CreatorRegex implements ICreator{
 	public String getBuildMethodName(){
 		if(this.buildMethodName == null && this.buildMatcher.find()){
 			String found = buildMatcher.group();
-			buildMethodName = found.substring(7);
+			buildMethodName = found.substring(7); //TODO
 		}
 		return this.buildMethodName;
 	}
 	
-	public List<String> getImports(){
+	public void retireveImports(){
 		if(this.imports == null && this.importMatcher.find()){
 			imports = new ArrayList<>();
 			String importString = importMatcher.group().substring(4);
@@ -321,10 +342,9 @@ public class CreatorRegex implements ICreator{
 			while(this.importParameterMatcher.find()){
 				String toImport = importParameterMatcher.group();
 				if(!toImport.equals(""))
-					imports.add(toImport);
+					this.genModel.addImports(toImport);
 			}
 		}
-		return imports;
 	}
 
 }

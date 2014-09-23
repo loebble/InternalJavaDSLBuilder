@@ -1,8 +1,9 @@
 package de.htwg.javaDSLBuilder.test;
 
 import de.htwg.generated.emf.Forum.ForumPackage;
+import de.htwg.generated.regex.User;
 import de.htwg.javaDSLBuilder.creator.CreatorEMF;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
 
 public class CreatorEMFTest {
 
@@ -10,9 +11,9 @@ public class CreatorEMFTest {
 		ForumPackage forumPackage = ForumPackage.eINSTANCE;
 		CreatorEMF creator = CreatorEMF.getInstance(forumPackage);
 		DSLGenerationModel builderModel = creator.getGenerationModel();
-		System.out.println(builderModel);
+		System.out.println(builderModel.printedModel());
 		System.out.println();
-		System.out.println(builderModel.printOrder());
+		System.out.println(builderModel.printedOrder());
 	}
 
 }

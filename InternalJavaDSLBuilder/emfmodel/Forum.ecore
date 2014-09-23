@@ -1,40 +1,98 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Forum" nsURI="http://de.htwg.generated.emf.Forum" nsPrefix="de.htwg.generated.emf.Forum">
-  <eClassifiers xsi:type="ecore:EClass" name="User">
-    <eOperations name="hasAddress" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
-      <eParameters name="chain" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
-      <eParameters name="map">
-        <eGenericType eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
-          <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
-          <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+<ecore:EPackage
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    name="Forum"
+    nsURI="http://de.htwg.generated.emf.Forum"
+    nsPrefix="de.htwg.generated.emf.Forum">
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="User">
+    <eOperations
+        name="hasAddress"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters
+          name="chain"
+          eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
+      <eParameters
+          name="map">
+        <eGenericType
+            eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
+          <eTypeArguments
+              eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+          <eTypeArguments
+              eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
         </eGenericType>
       </eParameters>
     </eOperations>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstName" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="null"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastName" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" transient="true"
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="firstName"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
         defaultValueLiteral="null"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        transient="true" defaultValueLiteral="null"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="address" lowerBound="1"
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="lastName"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="email"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="address"
+        lowerBound="1"
         eType="#//Address"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="phone" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
-        transient="true" defaultValueLiteral="null"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="age" ordered="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
-        transient="true" defaultValueLiteral="0"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="phone"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="age"
+        ordered="false"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        transient="true"
+        defaultValueLiteral="0"/>
   </eClassifiers>
-  <eClassifiers xsi:type="ecore:EClass" name="Address">
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="street" lowerBound="1"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="null"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="houseNumber" unique="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Address">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="street"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="houseNumber"
+        unique="false"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="zipCode" unique="false"
-        lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="zipCode"
+        unique="false"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
         defaultValueLiteral="0"/>
-    <eStructuralFeatures xsi:type="ecore:EAttribute" name="additional" unique="false"
-        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="additional"
+        unique="false"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="null"/>
   </eClassifiers>
 </ecore:EPackage>

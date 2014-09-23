@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.model;
+package de.htwg.javaDSLBuilder.dslmodel;
 
 public enum AttributeKind {
 	ATTRIBUTE, OPTIONAL_ATTRIBUTE,

@@ -18,9 +18,9 @@ import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ClassAttribute;
-import de.htwg.javaDSLBuilder.model.DSLGenerationModel.ModelClass;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ClassAttribute;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
 
 public class CreatorEMF implements ICreator{
 	private String modelPackage;

@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.model;
+package de.htwg.javaDSLBuilder.dslmodel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -10,12 +10,14 @@ public class DSLGenerationModel {
 	public DSLGenerationModel(){
 		imports = new ArrayList<String>();
 		classes = new LinkedHashMap<String,DSLGenerationModel.ModelClass>();
+		nestedCalls = new LinkedHashMap<String,String>();
 	}
 	
 	private String modelName;
 	private List<String> imports;
 	
-	private final Map<String,ModelClass> classes;
+	public final Map<String,ModelClass> classes;
+	public final Map<String,String> nestedCalls;
 	
 	public String getModelName() {
 		return modelName;
@@ -39,7 +41,11 @@ public class DSLGenerationModel {
 			classes.put(className,new ModelClass(className));
 		return classes.get(className);
 	}
-
+	
+	public ModelClass getClass(String className){
+		return classes.get(className);
+	}
+	
 	/**
 	 * returns a Map (Classname as Key and the {@code ModelClass} Object as Value) for all the Classes defined in the Model.
 	 * classes can be added via the put method of the Map interface
@@ -53,17 +59,27 @@ public class DSLGenerationModel {
 		public ModelClass(String name){
 			className = name;
 			attributes = new ArrayList<ClassAttribute>();
+			optionalAttributes = new ArrayList<ClassAttribute>();
 		}
 		
 		private String className;
 		private List<ClassAttribute> attributes;
+		private List<ClassAttribute> optionalAttributes;
 
 		public List<ClassAttribute> getAttributes() {
 			return attributes;
 		}
+		
+		public List<ClassAttribute> getOptionalAttributes() {
+			return optionalAttributes;
+		}
 
 		public void addAttribute(ClassAttribute attribute) {
 			this.attributes.add(attribute);
+		}
+		
+		public void addOptionalAttribute(ClassAttribute attribute) {
+			this.optionalAttributes.add(attribute);
 		}
 
 		public String getClassName() {
@@ -73,18 +89,21 @@ public class DSLGenerationModel {
 		public void setClassName(String className) {
 			this.className = className;
 		}
+		
 	}
 
 	public class ClassAttribute{
 		private String attributeName;
 		private String attributeFullName;
 		private String type;
-		private boolean optional; //TODO used in EMFCreator
-		private AttributeKind attributeType;
+		private boolean optional = false; //TODO used in EMFCreator
+		private AttributeKind kind;
 		private ClassAttribute nextAttribute; //TODO also List?
 		private List<ClassAttribute> nextOptionalAttributes;
+		private boolean isReference;
 		private List<String> nextClass;
 		private List<String> nextOptionalClasses;
+		private boolean lastAttribute = false;
 		
 		public ClassAttribute(){
 			this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
@@ -146,11 +165,11 @@ public class DSLGenerationModel {
 		}
 
 		public AttributeKind getAttributeKind() {
-			return attributeType;
+			return kind;
 		}
 
 		public void setAttributeKind(AttributeKind kind) {
-			this.attributeType = kind;
+			this.kind = kind;
 		}
 
 		public String getAttributeFullName() {
@@ -161,28 +180,50 @@ public class DSLGenerationModel {
 			this.attributeFullName = attributeFullName;
 		}
 
+		public boolean isLastAttribute() {
+			return lastAttribute;
+		}
+
+		public void setLastAttribute(boolean lastAttribute) {
+			this.lastAttribute = lastAttribute;
+		}
+
+		public boolean isReference() {
+			return isReference;
+		}
+
+		public void setReference(boolean isReference) {
+			this.isReference = isReference;
+		}
+
 	}
 	
-	@Override
-	public String toString() {
+	public String printedModel() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("DSL for: "+this.modelName +"\n");
-		sb.append("imports: ");
+		sb.append("IMPORTS: ");
 		for (String importString : this.imports) {
 			sb.append(importString + "; ");
 		}
-		sb.append("\n"+"Attributes: ");
+		sb.append("\n"+"CLASSES: ");
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
 			sb.append("\n" + "ModelClass: "+modelClass.className +"\n");
 			for (ClassAttribute attr : modelClass.attributes) {
-				sb.append("AttributeName: " +attr.attributeName + " type: " +attr.type + " optional: " +attr.optional+" ");
+				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
+						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
+						+" "+ " optional: " +attr.isOptional()+" " +"\n");
+			} 
+			for (ClassAttribute attr : modelClass.optionalAttributes) {
+				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
+						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
+						+" "+ " optional: " +attr.isOptional()+" " +"\n");
 			} 
 		}
 		return sb.toString();
 	}
 	
-	public String printOrder(){
+	public String printedOrder(){
 		StringBuffer sb = new StringBuffer();
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
@@ -193,11 +234,11 @@ public class DSLGenerationModel {
 					sb.append(" "+attr.attributeName);
 				if(attr.getNextAttribute() != null)
 					sb.append("-> "+ attr.getNextAttribute().getAttributeName());
+				for (String nextClass : attr.getNextClass()) {
+					sb.append(":"+nextClass);
+				}
 				for (ClassAttribute nextOptional : attr.getNextOptionalAttributes()) {
 					sb.append("(->"+nextOptional.getAttributeName()+")");
-				}
-				for (String nextClass : attr.getNextClass()) {
-					sb.append("->"+nextClass);
 				}
 				for (String nextClass : attr.getNextOptionalClass()) {
 					sb.append("(->"+nextClass+")");
