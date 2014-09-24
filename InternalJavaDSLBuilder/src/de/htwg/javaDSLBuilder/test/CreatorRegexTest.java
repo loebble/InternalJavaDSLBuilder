@@ -2,6 +2,8 @@
 package de.htwg.javaDSLBuilder.test;
 
 import de.htwg.generated.regex.User;
+import de.htwg.generated.regex.UserTMP;
+import static de.htwg.generated.regex.UserTMP.UserBuilder.*;
 import de.htwg.javaDSLBuilder.Builder;
 import de.htwg.javaDSLBuilder.creator.CreatorRegex;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
@@ -41,10 +43,19 @@ public class CreatorRegexTest {
 		
 		Builder.buildDSL(regexCreator, Builder.MODEL_MIXED_IN_TEMPLATE, "de.htwg.generated.regex");
 		
-		User user = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad").noAddress().buildUser();
-		User user2 = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad")
-						.address().street("asda").houseNumber(123).zipCode("adwad")
-							.country().name("fewfe").optionalUN_Member(true).isoCode(12345).buildUser();
+//		User user = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad").noAddress().buildUser();
+//		User user2 = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad")
+//						.address().street("asda").houseNumber(123).zipCode("adwad")
+//							.country().name("fewfe").optionalUN_Member(true).isoCode(12345).buildUser();
+//		
+//		UserTMP userTmp = 	createUser().firstName("Steven").lastName("Böckle").nickName("sboeckle")
+//								.address(createAddress().street("Zasius").houseNumber(11).zipCode("78462")
+//										.country(createCountry().name("Deutschland").optionalUN_Member(true).isoCode(12345)
+//											.buildCountry())
+//									.buildAddress())
+//							.buildUser();
+//		
+//		System.out.println(userTmp.firstName + userTmp.address.houseNumber + userTmp.address.country.name);
 		
 	}
 

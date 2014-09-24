@@ -48,7 +48,7 @@ public class Builder {
 		templatePath = templateDirecorty.toString();
 		switch (template) {
 		case MODEL_MIXED_IN_TEMPLATE:
-			templatePath += "/ModelMixedInTemplate.stg";
+			templatePath += "/ModelInternTemplate.stg";
 			break;
 		default:
 			break;
