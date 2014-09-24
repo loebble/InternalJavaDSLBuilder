@@ -47,8 +47,7 @@ private static class <className>{
 
 
 transferValues(attribute, builderName) ::= <<
-	<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet)
-	<endif>
+	<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet)<endif>
 	this.<attribute.attributeName> = <builderName>.<attribute.attributeName>Value;
 	
 >>
@@ -70,26 +69,6 @@ public void set<attribute.attributeName;format="cap">(<attribute.type> <attribut
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
 
->>
-
-
-
-createRootClassAttribute(className) ::= <<
-<className; format="cap"> <className>;
-
->>
-
-createRootClassBuilderAttribute(className) ::= <<
-final <className; format="cap">Builder <className>Builder;
-
->>
-
-declareNestedBuilder(type) ::= <<
-<type;format="cap">Builder <type;format="lower">Builder;
->>
-
-instantiateNestedBuilder(type) ::= <<
-this.<type>Builder = new <type>Builder();
 >>
 
 generateEntryPointMethod(modelClass) ::= <<
@@ -160,7 +139,7 @@ this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeNam
 createAttributeScopeClass(className,classAttribute, genModel) ::= <<
 public class <classAttribute.attributeName;format="cap">Scope{
 	<createAttributeMethod(className,classAttribute,genModel.modelName)>
-	<! foreach optional attribute !>
+	<! foreach simple optional attribute !>
 	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
 }
 
@@ -170,14 +149,27 @@ createAttributeMethod(className,classAttribute,modelName) ::= <<
 <if(!classAttribute.lastAttribute)>
 public <classAttribute.nextAttribute.attributeName;format="cap">Scope <classAttribute.attributeName> (<classAttribute.type> val){
 	<className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
 	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
 }
+<if(classAttribute.optional)>
+public <classAttribute.nextAttribute.attributeName;format="cap">Scope no<classAttribute.attributeName;format="cap"> (){
+	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
+}
+<endif>
 <else>
 public <className;format="cap">BuildScope <classAttribute.attributeName> (<classAttribute.type> val){
 	<className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
+}
+<if(classAttribute.optional)>
+public <className;format="cap">BuildScope no<classAttribute.attributeName;format="cap"> (){
 	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
 }
 <endif>
+<endif>
+
 >>
 
 
@@ -188,54 +180,4 @@ public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;fo
 	return <className;format="cap">Builder.this.<scopeName>Scope;
 }
 
->>
-
-createReferenceMethod(referenceAttribute, currentBuilderClass, classes, modelName) ::= <<
-public <referenceAttribute.type;format="cap">Builder.<first(classes.(referenceAttribute.type).attributes).attributeName;format="cap">Scope <referenceAttribute.attributeName> (){
-	<currentBuilderClass.className;format="cap">Builder.this.<referenceAttribute.type;format="lower">Builder = new <referenceAttribute.type;format="cap">Builder();
-	<if(referenceAttribute.optional)><currentBuilderClass.className;format="cap">Builder.this.<referenceAttribute.type;format="lower">ValueIsSet = true; <endif>
-	return <currentBuilderClass.className;format="cap">Builder.this.<referenceAttribute.type;format="lower">Builder.<first(classes.(referenceAttribute.type).attributes).attributeName>Scope;
-}
-<if(referenceAttribute.optional)>
-<createOptionalReferenceMethod(referenceAttribute, currentBuilderClass, classes, modelName)>
-<endif>
->>
-
-createOptionalReferenceMethod(referenceAttribute, currentBuilderClass, classes, modelName) ::= <<
-<if(!referenceAttribute.lastAttribute)>
-public <referenceAttribute.nextAttribute.attributeName;format="cap">Scope no<referenceAttribute.attributeName;format="cap"> (<referenceAttribute.type> val){
-	return <currentBuilderClass.className;format="cap">Builder.this.<referenceAttribute.nextAttribute.attributeName>Scope;
-}
-<else>
-public <modelName;format="cap">Builder.Build<modelName;format="cap">Scope no<referenceAttribute.attributeName;format="cap"> (){
-	return <modelName;format="cap">Builder.this.build<modelName;format="cap">Scope;
-}
-<endif>
-
->>
-
-SAVEcreateOptionalAttributeMethod(modelName,scopeName, optionalAttribute) ::= <<
-public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
-	<modelName;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
-	<modelName;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
-	return <modelName;format="cap">Builder.this.<scopeName>Scope;
-}
->>
-
-SAVEcreateAttributeScopeClass(className,classAttribute, modelName) ::= <<
-public class <classAttribute.attributeName;format="cap">Scope{
-	<if(classAttribute.nextClass.empty)><createAttributeMethod(className,classAttribute)> <! normal attribute with nextAttribute !>
-	<else><createAttributeMethod(classAttribute.nextClass.className,first(classAttribute.nextClass.attributes))> <! attribute with a class as next Attribute !>
-	<endif>
-	<! foreach optional attribute !>
-	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
-}
-
->>
-
-SAVEgenerateEntryPointMethod(firstClass,genModel) ::= <<
-public static <genModel.classes.(firstClass).className;format="cap">Builder.<first(genModel.classes.(firstClass).attributes).attributeName; format="cap">Scope <genModel.classes.(firstClass).className>(){
-	<genModel.modelName; format="cap">Builder builder = new <genModel.modelName; format="cap">Builder();
-	return builder.<genModel.classes.(firstClass).className>Builder.<first(genModel.classes.(firstClass).attributes).attributeName>Scope;
-}
 >>

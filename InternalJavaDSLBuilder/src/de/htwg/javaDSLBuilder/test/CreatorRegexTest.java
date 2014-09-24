@@ -1,9 +1,10 @@
 
 package de.htwg.javaDSLBuilder.test;
 
+import static de.htwg.generated.regex.User.AddressBuilder.createAddress;
+import static de.htwg.generated.regex.User.CountryBuilder.createCountry;
+import static de.htwg.generated.regex.User.UserBuilder.createUser;
 import de.htwg.generated.regex.User;
-import de.htwg.generated.regex.UserTMP;
-import static de.htwg.generated.regex.UserTMP.UserBuilder.*;
 import de.htwg.javaDSLBuilder.Builder;
 import de.htwg.javaDSLBuilder.creator.CreatorRegex;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
@@ -47,14 +48,14 @@ public class CreatorRegexTest {
 //		User user2 = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad")
 //						.address().street("asda").houseNumber(123).zipCode("adwad")
 //							.country().name("fewfe").optionalUN_Member(true).isoCode(12345).buildUser();
-//		
-//		UserTMP userTmp = 	createUser().firstName("Steven").lastName("Böckle").nickName("sboeckle")
-//								.address(createAddress().street("Zasius").houseNumber(11).zipCode("78462")
-//										.country(createCountry().name("Deutschland").optionalUN_Member(true).isoCode(12345)
-//											.buildCountry())
-//									.buildAddress())
-//							.buildUser();
-//		
+		
+		User userTmp = 	createUser().firstName("Steven").lastName("Böckle").nickName("sboeckle")
+								.address(createAddress().street("Zasius").houseNumber(11).zipCode("78462")
+										.country(createCountry().name("Deutschland").optionalUN_Member(true).isoCode(12345)
+											.buildCountry())
+									.buildAddress())
+							.buildUser();
+		
 //		System.out.println(userTmp.firstName + userTmp.address.houseNumber + userTmp.address.country.name);
 		
 	}
