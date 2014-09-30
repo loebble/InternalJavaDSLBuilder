@@ -14,4 +14,12 @@
             genModel="emfmodel/Forum.genmodel"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated ForumMulti -->
+      <package
+            uri="http://de.htwg.generated.emf.Forum"
+            class="de.htwg.generated.emf.ForumMulti.ForumMultiPackage"
+            genModel="emfmodel/ForumMulti.genmodel"/>
+   </extension>
+
 </plugin>

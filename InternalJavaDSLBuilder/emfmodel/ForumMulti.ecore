@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage
+    xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    name="ForumMulti"
+    nsURI="http://de.htwg.generated.emf.Forum"
+    nsPrefix="de.htwg.generated.emf.ForumMulti">
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="User">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="firstName"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="lastName"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="email"
+        lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="phone"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="age"
+        ordered="false"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        transient="true"
+        defaultValueLiteral="0"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="post"
+        eType="#//Post"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="friend"
+        lowerBound="1"
+        eType="#//User"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Post">
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="topic"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EAttribute"
+        name="text"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="nested"
+        eType="#//Nested"/>
+  </eClassifiers>
+  <eClassifiers
+      xsi:type="ecore:EClass"
+      name="Nested">
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="creator"
+        lowerBound="1"
+        eType="#//User"/>
+  </eClassifiers>
+</ecore:EPackage>

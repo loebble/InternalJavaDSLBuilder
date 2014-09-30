@@ -60,11 +60,13 @@ public class DSLGenerationModel {
 			className = name;
 			attributes = new ArrayList<ClassAttribute>();
 			optionalAttributes = new ArrayList<ClassAttribute>();
+			referencedByOpposite = new ArrayList<ClassAttribute>();
 		}
 		
 		private String className;
 		private List<ClassAttribute> attributes;
 		private List<ClassAttribute> optionalAttributes;
+		private List<ClassAttribute> referencedByOpposite;
 
 		public List<ClassAttribute> getAttributes() {
 			return attributes;
@@ -90,6 +92,30 @@ public class DSLGenerationModel {
 			this.className = className;
 		}
 		
+		public ClassAttribute getSpefificAttributeByFullName(String fullAttributeName) {
+			for (ClassAttribute attr : this.attributes) {
+				if(attr.attributeFullName.equals(fullAttributeName))
+					return attr;
+			}
+			return null;
+		}
+		
+		public ClassAttribute getSpefificAttribute(String attributeName) {
+			for (ClassAttribute attr : this.attributes) {
+				if(attr.attributeName.equals(attributeName))
+					return attr;
+			}
+			return null;
+		}
+
+		public List<ClassAttribute> getReferencedByOpposite() {
+			return referencedByOpposite;
+		}
+
+		public void addReferencedByOpposite(ClassAttribute referencedByOpposite) {
+			this.referencedByOpposite.add(referencedByOpposite);
+		}
+		
 	}
 
 	public class ClassAttribute{
@@ -104,6 +130,9 @@ public class DSLGenerationModel {
 		private List<String> nextClass;
 		private List<String> nextOptionalClasses;
 		private boolean lastAttribute = false;
+		private ClassAttribute opposite;
+		private boolean isReferencedByAttribute = false;
+		private ClassAttribute referencedBy = null;
 		
 		public ClassAttribute(){
 			this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
@@ -196,6 +225,30 @@ public class DSLGenerationModel {
 			this.isReference = isReference;
 		}
 
+		public void setOpposite(ClassAttribute opp) {
+			this.opposite=opp;
+		}
+		
+		public ClassAttribute getOpposite() {
+			return this.opposite;
+		}
+
+		public ClassAttribute getReferencedBy() {
+			return referencedBy;
+		}
+
+		public void setReferencedBy(ClassAttribute referencedBy) {
+			this.referencedBy = referencedBy;
+		}
+
+		public boolean isReferencedByAttribute() {
+			return isReferencedByAttribute;
+		}
+
+		public void setReferencedByAttribute(boolean isReferencedByAttribute) {
+			this.isReferencedByAttribute = isReferencedByAttribute;
+		}
+		
 	}
 	
 	public String printedModel() {
@@ -212,13 +265,19 @@ public class DSLGenerationModel {
 			for (ClassAttribute attr : modelClass.attributes) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
-						+" "+ " optional: " +attr.isOptional()+" " +"\n");
-			} 
+						+ " optional: " +attr.isOptional());
+				if(attr.getOpposite()!=null)
+					sb.append(" opposite: " +attr.getOpposite().getAttributeFullName());
+				sb.append("\n");
+			}
 			for (ClassAttribute attr : modelClass.optionalAttributes) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
-						+" "+ " optional: " +attr.isOptional()+" " +"\n");
-			} 
+						+ " optional: " +attr.isOptional()+" " +"\n");
+			}
+			for (ClassAttribute referencedCl : modelClass.referencedByOpposite) {
+				sb.append("\t" + referencedCl.getOpposite().getAttributeFullName() +" referenced by nestedClassAttr: "+referencedCl.getAttributeFullName() +"\n");
+			}
 		}
 		return sb.toString();
 	}

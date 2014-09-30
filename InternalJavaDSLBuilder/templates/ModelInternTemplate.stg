@@ -7,10 +7,10 @@ package <packageName>;
 public class <genModel.modelName>{
 
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelAttribute(modelAttribute)>}>
-	<genModel.classes.(genModel.modelName).optionalAttributes:{modelAttribute|<if(!modelAttribute.reference)><createModelAttribute(modelAttribute)><endif>}>
+	<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<createModelAttribute(attribute)>}>
 	private <genModel.modelName>(<genModel.modelName>Builder builder){
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<transferValues(attribute,"builder")>}>
-		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<if(!attribute.reference)><transferOptValues(attribute,"builder")><endif>}>
+		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
 
@@ -23,6 +23,7 @@ public class <genModel.modelName>{
 >>
 
 createModelAttribute(classAttribute) ::= <<
+<if(classAttribute.optional)>private boolean <classAttribute.attributeName>IsSet;<endif>
 private <classAttribute.type> <classAttribute.attributeName>;
 
 >>
@@ -83,9 +84,9 @@ public static <first(modelClass.attributes).attributeName; format="cap">Scope cr
 createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
 public static class <className>Builder{
 	//mandatory attributes
-	<modelClass.attributes:{classAttribute|<if(!classAttribute.optional)><createClassAttribute(classAttribute,"Value")><endif>}>
+	<modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
 	//optional attributes
-	<modelClass.optionalAttributes:{opClassAttribute|<createClassOptionalAttribute(opClassAttribute,"Value")>}>
+	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	//scope attributes
 	<modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
 	private final <className;format="cap">BuildScope <className;format="lower">BuildScope;
@@ -102,7 +103,9 @@ public static class <className>Builder{
 	
 	public class <className;format="cap">BuildScope{
 		public <className;format="cap"> build<className;format="cap">() {
-			return new <className;format="cap">(<className;format="cap">Builder.this);
+			<className;format="cap"> <className;format="lower"> = new <className;format="cap">(<className;format="cap">Builder.this);
+			<modelClass.referencedByOpposite:{nestedAttributeRef|<className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<className;format="lower">);}>
+			return <className;format="lower">;
 		}
 	}	
 
@@ -111,13 +114,8 @@ public static class <className>Builder{
 >>
 
 createClassAttribute(classAttribute, attach) ::= <<
+<if(classAttribute.optional)>private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
 private <classAttribute.type> <classAttribute.attributeName><attach>;
-
->>
-
-createClassOptionalAttribute(classAttribute, attach) ::= <<
-private <classAttribute.type> <classAttribute.attributeName>Value;
-private boolean <classAttribute.attributeName>ValueIsSet = false;
 
 >>
 
@@ -147,9 +145,10 @@ public class <classAttribute.attributeName;format="cap">Scope{
 
 createAttributeMethod(className,classAttribute,modelName) ::= <<
 <if(!classAttribute.lastAttribute)>
-public <classAttribute.nextAttribute.attributeName;format="cap">Scope <classAttribute.attributeName> (<classAttribute.type> val){
-	<className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+public <classAttribute.nextAttribute.attributeName;format="cap">Scope <classAttribute.attributeName> (<if(!classAttribute.referencedByAttribute)><classAttribute.type> val<endif>){
+	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
 	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+	<endif>
 	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
 }
 <if(classAttribute.optional)>
@@ -158,9 +157,10 @@ public <classAttribute.nextAttribute.attributeName;format="cap">Scope no<classAt
 }
 <endif>
 <else>
-public <className;format="cap">BuildScope <classAttribute.attributeName> (<classAttribute.type> val){
-	<className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+public <className;format="cap">BuildScope <classAttribute.attributeName> (<if(!classAttribute.ReferencedByAttribute)><classAttribute.type> val<endif>){
+	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
 	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+	<endif>
 	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
 }
 <if(classAttribute.optional)>

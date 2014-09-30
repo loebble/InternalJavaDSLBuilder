@@ -36,9 +36,9 @@ public class CreatorRegex implements ICreator{
 	private static final String REGEX_OPT_ATTRIBUTES = "(\\.OA=\\w+:\\w+)";
 	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
 	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
-	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\})"; //Must start with mandatory Attribute
-	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+(\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*\\}";
-	private static final String REGEX_ATTRIBUTE = "(.A|.OA|.LA|.OLA)=\\w+:\\w+";
+	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})"; //Must start with mandatory Attribute
+	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\}";
+	private static final String REGEX_ATTRIBUTE = "((.A|.OA|.LA|.OLA)=\\w+:\\w+)|(\\.OP=\\w+:\\w+->\\w+)";
 	public static final String REGEX_IMPORT = "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})";
 	
 	public static final String REGEX_PATTERN= 
@@ -53,10 +53,11 @@ public class CreatorRegex implements ICreator{
 	
 	public static final String MODEL_NAME = "modelName=\\w+";
 	public static final String CLASS_NAME = ".class=\\w+";
-	public static final String ATTR = ".A";
-	public static final String OPT_ATTR = ".OA";
-	public static final String LIST_OF_ATTR = ".LA";
-	public static final String OPT_LIST_OF_ATTR = ".OLA";
+	public static final String ATTR_START = ".A";
+	public static final String OPT_START = ".OA";
+	public static final String LIST_START = ".LA";
+	public static final String OPT_LIST_START = ".OLA";
+	public static final String OPPOSITE_START = ".OP";
 	public static final String NEXT_SCOPES = "\\{\\w+(\\s?\\,\\s?\\w+)*\\}";
 	public static final String SINGLE_SCOPE = "\\w+";
 	public static final String EP_SCOPE = "\\{\\w+";
@@ -64,12 +65,14 @@ public class CreatorRegex implements ICreator{
 	public static final String ATTRIBUTE_NAME = "=\\w+";
 	public static final String NAMING = "=\\w+";
 	public static final String TYPING = ":\\w+";
+	public static final String OPPOSITE = "->\\w+";
 	
 	public static final String BUILD = "\\.build=\\w+";
 	public static final String IMPORT_PARAMETER = "(\\w+(\\.)?)+";
 	
 	public static final String MANDATORY_ATTRIBUTES = "\\.A=\\w+:\\w+";
 	public static final String OPTIONAL_ATTRIBUTES = "\\.OA=\\w+:\\w+";
+	public static final String OPPOSITE_ATTRIBUTE = "(\\.OP=\\w+:\\w+->\\w+)";
 //TODO	public static final String LIST_MANDATORY_ATTRIBUTES;
 //TODO	public static final String LIST_OPTIONAL_ATTRIBUTES;
 	
@@ -80,11 +83,13 @@ public class CreatorRegex implements ICreator{
 	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(REGEX_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
 	private static final Pattern NAMING_PATTERN = Pattern.compile(NAMING, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PATTERN = Pattern.compile(REGEX_IMPORT, Pattern.CASE_INSENSITIVE);
+	private static final Pattern OPPOSITE_ATTRIBUTE_PATTERN = Pattern.compile(OPPOSITE_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
 	//old ones
 	private static final Pattern ATTRIBUTE_NAME_PATTERN= Pattern.compile(ATTRIBUTE_NAME, Pattern.CASE_INSENSITIVE);
 	private static final Pattern MANDATORY_ATTRIBUTES_PATTERN= Pattern.compile(MANDATORY_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern OPTIONAL_ATTRIBUTES_PATTERN= Pattern.compile(OPTIONAL_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern TYPING_PATTERN= Pattern.compile(TYPING, Pattern.CASE_INSENSITIVE);
+	private static final Pattern OPPOSITE_PATTERN= Pattern.compile(OPPOSITE, Pattern.CASE_INSENSITIVE);
 	private static final Pattern NEXT_SCOPES_PATTERN= Pattern.compile(NEXT_SCOPES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern SINGLE_SCOPE_PATTERN= Pattern.compile(SINGLE_SCOPE, Pattern.CASE_INSENSITIVE);
 	
@@ -98,6 +103,8 @@ public class CreatorRegex implements ICreator{
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
 	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
 	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
+	private static final String CLASS_NOT_DEFINED = "Class referenced is not defined!";
+	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
 	
 	private Matcher classDefinitionMatcher;
 	private Matcher modelNameMatcher;
@@ -118,7 +125,7 @@ public class CreatorRegex implements ICreator{
 	private List<String> imports;
 	private String firstAttribute;
 	private Map<String,String> lastAttribute;
-	private List<String> definedClasses= new ArrayList<>();
+	private Map<String,String> definedClasses= new LinkedHashMap<>();
 	
 	private CreatorRegex(){}
 	
@@ -174,6 +181,17 @@ public class CreatorRegex implements ICreator{
 		}
 	}
 	
+	private String getOppositeNameOfDefinition(String def){
+		Matcher opMatcher = OPPOSITE_PATTERN.matcher(def);
+		if(opMatcher.find()){
+				String naming = opMatcher.group();
+				return naming.substring(2); //without poiting operator "->"
+		} 
+		else{
+			return "";
+		}
+	}
+	
 	/**
 	 * Retrieves the classes and their attributes defined in the language description and
 	 * adds them to the {@link DSLGenerationModel}. instance
@@ -182,26 +200,34 @@ public class CreatorRegex implements ICreator{
 		while(this.classDefinitionMatcher.find()){
 			String classDef = this.classDefinitionMatcher.group();
 			String className = retrieveClassName(classDef);
-			addClassDef(className);
-			ModelClass modelClass = this.genModel.addModelClass(className);
-			retrieveAttributes(classDef,modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
+			addClassDef(className,classDef);
+		}
+		for (Map.Entry<String,String> classEntry: definedClasses.entrySet()) {
+			ModelClass modelClass = this.genModel.addModelClass(classEntry.getKey());
+			retrieveAttributes(classEntry.getValue(),modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
 		}
 	}
 	
-	private void addClassDef(String className){
+	private void addClassDef(String className, String classDef){
 		if(isClassDefined(className))
 			throw new IllegalArgumentException("Failed to define class of name: "+className+ ". "
 			+ CLASS_DEFINED_MULTIPLE_TIMES);
-		else this.definedClasses.add(className);
+		else this.definedClasses.put(className,classDef);
 	}
 	
 	private boolean isClassDefined(String className){
-		if(this.definedClasses.contains(className)){
+		if(this.definedClasses.containsKey(className)){
 			return true;
 		}else
 			return false;
 	}
 	
+	/**
+	 * Retives the attributes and their properties from the class definition and adds them to to given modelClass.
+	 * @param classDef
+	 * @param modelClass
+	 * @return
+	 */
 	private List<ClassAttribute> retrieveAttributes(String classDef, ModelClass modelClass) {
 		List<ClassAttribute> attributes = new ArrayList<ClassAttribute>();
 		Matcher attrDefMatcher = CLASS_ATTRIBUTES_PATTERN.matcher(classDef);
@@ -222,13 +248,42 @@ public class CreatorRegex implements ICreator{
 					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE || kind == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES)
 						modelClass.addOptionalAttribute(currentAttr);
 				}
+				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
+					setOppositeAttribute(currentAttr,classDef);
 				modelClass.addAttribute(currentAttr);
 			}
 		}
 		return attributes;
-		
 	}
 	
+	/**
+	 * Retrieves Opposite definitions and sets the corresponding opposite attribute to the given one.
+	 * @param currentAttr
+	 * @param classDef
+	 */
+	private void setOppositeAttribute(ClassAttribute currentAttr, String classDef) {
+		Matcher oppositeMatcher = OPPOSITE_ATTRIBUTE_PATTERN.matcher(classDef);
+		while(oppositeMatcher.find()){
+			String opDef = oppositeMatcher.group();
+			String name = getNameOfDefinition(opDef);
+			String opType = getTypeOfDefinition(opDef);
+			String nameOfOpposite = getOppositeNameOfDefinition(opDef);
+			if(isClassDefined(opType)){
+				ModelClass mc = genModel.getClass(opType);
+				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
+				mc.addReferencedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
+				currentAttr.setReferencedByAttribute(true);
+				if(oppositeAttribute != null){
+					currentAttr.setOpposite(oppositeAttribute);
+				}
+				else
+					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED + "Opposite attribute:"+name+":"+opType+". Class attribute "+ opType +"->"+ nameOfOpposite+" not found.");
+			}
+			else 
+				throw new IllegalArgumentException(CLASS_NOT_DEFINED + "opType");
+		}
+	}
+
 	private void setAttributeOrder() {
 		ModelClass firstClass = null;
 		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
@@ -251,26 +306,29 @@ public class CreatorRegex implements ICreator{
 		List<ClassAttribute> optionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // if its a mandatory attribute
-			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
+			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
+			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES ||
+			currentAtt.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE){
+				System.out.println(currentAtt.getAttributeFullName());
 				if(previousRequiredAttr==null)
 					previousRequiredAttr = currentAtt;
 				else if(previousRequiredAttr!=null){
-					if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set nextClass
+					if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
 						currentAtt.setReference(true);
 					}
 					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 					previousRequiredAttr = currentAtt;
 				}
-			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // if its an optional attribute
+			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // an optional attribute
 			currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES){
+				System.out.println(currentAtt.getAttributeFullName());
+				currentAtt.setOptional(true);
 				if(previousRequiredAttr!=null){
-					if(isClassDefined(currentAtt.getType())){
+					if(isClassDefined(currentAtt.getType())){ //It is a modeled Class
 						currentAtt.setReference(true);
-						currentAtt.setOptional(true);
 						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 						previousRequiredAttr = currentAtt;
-					}else{
+					}else{ // it is not a modeled Class e.g. simple types
 						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
 						optionalAttrs.add(currentAtt);
 					}
@@ -298,14 +356,17 @@ public class CreatorRegex implements ICreator{
 	}
 	
 	private AttributeKind getKind(String attrDef){
-		if(attrDef.startsWith(ATTR))
+		if(attrDef.startsWith(ATTR_START))
 			return AttributeKind.ATTRIBUTE;
-		else if (attrDef.startsWith(OPT_ATTR))
+		else if (attrDef.startsWith(OPT_START))
 			return AttributeKind.OPTIONAL_ATTRIBUTE;
-		else if (attrDef.startsWith(LIST_OF_ATTR))
+		else if (attrDef.startsWith(LIST_START))
 			return AttributeKind.LIST_OF_ATTRIBUTES;
-		else
+		else if (attrDef.startsWith(OPT_LIST_START))
 			return AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES;
+		else if (attrDef.startsWith(OPPOSITE_START))
+			return AttributeKind.OPPOSITE_ATTRIBUTE;
+		else return null;
 	}
 
 	public Map<String, String> getLastAttribute() {
