@@ -5,6 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.w3c.dom.Attr;
+
 public class DSLGenerationModel {
 	
 	public DSLGenerationModel(){
@@ -15,6 +17,7 @@ public class DSLGenerationModel {
 	
 	private String modelName;
 	private List<String> imports;
+	private boolean hasList = false;
 	
 	public final Map<String,ModelClass> classes;
 	public final Map<String,String> nestedCalls;
@@ -121,6 +124,7 @@ public class DSLGenerationModel {
 	public class ClassAttribute{
 		private String attributeName;
 		private String attributeFullName;
+		private String className;
 		private String type;
 		private boolean optional = false; //TODO used in EMFCreator
 		private AttributeKind kind;
@@ -130,6 +134,7 @@ public class DSLGenerationModel {
 		private List<String> nextClass;
 		private List<String> nextOptionalClasses;
 		private boolean lastAttribute = false;
+		private boolean isList = false;
 		private ClassAttribute opposite;
 		private boolean isReferencedByAttribute = false;
 		private ClassAttribute referencedBy = null;
@@ -249,9 +254,24 @@ public class DSLGenerationModel {
 			this.isReferencedByAttribute = isReferencedByAttribute;
 		}
 		
+		public String getClassName() {
+			return className;
+		}
+		public void setClassName(String className) {
+			this.className = className;
+		}
+
+		public boolean isList() {
+			return isList;
+		}
+
+		public void setList(boolean isList) {
+			this.isList = isList;
+		}
+		
 	}
 	
-	public String printedModel() {
+	public String printModel() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("DSL for: "+this.modelName +"\n");
 		sb.append("IMPORTS: ");
@@ -282,7 +302,7 @@ public class DSLGenerationModel {
 		return sb.toString();
 	}
 	
-	public String printedOrder(){
+	public String printOrder(){
 		StringBuffer sb = new StringBuffer();
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
@@ -290,22 +310,24 @@ public class DSLGenerationModel {
 			int i = 0;
 			for (ClassAttribute attr : modelClass.attributes) {
 				if(i == 0)
-					sb.append(" "+attr.attributeName);
+					sb.append(" "+attr.attributeName +":" +attr.getType());
 				if(attr.getNextAttribute() != null)
-					sb.append("-> "+ attr.getNextAttribute().getAttributeName());
-				for (String nextClass : attr.getNextClass()) {
-					sb.append(":"+nextClass);
-				}
+					sb.append("-> "+ attr.getNextAttribute().getAttributeName() +":" +attr.getNextAttribute().getType());
 				for (ClassAttribute nextOptional : attr.getNextOptionalAttributes()) {
-					sb.append("(->"+nextOptional.getAttributeName()+")");
-				}
-				for (String nextClass : attr.getNextOptionalClass()) {
-					sb.append("(->"+nextClass+")");
+					sb.append("(->"+nextOptional.getAttributeName()+":" +nextOptional.getType()+")");
 				}
 				i++;
 			}
 		}
 		return sb.toString();
+	}
+
+	public boolean isHasList() {
+		return hasList;
+	}
+
+	public void setHasList(boolean hasList) {
+		this.hasList = hasList;
 	}
 	
 }

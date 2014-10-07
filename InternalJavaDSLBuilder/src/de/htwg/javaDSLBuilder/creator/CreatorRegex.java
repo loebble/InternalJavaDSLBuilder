@@ -37,8 +37,8 @@ public class CreatorRegex implements ICreator{
 	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
 	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
 	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})"; //Must start with mandatory Attribute
-	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\}";
-	private static final String REGEX_ATTRIBUTE = "((.A|.OA|.LA|.OLA)=\\w+:\\w+)|(\\.OP=\\w+:\\w+->\\w+)";
+	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\}";
+	private static final String REGEX_ATTRIBUTE = "((.A|.OA|.LA)=\\w+:\\w+)|(\\.OP=\\w+:\\w+->\\w+)";
 	public static final String REGEX_IMPORT = "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})";
 	
 	public static final String REGEX_PATTERN= 
@@ -56,7 +56,6 @@ public class CreatorRegex implements ICreator{
 	public static final String ATTR_START = ".A";
 	public static final String OPT_START = ".OA";
 	public static final String LIST_START = ".LA";
-	public static final String OPT_LIST_START = ".OLA";
 	public static final String OPPOSITE_START = ".OP";
 	public static final String NEXT_SCOPES = "\\{\\w+(\\s?\\,\\s?\\w+)*\\}";
 	public static final String SINGLE_SCOPE = "\\w+";
@@ -104,6 +103,7 @@ public class CreatorRegex implements ICreator{
 	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
 	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
 	private static final String CLASS_NOT_DEFINED = "Class referenced is not defined!";
+	private static final String OPPOSITE_DIFFERENT_TYPE = "The defined opposite attribute and its referencing attribute have different types.";
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
 	
 	private Matcher classDefinitionMatcher;
@@ -132,7 +132,7 @@ public class CreatorRegex implements ICreator{
 	public static CreatorRegex getInstance(String languageDescr){
 		if(!languageDescr.matches(REGEX_PATTERN)){
 			throw new IllegalArgumentException(NO_MATCH);
-		}else System.out.println("Correct Description");
+		}
 		CreatorRegex creator = new CreatorRegex();
 		creator.genModel = new DSLGenerationModel();
 		creator.languageDescr = languageDescr;
@@ -235,9 +235,14 @@ public class CreatorRegex implements ICreator{
 			Matcher singleAttrMatcher = ATTRIBUTE_PATTERN.matcher(attrDefMatcher.group());
 			while(singleAttrMatcher.find()){
 				ClassAttribute currentAttr = genModel.new ClassAttribute();
+				currentAttr.setClassName(modelClass.getClassName());
 				String attrDef = singleAttrMatcher.group();
 				AttributeKind kind = getKind(attrDef);
 				currentAttr.setAttributeKind(kind);
+				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
+					currentAttr.setList(true);
+					this.genModel.setHasList(true);
+				}
 				String attrName = getNameOfDefinition(attrDef);
 				currentAttr.setAttributeName(attrName);
 				currentAttr.setAttributeFullName(modelClass.getClassName()+"."+attrName);
@@ -245,11 +250,11 @@ public class CreatorRegex implements ICreator{
 				currentAttr.setType(attrType);
 				attributes.add(currentAttr);
 				if(!isClassDefined(attrType)){
-					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE || kind == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES)
+					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE)
 						modelClass.addOptionalAttribute(currentAttr);
 				}
 				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
-					setOppositeAttribute(currentAttr,classDef);
+					setOppositeAttribute(currentAttr,attrDef);
 				modelClass.addAttribute(currentAttr);
 			}
 		}
@@ -258,30 +263,42 @@ public class CreatorRegex implements ICreator{
 	
 	/**
 	 * Retrieves Opposite definitions and sets the corresponding opposite attribute to the given one.
-	 * @param currentAttr
-	 * @param classDef
+	 * @param currentAttr the attribute which needs a opposite reference
+	 * @param attrDef String with attribute definitition defined by {@link REGEX_ATTRIBUTE}
 	 */
-	private void setOppositeAttribute(ClassAttribute currentAttr, String classDef) {
-		Matcher oppositeMatcher = OPPOSITE_ATTRIBUTE_PATTERN.matcher(classDef);
+	private void setOppositeAttribute(ClassAttribute currentAttr, String attrDef) {
+		System.out.println(attrDef);
+		Matcher oppositeMatcher = OPPOSITE_ATTRIBUTE_PATTERN.matcher(attrDef);
 		while(oppositeMatcher.find()){
 			String opDef = oppositeMatcher.group();
 			String name = getNameOfDefinition(opDef);
 			String opType = getTypeOfDefinition(opDef);
 			String nameOfOpposite = getOppositeNameOfDefinition(opDef);
+			System.out.println(name + opType + " ref by " +nameOfOpposite);
 			if(isClassDefined(opType)){
 				ModelClass mc = genModel.getClass(opType);
 				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
+				System.out.println(currentAttr.getType() + (mc.getClassName()));
+				checkForMatchingType(currentAttr, oppositeAttribute);
 				mc.addReferencedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
 				currentAttr.setReferencedByAttribute(true);
 				if(oppositeAttribute != null){
 					currentAttr.setOpposite(oppositeAttribute);
 				}
 				else
-					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED + "Opposite attribute:"+name+":"+opType+". Class attribute "+ opType +"->"+ nameOfOpposite+" not found.");
+					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED + "for given "+name+":"+opType+". Class attribute "+ opType +"."+ nameOfOpposite+" not found.");
 			}
 			else 
 				throw new IllegalArgumentException(CLASS_NOT_DEFINED + "opType");
 		}
+	}
+
+	private void checkForMatchingType(ClassAttribute currentAttr,
+			ClassAttribute oppositeAttribute) {
+		if(!currentAttr.getType().equals(oppositeAttribute.getClassName()) ||
+				   !oppositeAttribute.getType().equals(currentAttr.getClassName()))
+					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" + currentAttr.getAttributeName()+":"+currentAttr.getType() 
+							+ "' referencing attribute '" +oppositeAttribute.getAttributeName() +":"+oppositeAttribute.getType()+"'");
 	}
 
 	private void setAttributeOrder() {
@@ -309,7 +326,6 @@ public class CreatorRegex implements ICreator{
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
 			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES ||
 			currentAtt.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE){
-				System.out.println(currentAtt.getAttributeFullName());
 				if(previousRequiredAttr==null)
 					previousRequiredAttr = currentAtt;
 				else if(previousRequiredAttr!=null){
@@ -319,9 +335,7 @@ public class CreatorRegex implements ICreator{
 					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 					previousRequiredAttr = currentAtt;
 				}
-			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE || // an optional attribute
-			currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES){
-				System.out.println(currentAtt.getAttributeFullName());
+			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE){ // an optional attribute
 				currentAtt.setOptional(true);
 				if(previousRequiredAttr!=null){
 					if(isClassDefined(currentAtt.getType())){ //It is a modeled Class
@@ -362,8 +376,6 @@ public class CreatorRegex implements ICreator{
 			return AttributeKind.OPTIONAL_ATTRIBUTE;
 		else if (attrDef.startsWith(LIST_START))
 			return AttributeKind.LIST_OF_ATTRIBUTES;
-		else if (attrDef.startsWith(OPT_LIST_START))
-			return AttributeKind.OPTIONAL_LIST_OF_ATTRIBUTES;
 		else if (attrDef.startsWith(OPPOSITE_START))
 			return AttributeKind.OPPOSITE_ATTRIBUTE;
 		else return null;

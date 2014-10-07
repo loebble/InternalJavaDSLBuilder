@@ -5,10 +5,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import de.htwg.generated.regex.Forum;
-import de.htwg.generated.regex.Forum.PostBuilder;
-import de.htwg.generated.regex.Forum.UserBuilder;
 //import de.htwg.generated.regex.Forum;
 //import de.htwg.generated.regex.Forum.UserBuilder;
+import de.htwg.javaDSLBuilder.GeneratorRegex;
+import de.htwg.javaDSLBuilder.creator.CreatorRegex;
+import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
 
 public class CreatorRegexTest {
 	
@@ -23,9 +24,9 @@ public class CreatorRegexTest {
 //			;
 	
 	public final static String FORUM_DESCRIPTION = "modelName=Forum"
-			+ ".class=Forum{.A=name:String, .A=url:URL , .A=users:User}"
+			+ ".class=Forum{.A=name:String, .A=url:URL , .LA=user:User, .A=post:Post}"
 			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .OA=post:Post}"
-			+ ".class=Post{.A=title:String, .A=text:int, .A=views:int, .OP=creator:User->post}"
+			+ ".class=Post{.A=title:String, .A=text:String, .A=views:int, .OP=creator:User->post, .OP=forum:Forum->post}"
 			+ ".imp={java.net.URL}"
 			;
 	
@@ -38,49 +39,14 @@ public class CreatorRegexTest {
 	
 	
 	public static void main(String[] args) throws MalformedURLException {
-//		CreatorRegex regexCreator= CreatorRegex.getInstance(FORUM_DESCRIPTION);
-//		DSLGenerationModel builderModel = regexCreator.getGenerationModel();
-//		System.out.println(builderModel.printedModel());
-//		System.out.println();
-//		System.out.println(builderModel.printedOrder());
-//		
-//		Builder.buildDSL(regexCreator, Builder.MODEL_MIXED_IN_TEMPLATE, "de.htwg.generated.regex");
+		CreatorRegex regexCreator= CreatorRegex.getInstance(FORUM_DESCRIPTION);
+		DSLGenerationModel builderModel = regexCreator.getGenerationModel();
+		System.out.println(builderModel.printModel());
+		System.out.println();
+		System.out.println(builderModel.printOrder());
 		
-//		User user = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad").noAddress().buildUser();
-//		User user2 = User.UserBuilder.createUser().firstName("asd").lastName("asd").nickName("ad")
-//						.address().street("asda").houseNumber(123).zipCode("adwad")
-//							.country().name("fewfe").optionalUN_Member(true).isoCode(12345).buildUser();
+		GeneratorRegex.buildDSL(regexCreator, GeneratorRegex.MODEL_MIXED_IN_TEMPLATE, "de.htwg.generated.regex");
 		
-//		User userTmp = 	createUser().firstName("Steven").lastName("Böckle").nickName("sboeckle")
-//								.address(createAddress().street("Zasius").houseNumber(11).zipCode("78462")
-//										.country(createCountry().name("Deutschland").optionalUN_Member(true).isoCode(12345)
-//										.buildCountry())
-//								.buildAddress())
-//						.buildUser();
-		
-//		System.out.println(userTmp.firstName + userTmp.address.houseNumber + userTmp.address.country.name);
-		
-//		ForumTMP forum = ForumTMP.ForumTMPBuilder
-//						.createForumTMP().name("facebook").url(new URL("http://facebook.com")).users(
-//								UserBuilder.createUser().firstName("steven").lastName("boeckle").nickName("sboeckle")
-//									.post(
-//											PostBuilder.createPost().title("introduction").text(12345).views(1)
-//												.nested(NestedBuilder.createNested().name("THE NESTED STRING").referencedCreator().buildNested())
-//											.buildPost()
-//									).buildUser()
-//								).buildForumTMP();
-//		
-//		System.out.println(forum.users.nickName + forum.users.post.title +forum.users.post.nested.name + " from Creator:" + forum.users.post.nested.creator.nickName);
-		
-		Forum forum = Forum.ForumBuilder
-		.createForum().name("facebook").url(new URL("http://facebook.com")).users(
-				UserBuilder.createUser().firstName("steven").lastName("boeckle").nickName("sboeckle")
-					.post(
-							PostBuilder.createPost().title("introduction").text(12345).views(1).creator().buildPost()
-					).buildUser()
-				).buildForum();
-		
-		System.out.println(forum.users.nickName + forum.users.post.title +forum.users.post.text+ " from Creator:" + forum.users.post.creator.nickName);
 	}
 
 }

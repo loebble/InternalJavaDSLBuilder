@@ -11,9 +11,9 @@ public class CreatorEMFTest {
 		ForumPackage forumPackage = ForumPackage.eINSTANCE;
 		CreatorEMF creator = CreatorEMF.getInstance(forumPackage);
 		DSLGenerationModel builderModel = creator.getGenerationModel();
-		System.out.println(builderModel.printedModel());
+		System.out.println(builderModel.printModel());
 		System.out.println();
-		System.out.println(builderModel.printedOrder());
+		System.out.println(builderModel.printOrder());
 	}
 
 }

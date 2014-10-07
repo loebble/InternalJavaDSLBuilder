@@ -1,5 +1,5 @@
-BuilderTemplate(packageName, genModel) ::= <<
-<! Template for DSLGenerationModel DSL!>
+ModelTemplate(packageName, genModel) ::= <<
+<! Template for ModelClasses !>
 package <packageName>;
 
 <genModel.imports:{imp| import <imp>;<\n>}>
@@ -13,19 +13,20 @@ public class <genModel.modelName>{
 		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
-
-	<genModel.classes.keys:{className|<createClassBuilder(className, genModel.classes.(className), genModel.classes, genModel)>}>
-		
-	
-
 }
 
+>>
+
+BuilderTemplate(packageName, genModel, rootBuilderName) ::= <<
+<! Template for BuilderClasses !>
+package <packageName>;
+
+}
 >>
 
 createModelAttribute(classAttribute) ::= <<
 <if(classAttribute.optional)>private boolean <classAttribute.attributeName>IsSet;<endif>
 private <classAttribute.type> <classAttribute.attributeName>;
-
 >>
 
 createModelClass(className, modelClass,modelName) ::= <<
@@ -50,7 +51,6 @@ private static class <className>{
 transferValues(attribute, builderName) ::= <<
 	<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet)<endif>
 	this.<attribute.attributeName> = <builderName>.<attribute.attributeName>Value;
-	
 >>
 
 transferOptValues(attribute, builderName) ::= <<
@@ -62,26 +62,24 @@ createModelGetter(attribute) ::= <<
 public <attribute.type> get<attribute.attributeName;format="cap">(){
 	return <attribute.attributeName>;
 }
-
 >>
 
 createModelSetter(attribute) ::= <<
 public void set<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
-
 >>
 
 generateEntryPointMethod(modelClass) ::= <<
 /**
-* Entrypoint of the DSL. Use static import in your code for context free DSL using. 
+* Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
 */
 public static <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
 	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }
 >>
 
-createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
+createClassBuilder(className,modelClass,genModel) ::= <<
 public static class <className>Builder{
 	//mandatory attributes
 	<modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
@@ -116,12 +114,10 @@ public static class <className>Builder{
 createClassAttribute(classAttribute, attach) ::= <<
 <if(classAttribute.optional)>private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
 private <classAttribute.type> <classAttribute.attributeName><attach>;
-
 >>
 
 createScopeAttribute(classAttribute) ::= <<
 private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-
 >>
 
 createBuilderConstructor(modelClass) ::= <<
@@ -131,7 +127,6 @@ private <modelClass.className;format="cap">Builder <classAttribute.attributeName
 
 instantiateScopeAttributes(classAttribute) ::= <<
 this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
-
 >>
 
 createAttributeScopeClass(className,classAttribute, genModel) ::= <<
@@ -140,7 +135,6 @@ public class <classAttribute.attributeName;format="cap">Scope{
 	<! foreach simple optional attribute !>
 	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
 }
-
 >>
 
 createAttributeMethod(className,classAttribute,modelName) ::= <<
@@ -169,7 +163,6 @@ public <className;format="cap">BuildScope no<classAttribute.attributeName;format
 }
 <endif>
 <endif>
-
 >>
 
 
@@ -179,5 +172,4 @@ public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;fo
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
 	return <className;format="cap">Builder.this.<scopeName>Scope;
 }
-
 >>

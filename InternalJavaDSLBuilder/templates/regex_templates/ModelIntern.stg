@@ -1,0 +1,201 @@
+BuilderTemplate(packageName, genModel) ::= <<
+<! Template for DSLGenerationModel DSL!>
+package <packageName>;
+
+<genModel.imports:{imp| import <imp>;<\n>}>
+<if(genModel.hasList)> import java.util.List; <endif>
+
+public class <genModel.modelName>{
+
+	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelAttribute(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<createModelAttribute(attribute)>}>
+	private <genModel.modelName>(<genModel.modelName>Builder builder){
+		<genModel.classes.(genModel.modelName).attributes:{attribute|<transferValues(attribute,"builder")>}>
+		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
+	}
+	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
+
+	<genModel.classes.keys:{className|<createClassBuilder(className, genModel.classes.(className), genModel.classes, genModel)>}>
+		
+	
+
+}
+
+>>
+
+createModelAttribute(classAttribute) ::= <<
+<if(classAttribute.optional)>private boolean <classAttribute.attributeName>IsSet;<endif>
+<if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName>;
+<else>private <classAttribute.type> <classAttribute.attributeName>;
+<endif>
+>>
+
+createModelClass(className, modelClass,modelName) ::= <<
+private static class <className>{
+	<modelClass.attributes:{attribute|<createClassAttribute(attribute,"")>}>
+	<modelClass.optionalAttributes:{attribute|<createClassAttribute(attribute,"")>}>
+	<! constructor !>
+	private <className>(<className;format="cap">Builder builder){
+		<modelClass.attributes:{attribute|<transferValues(attribute,"builder")>}>
+		<modelClass.optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
+	}	
+	<modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
+	<modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
+	<modelClass.optionalAttributes:{attribute|<createModelGetter(attribute)>}>
+	<modelClass.optionalAttributes:{attribute|<createModelSetter(attribute)>}>
+}
+
+>>
+
+
+
+transferValues(attribute, builderName) ::= <<
+	<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet)<endif>
+	this.<attribute.attributeName> = <builderName>.<attribute.attributeName>Value;
+>>
+
+transferOptValues(attribute, builderName) ::= <<
+	if(<builderName>.<attribute.attributeName>ValueIsSet)
+		this.<attribute.attributeName> = <builderName>.<attribute.attributeName>Value;
+>>
+
+createModelGetter(attribute) ::= <<
+<if(attribute.list)>public List\<<attribute.type>\> get<attribute.attributeName;format="cap">(){
+<else>public <attribute.type> get<attribute.attributeName;format="cap">(){ <endif>
+	return <attribute.attributeName>;
+}
+
+>>
+
+createModelSetter(attribute) ::= <<
+<if(attribute.list)>public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
+	this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
+}
+<endif>public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
+	this.<attribute.attributeName> = <attribute.attributeName>;
+}
+
+>>
+
+generateEntryPointMethod(modelClass) ::= <<
+/**
+* Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
+*/
+public static <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
+}
+>>
+
+createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
+public static class <className>Builder{
+	//mandatory attributes
+	<modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
+	//optional attributes
+	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
+	//scope attributes
+	<modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
+	private final <className;format="cap">BuildScope <className;format="lower">BuildScope;
+	
+	<! Constructor for ClassBuilder !>
+	private <className;format="cap">Builder(){
+		<modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
+		this.<className;format="lower">BuildScope = new <className;format="cap">BuildScope();
+	}
+	
+	<generateEntryPointMethod(modelClass)>
+	
+	<modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute,genModel)>}>
+	
+	public class <className;format="cap">BuildScope{
+		public <className;format="cap"> build<className;format="cap">() {
+			<className;format="cap"> <className;format="lower"> = new <className;format="cap">(<className;format="cap">Builder.this);
+			<modelClass.referencedByOpposite:{nestedAttributeRef|<className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<className;format="lower">);}>
+			return <className;format="lower">;
+		}
+	}	
+
+	
+}
+>>
+
+createClassAttribute(classAttribute, attach) ::= <<
+<if(classAttribute.optional)>private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
+<if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName><attach>;
+<else>private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
+>>
+
+createScopeAttribute(classAttribute) ::= <<
+private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
+>>
+
+createBuilderConstructor(modelClass) ::= <<
+private <modelClass.className;format="cap">Builder <classAttribute.attributeName>Scope;
+<modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
+>>
+
+instantiateScopeAttributes(classAttribute) ::= <<
+this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
+>>
+
+createAttributeScopeClass(className,classAttribute, genModel) ::= <<
+public class <classAttribute.attributeName;format="cap">Scope{
+	<createAttributeMethod(className,classAttribute,genModel.modelName)>
+	<! foreach simple optional attribute !>
+	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
+}
+>>
+
+createAttributeMethod(className,classAttribute,modelName) ::= <<
+<if(classAttribute.list)><createListMethod(className,classAttribute,modelName)>
+<else><if(!classAttribute.lastAttribute)>public <classAttribute.nextAttribute.attributeName;format="cap">Scope <classAttribute.attributeName> (<if(!classAttribute.referencedByAttribute)><classAttribute.type> val<endif>){
+	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+	<endif>
+	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
+}
+<if(classAttribute.optional)>
+public <classAttribute.nextAttribute.attributeName;format="cap">Scope no<classAttribute.attributeName;format="cap"> (){
+	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
+}
+<endif>
+<else>
+public <className;format="cap">BuildScope <classAttribute.attributeName> (<if(!classAttribute.ReferencedByAttribute)><classAttribute.type> val<endif>){
+	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+	<endif>
+	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
+}
+<if(classAttribute.optional)>
+public <className;format="cap">BuildScope no<classAttribute.attributeName;format="cap"> (){
+	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
+}
+<endif>
+<endif>
+<endif>
+
+>>
+
+createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
+public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
+	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
+	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
+	return <className;format="cap">Builder.this.<scopeName>Scope;
+}
+>>
+
+createListMethod(className, scopeName, optionalAttribute) ::= <<
+public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap"> (<classAttribute.type> val){
+	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val)<endif>;
+	return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
+}
+<if(classAttribute.lastAttribute)>
+public <className;format="cap">BuildScope no<classAttribute.attributeName;format="cap"> (){
+	return <className;format="cap">Builder.this.<className;format="lower">BuildScope;
+}
+<else>public <classAttribute.nextAttribute.attributeName;format="cap">Scope no<classAttribute.attributeName;format="cap"> (){
+	return <className;format="cap">Builder.this.<classAttribute.nextAttribute.attributeName>Scope;
+}<endif>
+
+>>
+
+
