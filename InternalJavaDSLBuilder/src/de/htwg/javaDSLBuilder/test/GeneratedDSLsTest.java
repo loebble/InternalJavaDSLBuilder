@@ -37,27 +37,21 @@ public class GeneratedDSLsTest {
 		//	
 		//	System.out.println(forum.users.nickName + forum.users.post.title +forum.users.post.nested.name + " from Creator:" + forum.users.post.nested.creator.nickName);
 			
-//			Forum forum = Forum.ForumBuilder
-//			.createForum().name("facebook").url(new URL("http://facebook.com"))
-//					.user(
-//						UserBuilder.createUser().firstName("steven").lastName("boeckle").nickName("sboeckle").post(
-//									PostBuilder.createPost().title("introduction").text("Some Text").views(1).creator().forum().buildPost()
-//						).buildUser()
-//					)
-//					.post(PostBuilder.createPost().title("getStarted").text("Other Text").views(0).creator().forum().buildPost())
-//			.buildForum();
+			Forum forum = Forum.ForumBuilder
+			.createForum().name("facebook").url(new URL("http://facebook.com"))
+					.addUser(
+						UserBuilder.createUser().firstName("steven").lastName("boeckle").nickName("sboeckle").post(
+									PostBuilder.createPost().title("introduction").text("Some Text").views(1).creator().forum().buildPost()
+						).buildUser()
+					)
+					.noUser()
+					.post(PostBuilder.createPost().title("getStarted").text("Other Text").views(0).creator().forum().buildPost())
+			.buildForum();
 //			
-//			System.out.println(forum.user.nickName + forum.user.post.title +forum.user.post.text+ " from Creator:" + forum.user.post.creator.nickName
-//					+ forum.post.forum.name);
-//			
-//			Forum forum2 = Forum.ForumBuilder
-//					.createForum().name("facebook").url(new URL("http://facebook.com"))
-//							.addUser(
-//								UserBuilder.createUser().firstName("steven").lastName("boeckle").nickName("sboeckle").noPost().buildUser()
-//							)
-//							.post(PostBuilder.createPost().title("getStarted").text("Other Text").views(0).creator().forum().buildPost())
-//					.buildForum();
-//			System.out.println(forum.user.getPost());
+			System.out.println(forum.getUser().get(0).getNickName() +"Post 1:" +forum.getUser().get(0).getPost().getTitle() 
+					+ " from Creator:" + forum.getUser().get(0).getPost().getCreator().getNickName());
+			System.out.println("ForumPost:"+forum.getPost().getTitle()+ " from Forum: "+forum.getPost().getForum().getName());
+			System.out.println("forumPost has UserCreator? " + forum.getPost().getCreator());
 	}
 
 }
