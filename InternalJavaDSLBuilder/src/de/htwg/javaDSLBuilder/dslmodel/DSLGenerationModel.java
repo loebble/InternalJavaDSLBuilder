@@ -68,6 +68,11 @@ public class DSLGenerationModel {
 		private List<ClassAttribute> attributes;
 		private List<ClassAttribute> optionalAttributes;
 		private List<ClassAttribute> referencedByOpposite;
+		private boolean optionalsOnly;
+
+		public boolean isOptionalsOnly() {
+			return optionalsOnly;
+		}
 
 		public List<ClassAttribute> getAttributes() {
 			return attributes;
@@ -115,6 +120,10 @@ public class DSLGenerationModel {
 
 		public void addReferencedByOpposite(ClassAttribute referencedByOpposite) {
 			this.referencedByOpposite.add(referencedByOpposite);
+		}
+
+		public void setOptionalsOnly(boolean b) {
+			this.optionalsOnly = b;
 		}
 		
 	}

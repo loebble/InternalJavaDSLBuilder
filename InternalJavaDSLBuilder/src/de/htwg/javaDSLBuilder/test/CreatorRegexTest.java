@@ -2,9 +2,6 @@
 package de.htwg.javaDSLBuilder.test;
 
 import java.net.MalformedURLException;
-import java.net.URL;
-
-import de.htwg.generated.regex.Forum;
 //import de.htwg.generated.regex.Forum;
 //import de.htwg.generated.regex.Forum.UserBuilder;
 import de.htwg.javaDSLBuilder.GeneratorRegex;
@@ -23,18 +20,23 @@ public class CreatorRegexTest {
 //			+ ".class:Address{.A=street:String, .A=houseNumber:int, .A=zipCode:String}"
 //			;
 	
-	public final static String FORUM_DESCRIPTION = "modelName=Forum"
-			+ ".class=Forum{.A=name:String, .A=url:URL , .LA=user:User, .A=post:Post}"
+	public final static String FORUM_DESCRIPTION =
+			".class=Forum{.A=name:String, .A=url:URL , .LA=user:User, .A=post:Post}"
 			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .OA=post:Post}"
 			+ ".class=Post{.A=title:String, .A=text:String, .A=views:int, .OP=creator:User->post, .OP=forum:Forum->post}"
 			+ ".imp={java.net.URL}"
 			;
 	
-	public final static String SECOND_FORUM_DESCRIPTION = "modelName=User"
-			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address, .A=country:Country}"
+	public final static String SECOND_FORUM_DESCRIPTION =
+			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address, .A=country:Country}"
 			+ ".class=Address{.A=street:String, .A=houseNumber:int, .A=zipCode:String}"
 			+ ".class=Country{.A=name:String, .A=isoCode:int, .OA=UN_Member:boolean}"
 			+ ".imp={de.htwg.javaDSLBuilder.test.TestImport}"
+			;
+	
+	public final static String THIRD_FORUM_DESCRIPTION =
+			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address}"
+			+ ".class=Address{.OA=street:String, .OA=houseNumber:int, .OA=zipCode:String}"
 			;
 	
 	

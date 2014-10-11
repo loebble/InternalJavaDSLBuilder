@@ -38,6 +38,7 @@ public class CreatorEMF implements ICreator{
 	
 	private DSLGenerationModel genModel;
 
+	@Override
 	public DSLGenerationModel getGenerationModel() {
 		return this.genModel;
 	}

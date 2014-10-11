@@ -19,82 +19,70 @@ import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
  *
  */
 public class CreatorRegex implements ICreator{
-	
-	/* Old one
-	 	REGEX_PATTERN= "modelName=\\w+"
-			+ "((\\.A=\\w+:\\w+)|(\\.A=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
-			+ "((\\.OA=\\w+:\\w+)|(\\.OA=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
-			+ "((\\.LA=\\w+:\\w+)|(\\.LA=\\w+:\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\}))*"
-			+ "((\\.OLA=\\w+:\\w+)|(\\.OLA=\\w+:\\w+((.A|.OA|.LA|.OLA)=\\{\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})))*"
-			+ "(\\.class=\\w+\\{(.A|.OA|.LA|.OLA)=\\w+:\\w+(\\,\\s?(.A|.OA|.LA|.OLA)=\\w+:\\w+)*\\})*"
-			+ "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})*"
-			+ "(\\.build=\\w+)*";
-	 */
-	
+	@Deprecated
 	private static final String REGEX_DSLNAME = "(?i)modelName=\\w+";
-	private static final String REGEX_ATTRIBUTES = "(\\.A=\\w+:\\w+)";
-	private static final String REGEX_OPT_ATTRIBUTES = "(\\.OA=\\w+:\\w+)";
-	private static final String REGEX_LIST_OF_ATTRIBUTES= "(\\.LA=\\w+:\\w+)";
-	private static final String REGEX_OPT_LIST_OF_ATTRIBUTES= "(\\.OLA=\\w+:\\w+)";
-	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})"; //Must start with mandatory Attribute
+	@Deprecated
+	public static final String MODEL_NAME = "modelName=\\w+";
+	@Deprecated
+	private static final Pattern MODEL_NAME_PATTERN = Pattern.compile(MODEL_NAME, Pattern.CASE_INSENSITIVE);
+	
+	/**
+	 * Regular expression for the attributes in a class definition
+	 */
 	private static final String REGEX_CLASS_ATTR_DEFINITION = "\\{(\\.A|\\.OA|\\.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\}";
-	private static final String REGEX_ATTRIBUTE = "((.A|.OA|.LA)=\\w+:\\w+)|(\\.OP=\\w+:\\w+->\\w+)";
+	/**
+	 * Regular expression for a single attribute without opposite Attribute
+	 */
+	private static final String REGEX_ATTRIBUTE = "((.A|.OA|.LA)=\\w+:\\w+)";
+	/**
+	 * Regular expression for a single attribute with opposite Attribute
+	 */
+	private static final String FOLLOWING_REGEX_ATTRIBUTE = "(\\s?\\,\\s?(.A|.OA|.LA)=\\w+:\\w+)";
+	private static final String REGEX_ALL_ATTRIBUTE = "("+REGEX_ATTRIBUTE+"|(\\.OP=\\w+:\\w+->\\w+))";
+	/**
+	 * Regular expression for the imports
+	 */
 	public static final String REGEX_IMPORT = "(\\.imp=\\{(\\w+(\\.)?)+(\\s?\\,\\s? (\\w+(\\.)?)+)*\\})";
 	
+	/**
+	 * Regular Expression for the complete model description 
+	 */
+	
+	/**
+	 * Regular expression for a complete Class definition
+	 */
+	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{"+REGEX_ATTRIBUTE+FOLLOWING_REGEX_ATTRIBUTE+"*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})";
+//	private static final String MAND_ATTR_FIRTS_REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})"; //Must start with mandatory Attribute
+	
 	public static final String REGEX_PATTERN= 
-			REGEX_DSLNAME
-//			+ REGEX_ATTRIBUTES +"*"
-//			+ REGEX_OPT_ATTRIBUTES +"*"
-//			+ REGEX_LIST_OF_ATTRIBUTES +"*"
-//			+ REGEX_OPT_LIST_OF_ATTRIBUTES +"*"
-			+ REGEX_CLASS_DEFINITION +"+"
+			REGEX_CLASS_DEFINITION + "+"
 			+ REGEX_IMPORT + "?"
 			;
-	
-	public static final String MODEL_NAME = "modelName=\\w+";
+	//Parts of regular expressions
 	public static final String CLASS_NAME = ".class=\\w+";
 	public static final String ATTR_START = ".A";
 	public static final String OPT_START = ".OA";
 	public static final String LIST_START = ".LA";
 	public static final String OPPOSITE_START = ".OP";
-	public static final String NEXT_SCOPES = "\\{\\w+(\\s?\\,\\s?\\w+)*\\}";
-	public static final String SINGLE_SCOPE = "\\w+";
-	public static final String EP_SCOPE = "\\{\\w+";
-	public static final String EP_NEXT = "=\\w+";
-	public static final String ATTRIBUTE_NAME = "=\\w+";
-	public static final String NAMING = "=\\w+";
-	public static final String TYPING = ":\\w+";
-	public static final String OPPOSITE = "->\\w+";
-	
-	public static final String BUILD = "\\.build=\\w+";
+	public static final String OPPOSITE_OPERATOR = "->";
+	public static final String NAMING_OPERATOR = "=";
+	public static final String TYPING_OPERATOR = ":";
+	public static final String NAMING = NAMING_OPERATOR+"\\w+";
+	public static final String TYPING = TYPING_OPERATOR+"\\w+";
+	public static final String OPPOSITE = OPPOSITE_OPERATOR+"\\w+";
+	public static final String OPPOSITE_ATTRIBUTE = "(\\.OP=\\w+:\\w+"+OPPOSITE_OPERATOR+"\\w+)";
+	public static final String IMPORT_START= ".imp=";
 	public static final String IMPORT_PARAMETER = "(\\w+(\\.)?)+";
-	
-	public static final String MANDATORY_ATTRIBUTES = "\\.A=\\w+:\\w+";
-	public static final String OPTIONAL_ATTRIBUTES = "\\.OA=\\w+:\\w+";
-	public static final String OPPOSITE_ATTRIBUTE = "(\\.OP=\\w+:\\w+->\\w+)";
-//TODO	public static final String LIST_MANDATORY_ATTRIBUTES;
-//TODO	public static final String LIST_OPTIONAL_ATTRIBUTES;
-	
-	private static final Pattern MODEL_NAME_PATTERN = Pattern.compile(MODEL_NAME, Pattern.CASE_INSENSITIVE);
+	//Patterns
 	private static final Pattern CLASS_DEFINITION_PATTERN = Pattern.compile(REGEX_CLASS_DEFINITION, Pattern.CASE_INSENSITIVE);
 	private static final Pattern CLASS_NAME_PATTERN= Pattern.compile(CLASS_NAME, Pattern.CASE_INSENSITIVE);
 	private static final Pattern CLASS_ATTRIBUTES_PATTERN= Pattern.compile(REGEX_CLASS_ATTR_DEFINITION, Pattern.CASE_INSENSITIVE);
-	private static final Pattern ATTRIBUTE_PATTERN = Pattern.compile(REGEX_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
+	private static final Pattern ATTRIBUTE_ALL_PATTERN = Pattern.compile(REGEX_ALL_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
 	private static final Pattern NAMING_PATTERN = Pattern.compile(NAMING, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PATTERN = Pattern.compile(REGEX_IMPORT, Pattern.CASE_INSENSITIVE);
 	private static final Pattern OPPOSITE_ATTRIBUTE_PATTERN = Pattern.compile(OPPOSITE_ATTRIBUTE, Pattern.CASE_INSENSITIVE);
-	//old ones
-	private static final Pattern ATTRIBUTE_NAME_PATTERN= Pattern.compile(ATTRIBUTE_NAME, Pattern.CASE_INSENSITIVE);
-	private static final Pattern MANDATORY_ATTRIBUTES_PATTERN= Pattern.compile(MANDATORY_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
-	private static final Pattern OPTIONAL_ATTRIBUTES_PATTERN= Pattern.compile(OPTIONAL_ATTRIBUTES, Pattern.CASE_INSENSITIVE);
 	private static final Pattern TYPING_PATTERN= Pattern.compile(TYPING, Pattern.CASE_INSENSITIVE);
 	private static final Pattern OPPOSITE_PATTERN= Pattern.compile(OPPOSITE, Pattern.CASE_INSENSITIVE);
-	private static final Pattern NEXT_SCOPES_PATTERN= Pattern.compile(NEXT_SCOPES, Pattern.CASE_INSENSITIVE);
-	private static final Pattern SINGLE_SCOPE_PATTERN= Pattern.compile(SINGLE_SCOPE, Pattern.CASE_INSENSITIVE);
-	
-	private static final Pattern EP_SCOPE_PATTERN = Pattern.compile(EP_SCOPE, Pattern.CASE_INSENSITIVE);
-	private static final Pattern EP_NEXT_PATTERN = Pattern.compile(EP_NEXT, Pattern.CASE_INSENSITIVE);
-	private static final Pattern BUILD_PATTERN = Pattern.compile(BUILD, Pattern.CASE_INSENSITIVE);
 	private static final Pattern IMPORT_PARAMETER_PATTERN = Pattern.compile(IMPORT_PARAMETER, Pattern.CASE_INSENSITIVE);
 	
 	//Error Messages
@@ -106,12 +94,12 @@ public class CreatorRegex implements ICreator{
 	private static final String OPPOSITE_DIFFERENT_TYPE = "The defined opposite attribute and its referencing attribute have different types.";
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
 	
-	private Matcher classDefinitionMatcher;
+	//Matcher
+	@Deprecated
 	private Matcher modelNameMatcher;
+	private Matcher classDefinitionMatcher;
 	private Matcher namingMatcher;
 	private Matcher typingMatcher;
-	private Matcher epMatcher;
-	private Matcher nextScopesMatcher;
 	private Matcher buildMatcher;
 	private Matcher importMatcher;
 	private Matcher importParameterMatcher;
@@ -119,9 +107,6 @@ public class CreatorRegex implements ICreator{
 	private DSLGenerationModel genModel;
 	private String languageDescr;
 	private String dslName;
-	private String entryPointMethod;
-	public List<String> attributeDeclarations;
-	private String buildMethodName;
 	private List<String> imports;
 	private String firstAttribute;
 	private Map<String,String> lastAttribute;
@@ -136,12 +121,10 @@ public class CreatorRegex implements ICreator{
 		CreatorRegex creator = new CreatorRegex();
 		creator.genModel = new DSLGenerationModel();
 		creator.languageDescr = languageDescr;
-		creator.modelNameMatcher = MODEL_NAME_PATTERN.matcher(languageDescr);
 		creator.classDefinitionMatcher = CLASS_DEFINITION_PATTERN.matcher(languageDescr);
 		creator.importMatcher = IMPORT_PATTERN.matcher(languageDescr);
-		creator.retrieveDslName();
 		creator.retrieveDefinedClasses();
-		creator.retireveImports();
+		creator.retrieveImports();
 		creator.setAttributeOrder();
 		return creator;
 	}
@@ -151,6 +134,7 @@ public class CreatorRegex implements ICreator{
 		return this.genModel;
 	}
 	
+	@Deprecated
 	public String retrieveDslName(){
 		if(this.dslName == null && this.modelNameMatcher.find()){
 			String modelNameDef = modelNameMatcher.group();
@@ -163,7 +147,7 @@ public class CreatorRegex implements ICreator{
 		this.namingMatcher = NAMING_PATTERN.matcher(def);
 		if(this.namingMatcher.find()){
 				String naming = namingMatcher.group();
-				return naming.substring(1); //without naming operator "="
+				return naming.substring(NAMING_OPERATOR.length());
 		} 
 		else{
 			return "";
@@ -174,7 +158,7 @@ public class CreatorRegex implements ICreator{
 		this.typingMatcher = TYPING_PATTERN.matcher(def);
 		if(this.typingMatcher.find()){
 				String naming = typingMatcher.group();
-				return naming.substring(1); //without typing operator ":"
+				return naming.substring(TYPING_OPERATOR.length());
 		} 
 		else{
 			return "";
@@ -185,7 +169,7 @@ public class CreatorRegex implements ICreator{
 		Matcher opMatcher = OPPOSITE_PATTERN.matcher(def);
 		if(opMatcher.find()){
 				String naming = opMatcher.group();
-				return naming.substring(2); //without poiting operator "->"
+				return naming.substring(OPPOSITE_OPERATOR.length());
 		} 
 		else{
 			return "";
@@ -200,6 +184,9 @@ public class CreatorRegex implements ICreator{
 		while(this.classDefinitionMatcher.find()){
 			String classDef = this.classDefinitionMatcher.group();
 			String className = retrieveClassName(classDef);
+			//set modelName to first Class found, since its the root class
+			if(this.genModel.getModelName() == null)
+				this.genModel.setModelName(className);
 			addClassDef(className,classDef);
 		}
 		for (Map.Entry<String,String> classEntry: definedClasses.entrySet()) {
@@ -232,7 +219,7 @@ public class CreatorRegex implements ICreator{
 		List<ClassAttribute> attributes = new ArrayList<ClassAttribute>();
 		Matcher attrDefMatcher = CLASS_ATTRIBUTES_PATTERN.matcher(classDef);
 		while(attrDefMatcher.find()){
-			Matcher singleAttrMatcher = ATTRIBUTE_PATTERN.matcher(attrDefMatcher.group());
+			Matcher singleAttrMatcher = ATTRIBUTE_ALL_PATTERN.matcher(attrDefMatcher.group());
 			while(singleAttrMatcher.find()){
 				ClassAttribute currentAttr = genModel.new ClassAttribute();
 				currentAttr.setClassName(modelClass.getClassName());
@@ -304,7 +291,6 @@ public class CreatorRegex implements ICreator{
 	private void setAttributeOrder() {
 		ModelClass firstClass = null;
 		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
-			String className = classEntry.getKey();
 			ModelClass modelClass = classEntry.getValue();
 			if(firstClass == null) //works because Map is LinkedHasMap which has Order saved
 				firstClass = modelClass; 
@@ -320,14 +306,18 @@ public class CreatorRegex implements ICreator{
 	 * @return a List<ClassAttribute> with the optionalAttributes
 	 */
 	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) {
+		List<ClassAttribute> firstOptAttr= new ArrayList<>();
 		List<ClassAttribute> optionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
 			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES ||
 			currentAtt.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE){
-				if(previousRequiredAttr==null)
+				if(previousRequiredAttr==null){
 					previousRequiredAttr = currentAtt;
+					// optional attributes before first mandatory then add them to the first mandatory attribute(scope)
+					currentAtt.setNextOptionalAttributes(firstOptAttr);
+				}
 				else if(previousRequiredAttr!=null){
 					if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
 						currentAtt.setReference(true);
@@ -342,15 +332,26 @@ public class CreatorRegex implements ICreator{
 						currentAtt.setReference(true);
 						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 						previousRequiredAttr = currentAtt;
-					}else{ // it is not a modeled Class e.g. simple types
+					}else{ // type is not a modeled Class e.g. a simple types
 						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
 						optionalAttrs.add(currentAtt);
 					}
+				}else{
+					firstOptAttr.add(currentAtt);
+					optionalAttrs.add(currentAtt);
 				}
+				
 			}
 		}
-		previousRequiredAttr.setLastAttribute(true);
-		return optionalAttrs;
+		//Special Case if no required Attribute in Class
+		if(previousRequiredAttr == null){
+			modelClass.setOptionalsOnly(true);
+			return optionalAttrs;
+		}
+		else{
+			previousRequiredAttr.setLastAttribute(true);
+			return optionalAttrs;
+		}
 	}
 
 	
@@ -385,33 +386,19 @@ public class CreatorRegex implements ICreator{
 		return lastAttribute;
 	}
 	
-	public String getEntryPointMethod(){
-//			if(this.entryPointMethod == null && this.epMatcher.find()){
-//				String found = epMatcher.group();
-//				this.entryPointMethod = found.substring(4);
-//			}
-		return this.entryPointMethod;
-	}
 	
 	public String getFirstAttribute() {
 		return firstAttribute;
 	}
 	
 	
-	public String getBuildMethodName(){
-		if(this.buildMethodName == null && this.buildMatcher.find()){
-			String found = buildMatcher.group();
-			buildMethodName = found.substring(7); //TODO
-		}
-		return this.buildMethodName;
-	}
-	
-	public void retireveImports(){
+	public void retrieveImports(){
 		if(this.imports == null && this.importMatcher.find()){
 			imports = new ArrayList<>();
-			String importString = importMatcher.group().substring(4);
+			String importsString = importMatcher.group().substring(IMPORT_START.length());
+			System.out.println(importMatcher.group());
 			//initialize importParameterMatcher with found imports
-			this.importParameterMatcher = IMPORT_PARAMETER_PATTERN.matcher(importString);
+			this.importParameterMatcher = IMPORT_PARAMETER_PATTERN.matcher(importsString);
 			while(this.importParameterMatcher.find()){
 				String toImport = importParameterMatcher.group();
 				if(!toImport.equals(""))

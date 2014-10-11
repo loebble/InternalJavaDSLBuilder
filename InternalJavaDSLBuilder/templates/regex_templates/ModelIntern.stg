@@ -109,9 +109,15 @@ generateEntryPointMethod(modelClass) ::= <<
 /**
 * Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
 */
+<if(!modelClass.optionalsOnly)>
 public static <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
 	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }
+<else>
+public static OptionalsOnlyScope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>Builder().optionalsOnlyScope;
+}
+<endif>
 >>
 
 createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
@@ -125,34 +131,47 @@ public static class <className>Builder{
 	<if(!modelClass.optionalAttributes.empty)>// simple optional attributes<endif>
 	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
-	private final <className;format="cap">BuildScope <className;format="lower">BuildScope;
+	<! optionalOnly classes dont have build scopes !>
+	<if(!modelClass.optionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
 	<modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
+	<if(modelClass.optionalsOnly)>private final OptionalsOnlyScope optionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	private <className;format="cap">Builder(){
-		// building Scope
+		<if(modelClass.optionalsOnly)>this.optionalsOnlyScope = new OptionalsOnlyScope();
+		<else>// building Scope
 		this.<className;format="lower">BuildScope = new <className;format="cap">BuildScope();
-		// attribute Scopes
+		<endif>
+		<if(!modelClass.attributes.empty)>// attribute Scopes <endif>
 		<modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 	}
 	
 	<generateEntryPointMethod(modelClass)>
 	
 	<modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute,genModel)>}>
-	/**
-	* Building scope for <className>.
+	<if(modelClass.optionalsOnly)><optionalsOnlyScopeClass(modelClass)>
+	<else><buildScopeClass(modelClass)>
+	<endif>
+}
+>>
+
+buildScopeClass(modelClass) ::= <<
+/**
+	* Building scope for <modelClass.className>.
 	*/
-	public class <className;format="cap">BuildScope{
-		/**
-		* Build Method for <className> instances.
-		* @return a new <className> instance with attributes filled from this builder class.
-		*/
-		public <className;format="cap"> build<className;format="cap">() {
-			<className;format="cap"> <className;format="lower"> = new <className;format="cap">(<className;format="cap">Builder.this);
-			<modelClass.referencedByOpposite:{nestedAttributeRef|<className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<className;format="lower">);}>
-			return <className;format="lower">;
-		}
-	}	
-	
+	public class <modelClass.className;format="cap">BuildScope{
+		<buildObjectMethod(modelClass)>
+	}
+>>
+
+buildObjectMethod(modelClass) ::= <<
+/**
+* Build Method for <modelClass.className> instances.
+* @return a new <modelClass.className> instance with attributes filled from this builder class.
+*/
+public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
+	<modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
+	<modelClass.referencedByOpposite:{nestedAttributeRef|<modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);}>
+	return <modelClass.className;format="lower">;
 }
 >>
 
@@ -183,6 +202,16 @@ public class <classAttribute.attributeName;format="cap">Scope{
 	<createAttributeMethod(className,classAttribute,genModel.modelName)>
 	<! foreach simple optional attribute !>
 	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
+}
+>>
+
+optionalsOnlyScopeClass(modelClass) ::= <<
+<javaDocOptOnlyScopeClass(modelClass)>
+public class OptionalsOnlyScope{
+	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
+	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
+	<modelClass.optionalAttributes:{optAttr|<createOptionalAttributeMethod(modelClass.className, "optionalsOnly", optAttr)>}>
+	<buildObjectMethod(modelClass)>
 }
 >>
 
@@ -296,6 +325,13 @@ javaDocScopeClass(classAttribute)::= <<
 
 /**
 * Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
+*/
+>>
+
+javaDocOptOnlyScopeClass(modelClass)::= <<
+
+/**
+* Scope Class for setting optional attributes of <modelClass.className>
 */
 >>
 
