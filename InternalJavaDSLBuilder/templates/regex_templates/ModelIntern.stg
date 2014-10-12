@@ -31,8 +31,6 @@ public class <genModel.modelName>{
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
 
 	<genModel.classes.keys:{className|<createClassBuilder(className, genModel.classes.(className), genModel.classes, genModel)>}>
-		
-	
 
 }
 
@@ -109,13 +107,13 @@ generateEntryPointMethod(modelClass) ::= <<
 /**
 * Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
 */
-<if(!modelClass.optionalsOnly)>
+<if(!modelClass.simpleOptionalsOnly)>
 public static <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
 	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }
 <else>
-public static OptionalsOnlyScope create<modelClass.className;format="cap">(){
-	return new <modelClass.className>Builder().optionalsOnlyScope;
+public static SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>Builder().simpleOptionalsOnlyScope;
 }
 <endif>
 >>
@@ -131,13 +129,13 @@ public static class <className>Builder{
 	<if(!modelClass.optionalAttributes.empty)>// simple optional attributes<endif>
 	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
-	<! optionalOnly classes dont have build scopes !>
-	<if(!modelClass.optionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
+	<! simpleOptionalsOnly classes dont have build scopes !>
+	<if(!modelClass.simpleOptionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
 	<modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
-	<if(modelClass.optionalsOnly)>private final OptionalsOnlyScope optionalsOnlyScope;<endif>
+	<if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	private <className;format="cap">Builder(){
-		<if(modelClass.optionalsOnly)>this.optionalsOnlyScope = new OptionalsOnlyScope();
+		<if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
 		<else>// building Scope
 		this.<className;format="lower">BuildScope = new <className;format="cap">BuildScope();
 		<endif>
@@ -148,7 +146,7 @@ public static class <className>Builder{
 	<generateEntryPointMethod(modelClass)>
 	
 	<modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute,genModel)>}>
-	<if(modelClass.optionalsOnly)><optionalsOnlyScopeClass(modelClass)>
+	<if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
 	<else><buildScopeClass(modelClass)>
 	<endif>
 }
@@ -205,24 +203,24 @@ public class <classAttribute.attributeName;format="cap">Scope{
 }
 >>
 
-optionalsOnlyScopeClass(modelClass) ::= <<
+simpleOptionalsOnlyScopeClass(modelClass) ::= <<
 <javaDocOptOnlyScopeClass(modelClass)>
-public class OptionalsOnlyScope{
+public class SimpleOptionalsOnlyScope{
 	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
 	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
-	<modelClass.optionalAttributes:{optAttr|<createOptionalAttributeMethod(modelClass.className, "optionalsOnly", optAttr)>}>
+	<modelClass.optionalAttributes:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
 	<buildObjectMethod(modelClass)>
 }
 >>
 
 createAttributeMethod(className,classAttribute,modelName) ::= <<
 <if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute,modelName)>
-<elseif(classAttribute.ReferencedByAttribute)><createOPPMethod(classAttribute.className,classAttribute,modelName)>
+<! <elseif(classAttribute.ReferencedByAttribute)><createOPPMethod(classAttribute.className,classAttribute,modelName)> !>
 <else><createSimpleMethod(classAttribute.className,classAttribute,modelName)>
 <endif>
 >>
 
-createSimpleMethod(className,classAttribute,modelName) ::= <<
+createSimpleMethod(className, classAttribute, modelName) ::= <<
 <! for normal attribute setting methods!>
 /**
 * Method for setting the <classAttribute.attributeName>Value in this builder so that it can later be transfered to the <className> Model object.

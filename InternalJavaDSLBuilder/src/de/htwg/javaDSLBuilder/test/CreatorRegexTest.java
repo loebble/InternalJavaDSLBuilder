@@ -36,12 +36,13 @@ public class CreatorRegexTest {
 	
 	public final static String THIRD_FORUM_DESCRIPTION =
 			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address}"
-			+ ".class=Address{.OA=street:String, .OA=houseNumber:int, .OA=zipCode:String}"
+			+ ".class=Address{.OA=street:String, .OA=houseNumber:int, .OA=zipCode:String, .OA=country:Country, .OP=user:User->address}"
+			+ ".class=Country{.OA=street:String, .OA=houseNumber:int, .OA=zipCode:String}"
 			;
 	
 	
 	public static void main(String[] args) throws MalformedURLException {
-		CreatorRegex regexCreator= CreatorRegex.getInstance(FORUM_DESCRIPTION);
+		CreatorRegex regexCreator= CreatorRegex.getInstance(THIRD_FORUM_DESCRIPTION);
 		DSLGenerationModel builderModel = regexCreator.getGenerationModel();
 		System.out.println(builderModel.printModel());
 		System.out.println();

@@ -52,13 +52,14 @@ public class GeneratedDSLsTest {
 //			System.out.println("ForumPost:"+forum.getPost().getTitle()+ " from Forum: "+forum.getPost().getForum().getName());
 //			System.out.println("forumPost has UserCreator? " + forum.getPost().getCreator());
 		
-		User user = UserBuilder.createUser().firstName("Steven").lastName("Boeckle").nickName("asd").
+		User user = UserBuilder.createUser().firstName("Steven").optionalAge(26).lastName("Boeckle").nickName("asd").
 						address(
-							AddressBuilder.createAddress().optionalHouseNumber(23).optionalStreet("saystreet").buildAddress()
+							AddressBuilder.createAddress().optionalHouseNumber(23).user()
+							.buildAddress()
 						)
 					.buildUser();
 		
-		System.out.println(user.getLastName() + user.getNickName() + user.getAddress().getHouseNumber());
+		System.out.println(user.getLastName() + user.getNickName() + user.getAddress().getHouseNumber() + user.getAddress().getUser().getAge());
 		
 	}
 

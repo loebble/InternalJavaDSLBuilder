@@ -184,6 +184,8 @@ public class CreatorRegex implements ICreator{
 		while(this.classDefinitionMatcher.find()){
 			String classDef = this.classDefinitionMatcher.group();
 			String className = retrieveClassName(classDef);
+			//a className's first letter should be upper case
+			className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 			//set modelName to first Class found, since its the root class
 			if(this.genModel.getModelName() == null)
 				this.genModel.setModelName(className);
@@ -203,6 +205,7 @@ public class CreatorRegex implements ICreator{
 	}
 	
 	private boolean isClassDefined(String className){
+		className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 		if(this.definedClasses.containsKey(className)){
 			return true;
 		}else
@@ -231,15 +234,17 @@ public class CreatorRegex implements ICreator{
 					this.genModel.setHasList(true);
 				}
 				String attrName = getNameOfDefinition(attrDef);
+				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
 				currentAttr.setAttributeName(attrName);
 				currentAttr.setAttributeFullName(modelClass.getClassName()+"."+attrName);
 				String attrType = getTypeOfDefinition(attrDef);
-				currentAttr.setType(attrType);
-				attributes.add(currentAttr);
 				if(!isClassDefined(attrType)){
 					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE)
 						modelClass.addOptionalAttribute(currentAttr);
-				}
+				}else // if class is defined make sure uppcase is used
+					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
+				currentAttr.setType(attrType);
+				attributes.add(currentAttr);
 				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
 					setOppositeAttribute(currentAttr,attrDef);
 				modelClass.addAttribute(currentAttr);
@@ -259,13 +264,14 @@ public class CreatorRegex implements ICreator{
 		while(oppositeMatcher.find()){
 			String opDef = oppositeMatcher.group();
 			String name = getNameOfDefinition(opDef);
+			name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
 			String opType = getTypeOfDefinition(opDef);
+			opType = Character.toUpperCase(opType.charAt(0)) + opType.substring(1);
 			String nameOfOpposite = getOppositeNameOfDefinition(opDef);
-			System.out.println(name + opType + " ref by " +nameOfOpposite);
+			nameOfOpposite = Character.toLowerCase(nameOfOpposite.charAt(0)) + nameOfOpposite.substring(1);
 			if(isClassDefined(opType)){
 				ModelClass mc = genModel.getClass(opType);
 				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
-				System.out.println(currentAttr.getType() + (mc.getClassName()));
 				checkForMatchingType(currentAttr, oppositeAttribute);
 				mc.addReferencedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
 				currentAttr.setReferencedByAttribute(true);
@@ -292,7 +298,7 @@ public class CreatorRegex implements ICreator{
 		ModelClass firstClass = null;
 		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
-			if(firstClass == null) //works because Map is LinkedHasMap which has Order saved
+			if(firstClass == null) //Map is LinkedHasMap which has Order saved
 				firstClass = modelClass; 
 			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
 			removeOptionalAttributes(optionalAttrs, modelClass);
@@ -305,7 +311,7 @@ public class CreatorRegex implements ICreator{
 	 * @param modelClass The ModelClass object to order attributes in
 	 * @return a List<ClassAttribute> with the optionalAttributes
 	 */
-	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) {
+	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) { //TODO refactor with attributeKind SIMPLE:OPTIONAL_ATTRIBUTE, to reduce complexity
 		List<ClassAttribute> firstOptAttr= new ArrayList<>();
 		List<ClassAttribute> optionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
@@ -337,15 +343,25 @@ public class CreatorRegex implements ICreator{
 						optionalAttrs.add(currentAtt);
 					}
 				}else{
-					firstOptAttr.add(currentAtt);
-					optionalAttrs.add(currentAtt);
+					if(currentAtt.isReference()){
+						previousRequiredAttr = currentAtt;
+						currentAtt.setNextOptionalAttributes(firstOptAttr);
+					}else{
+						firstOptAttr.add(currentAtt);
+						optionalAttrs.add(currentAtt);
+					}
 				}
 				
 			}
 		}
 		//Special Case if no required Attribute in Class
 		if(previousRequiredAttr == null){
-			modelClass.setOptionalsOnly(true);
+			boolean simpleOptionalsOnly = true;
+			for (ClassAttribute attr : modelClass.getOptionalAttributes()) {
+				if(attr.isReference())
+					simpleOptionalsOnly = false;
+			}
+			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
 			return optionalAttrs;
 		}
 		else{
