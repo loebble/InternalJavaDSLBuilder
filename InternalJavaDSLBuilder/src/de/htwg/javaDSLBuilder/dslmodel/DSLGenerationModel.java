@@ -292,7 +292,7 @@ public class DSLGenerationModel {
 			for (ClassAttribute attr : modelClass.attributes) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
-						+ " optional: " +attr.isOptional());
+						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
 				if(attr.getOpposite()!=null)
 					sb.append(" opposite: " +attr.getOpposite().getAttributeFullName());
 				sb.append("\n");

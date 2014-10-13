@@ -24,7 +24,7 @@ public class <genModel.modelName>{
 	<genModel.classes.(genModel.modelName).optionalAttributes:{modelAttribute|<createModelSetter(modelAttribute)>}>
 	
 	private <genModel.modelName>(<genModel.modelName>Builder builder){
-		<genModel.classes.(genModel.modelName).attributes:{attribute|<transferValues(attribute,"builder")>}>
+		<genModel.classes.(genModel.modelName).attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
 		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	
@@ -38,7 +38,7 @@ public class <genModel.modelName>{
 
 createModelAttribute(classAttribute) ::= <<
 <if(!classAttribute.optional)>
-private asd <classAttribute.attributeName>IsSet;<endif>
+private <classAttribute.attributeName>IsSet;<endif>
 <if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName>;<else>
 private <classAttribute.type> <classAttribute.attributeName>;<endif>
 >>
@@ -55,7 +55,7 @@ public static class <className>{
 	
 	<! constructor !>
 	private <className>(<className;format="cap">Builder builder){
-		<modelClass.attributes:{attribute|<transferValues(attribute,"builder")>}>
+		<modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
 		<modelClass.optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	
@@ -125,13 +125,13 @@ createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
 */
 public static class <className>Builder{
 	<if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
-	<modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
+	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
 	<if(!modelClass.optionalAttributes.empty)>// simple optional attributes<endif>
 	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
 	<! simpleOptionalsOnly classes dont have build scopes !>
 	<if(!modelClass.simpleOptionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
-	<modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
+	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
 	<if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	private <className;format="cap">Builder(){
@@ -140,12 +140,12 @@ public static class <className>Builder{
 		this.<className;format="lower">BuildScope = new <className;format="cap">BuildScope();
 		<endif>
 		<if(!modelClass.attributes.empty)>// attribute Scopes <endif>
-		<modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
+		<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
 	}
 	
 	<generateEntryPointMethod(modelClass)>
-	
-	<modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute,genModel)>}>
+	<! only create ScopeClass and attribute method if it isnt a opposite attribute !>
+	<modelClass.attributes:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute,genModel)><endif>}>
 	<if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
 	<else><buildScopeClass(modelClass)>
 	<endif>
@@ -168,9 +168,19 @@ buildObjectMethod(modelClass) ::= <<
 */
 public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
 	<modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
-	<modelClass.referencedByOpposite:{nestedAttributeRef|<modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);}>
+	<modelClass.referencedByOpposite:{nestedAttributeRef|<setOpAttribute(modelClass,nestedAttributeRef)>}>
 	return <modelClass.className;format="lower">;
 }
+>>
+
+setOpAttribute(modelClass,nestedAttributeRef) ::= <<
+<! if a list attribute is referenced by an opposite attribute, the opposite relation for every list item has to be set !>
+<if(nestedAttributeRef.opposite.list)>
+for (<nestedAttributeRef.opposite.type> item : <modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>) {
+	item.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);
+}
+<else><modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);
+<endif>
 >>
 
 createClassAttribute(classAttribute, attach) ::= <<
@@ -215,8 +225,7 @@ public class SimpleOptionalsOnlyScope{
 
 createAttributeMethod(className,classAttribute,modelName) ::= <<
 <if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute,modelName)>
-<! <elseif(classAttribute.ReferencedByAttribute)><createOPPMethod(classAttribute.className,classAttribute,modelName)> !>
-<else><createSimpleMethod(classAttribute.className,classAttribute,modelName)>
+<elseif (!classAttribute.opposite)><createSimpleMethod(classAttribute.className,classAttribute,modelName)>
 <endif>
 >>
 

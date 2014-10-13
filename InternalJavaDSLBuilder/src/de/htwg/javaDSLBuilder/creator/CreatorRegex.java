@@ -90,7 +90,7 @@ public class CreatorRegex implements ICreator{
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
 	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
 	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
-	private static final String CLASS_NOT_DEFINED = "Class referenced is not defined!";
+	private static final String CLASS_NOT_DEFINED = "class is not defined!";
 	private static final String OPPOSITE_DIFFERENT_TYPE = "The defined opposite attribute and its referencing attribute have different types.";
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
 	
@@ -115,8 +115,18 @@ public class CreatorRegex implements ICreator{
 	private CreatorRegex(){}
 	
 	public static CreatorRegex getInstance(String languageDescr){
-		if(!languageDescr.matches(REGEX_PATTERN)){
-			throw new IllegalArgumentException(NO_MATCH);
+		if(!languageDescr.matches(REGEX_PATTERN)){ //TODO better error-handling and -printing
+			Pattern p = Pattern.compile(REGEX_CLASS_DEFINITION);
+			Matcher m = p.matcher(languageDescr);
+			int endOfLastCorrectClass = 0;
+			while(m.find())
+				endOfLastCorrectClass = m.end();
+			String appendedErrorMsg = "";
+			if(endOfLastCorrectClass == 0)
+				appendedErrorMsg = "\n First class definition has errors";
+			else
+				appendedErrorMsg = "\n Error in class definition: " + languageDescr.substring(endOfLastCorrectClass, endOfLastCorrectClass + 15) + "...";
+			throw new IllegalArgumentException(NO_MATCH + appendedErrorMsg);
 		}
 		CreatorRegex creator = new CreatorRegex();
 		creator.genModel = new DSLGenerationModel();
@@ -235,6 +245,9 @@ public class CreatorRegex implements ICreator{
 				}
 				String attrName = getNameOfDefinition(attrDef);
 				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
+				if(modelClass.getSpefificAttribute(attrName) != null)
+					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
+							+ " attribute "+attrName +" in class" + modelClass.getClassName());
 				currentAttr.setAttributeName(attrName);
 				currentAttr.setAttributeFullName(modelClass.getClassName()+"."+attrName);
 				String attrType = getTypeOfDefinition(attrDef);
@@ -259,7 +272,6 @@ public class CreatorRegex implements ICreator{
 	 * @param attrDef String with attribute definitition defined by {@link REGEX_ATTRIBUTE}
 	 */
 	private void setOppositeAttribute(ClassAttribute currentAttr, String attrDef) {
-		System.out.println(attrDef);
 		Matcher oppositeMatcher = OPPOSITE_ATTRIBUTE_PATTERN.matcher(attrDef);
 		while(oppositeMatcher.find()){
 			String opDef = oppositeMatcher.group();
@@ -282,7 +294,7 @@ public class CreatorRegex implements ICreator{
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED + "for given "+name+":"+opType+". Class attribute "+ opType +"."+ nameOfOpposite+" not found.");
 			}
 			else 
-				throw new IllegalArgumentException(CLASS_NOT_DEFINED + "opType");
+				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  + " referenced by " + opDef);
 		}
 	}
 
@@ -313,34 +325,32 @@ public class CreatorRegex implements ICreator{
 	 */
 	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) { //TODO refactor with attributeKind SIMPLE:OPTIONAL_ATTRIBUTE, to reduce complexity
 		List<ClassAttribute> firstOptAttr= new ArrayList<>();
-		List<ClassAttribute> optionalAttrs = new ArrayList<>();
+		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
+			if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
+				currentAtt.setReference(true);
+			}
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
-			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES ||
-			currentAtt.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE){
+			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
 				if(previousRequiredAttr==null){
 					previousRequiredAttr = currentAtt;
 					// optional attributes before first mandatory then add them to the first mandatory attribute(scope)
 					currentAtt.setNextOptionalAttributes(firstOptAttr);
 				}
 				else if(previousRequiredAttr!=null){
-					if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
-						currentAtt.setReference(true);
-					}
 					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 					previousRequiredAttr = currentAtt;
 				}
 			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE){ // an optional attribute
 				currentAtt.setOptional(true);
 				if(previousRequiredAttr!=null){
-					if(isClassDefined(currentAtt.getType())){ //It is a modeled Class
-						currentAtt.setReference(true);
+					if(currentAtt.isReference()){
 						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 						previousRequiredAttr = currentAtt;
 					}else{ // type is not a modeled Class e.g. a simple types
 						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
-						optionalAttrs.add(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
 					}
 				}else{
 					if(currentAtt.isReference()){
@@ -348,7 +358,7 @@ public class CreatorRegex implements ICreator{
 						currentAtt.setNextOptionalAttributes(firstOptAttr);
 					}else{
 						firstOptAttr.add(currentAtt);
-						optionalAttrs.add(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
 					}
 				}
 				
@@ -362,11 +372,11 @@ public class CreatorRegex implements ICreator{
 					simpleOptionalsOnly = false;
 			}
 			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			return optionalAttrs;
+			return simpleOptionalAttrs;
 		}
 		else{
 			previousRequiredAttr.setLastAttribute(true);
-			return optionalAttrs;
+			return simpleOptionalAttrs;
 		}
 	}
 
@@ -412,7 +422,6 @@ public class CreatorRegex implements ICreator{
 		if(this.imports == null && this.importMatcher.find()){
 			imports = new ArrayList<>();
 			String importsString = importMatcher.group().substring(IMPORT_START.length());
-			System.out.println(importMatcher.group());
 			//initialize importParameterMatcher with found imports
 			this.importParameterMatcher = IMPORT_PARAMETER_PATTERN.matcher(importsString);
 			while(this.importParameterMatcher.find()){
