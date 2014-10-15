@@ -155,7 +155,7 @@ public class DSLGenerationModel {
 			this.attributeName = name;
 			this.type = type;
 			this.className = className;
-			this.attributeFullName = type + name;
+			this.attributeFullName = className + name;
 			this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
 			this.nextClass = new ArrayList<String>();
 			this.nextOptionalClasses = new ArrayList<String>();
@@ -260,6 +260,7 @@ public class DSLGenerationModel {
 
 		public void setReferencedBy(ClassAttribute referencedBy) {
 			this.referencedBy = referencedBy;
+			this.getModelClass().addReferencedByOpposite(referencedBy);
 		}
 
 		public boolean isReferencedByAttribute() {
@@ -315,7 +316,7 @@ public class DSLGenerationModel {
 			ModelClass modelClass = (ModelClass) entry.getValue();
 			sb.append("\n" + "ModelClass: "+modelClass.className +"\n");
 			for (ClassAttribute attr : modelClass.attributes) {
-				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
+				sb.append("\t" + "FullName: " +attr.getAttributeFullName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
 				if(attr.getOpposite()!=null)
@@ -323,7 +324,7 @@ public class DSLGenerationModel {
 				sb.append("\n");
 			}
 			for (ClassAttribute attr : modelClass.optionalAttributes) {
-				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
+				sb.append("\t" + "FullName: " +attr.getAttributeFullName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional()+" " +"\n");
 			}

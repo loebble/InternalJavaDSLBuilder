@@ -13,6 +13,7 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EFactory;
+import org.eclipse.emf.ecore.EOperation;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
@@ -35,6 +36,7 @@ public class CreatorEMF implements ICreator {
 	private String entryPointMethod;
 	private String buildMethodName;
 	private ArrayList<String> imports;
+	@Deprecated
 	private List<EReference> incompleteOpposites = new ArrayList<>();
 
 	private final DSLGenerationModel genModel;
@@ -42,6 +44,8 @@ public class CreatorEMF implements ICreator {
 	private final String OPPOSITES_DEFINED_WRONG = "Opposite releation not correct defined. ";
 	private final String WRONG_ECORE = "Make sure to have a correct Ecore Model which you can save and generate code from. ";
 	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
+	private final String NO_OPPOSITE = "Reference has no opposite";
+	
 	@Override
 	public DSLGenerationModel getGenerationModel() {
 		return this.genModel;
@@ -57,7 +61,6 @@ public class CreatorEMF implements ICreator {
 		creator.ePackage = eP;
 		creator.genModel.setModelName(eP.getName());
 		creator.retrieveAttributes();
-		creator.completeOppositeRelation();
 		// creator.factoryClass = Class.forName(fullyQUalifiedFactoryName);
 		// creator.modelPackage = creator.factoryClass.getPackage().getName();
 		// creator.builderModel.addImports(creator.modelPackage);
@@ -83,6 +86,7 @@ public class CreatorEMF implements ICreator {
 				String eClassName = eClass.getName();
 				String type = eClass.getInstanceTypeName();
 				this.genModel.addImports(type);
+				String packageName = eClass.getClass().getPackage().getName();
 				ModelClass modelClass = this.genModel.new ModelClass(eClassName);
 				this.genModel.getClasses().put(eClassName, modelClass);
 				for (Iterator ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
@@ -98,17 +102,30 @@ public class CreatorEMF implements ICreator {
 						ClassAttribute modelAttribute = createModelAttribute(reference, modelClass.getClassName());
 						modelAttribute.setReference(true);
 						modelClass.addAttribute(modelAttribute);
-						if(reference.getEOpposite() == null)
-							System.out.println("IST NULL");
-						else{
+						EReference opposite = reference.getEOpposite();
+						if(opposite != null){
 							// Opposite attribute could not have been processed yet
-							ClassAttribute oppositeAttr = lookForOppositeAttribute(reference);
+//							System.out.println(modelAttribute.getAttributeFullName() + " refBy " + reference.getEReferenceType().getName()+ opposite.getName());
+							ClassAttribute oppositeAttr = findAttribute(reference.getEReferenceType().getName(), opposite.getName());
 							if(oppositeAttr == null){
 								// if not processed the current attribute is the "creator" and is Referenced by the other one
-								modelAttribute.setReferencedByAttribute(true);
+								System.out.println("creator: "+ modelAttribute.getAttributeFullName());
+								modelAttribute.setCreatorOfOpposite(true);
 							}else{
 								//Sets the end of an opposite relation
 								modelAttribute.setOpposite(oppositeAttr);
+								System.out.println("opposite created for "+modelAttribute.getAttributeFullName() +" ->"+oppositeAttr.getAttributeFullName());
+								oppositeAttr.setOpposite(modelAttribute);
+								System.out.println("opposite created for "+oppositeAttr.getAttributeFullName() +" ->"+modelAttribute.getAttributeFullName());
+								ClassAttribute creator = null;
+								if(modelAttribute.isCreatorOfOpposite()) //TODO do it nicer
+									creator = modelAttribute;
+								else if (oppositeAttr.isCreatorOfOpposite()) {
+									creator = oppositeAttr;
+								}
+								System.out.println("Creator is "+creator.getAttributeFullName());
+								creator.setReferencedByAttribute(true);
+								creator.setReferencedBy(creator.getOpposite());
 								this.incompleteOpposites.add(reference);
 							}
 						}
@@ -137,19 +154,21 @@ public class CreatorEMF implements ICreator {
 	 * Only call Method after {@link #retrieveAttributes()}
 	 * @param opposites
 	 */
+	@Deprecated
 	private void completeOppositeRelation() {
 		for (EReference eReference : this.incompleteOpposites) {
 			System.out.println("Completing Opp Relation");
 			System.out.println(eReference.getName());
-			ClassAttribute otherEnd = lookForOppositeAttribute(eReference);
-			if(otherEnd == null)
-				throw new IllegalArgumentException(OPPOSITES_DEFINED_WRONG + WRONG_ECORE);
-			//Get the 
-			ClassAttribute thisEnd = otherEnd.getOpposite();
-			thisEnd.setOpposite(otherEnd);
-			if(thisEnd.isReferencedByAttribute()){
-				thisEnd.setReferencedBy(otherEnd);
-				thisEnd.getModelClass().addReferencedByOpposite(otherEnd);
+			EReference oppositeRef = eReference.getEOpposite();
+			if(oppositeRef == null)
+				throw new IllegalArgumentException(NO_OPPOSITE);
+			ClassAttribute existingOpAttribute = findAttribute(eReference.getEReferenceType().getName(), eReference.getName());
+			ClassAttribute newOpAttribute = findAttribute(oppositeRef.getEReferenceType().getName(), oppositeRef.getName());
+			//Is set by retrieve attributes
+			if(newOpAttribute.isCreatorOfOpposite()){
+				System.out.print("found Creator for this opposite");
+				newOpAttribute.setOpposite(existingOpAttribute);
+				newOpAttribute.setReferencedBy(existingOpAttribute);
 			}
 		}
 		
@@ -160,31 +179,27 @@ public class CreatorEMF implements ICreator {
 	 * @param reference the EReference which has an opposite attribute defined
 	 * @return the found ClassAttribute in the DSLGenerationModel or null if none has been found
 	 */
-	private ClassAttribute lookForOppositeAttribute(EReference reference) {
-		EReference eOpposite = reference.getEOpposite();
-		if(eOpposite == null) 
-			return null;
-		String oppositeFullName = reference.getEReferenceType().getName() + eOpposite.getName(); 
-		System.out.println(oppositeFullName);
+	
+	
+	private ClassAttribute findAttribute(String className, String attrName){
 		for (Map.Entry<String,ModelClass> classEntry: genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
-			ClassAttribute oppositeAttribute = modelClass.getSpefificAttributeByFullName(oppositeFullName);
-			if(oppositeAttribute != null){
-				System.out.println("opposite gefunden "+ oppositeAttribute.getAttributeFullName());
-				return oppositeAttribute;
+			if(!modelClass.getClassName().equals(className))
+				continue;
+			ClassAttribute foundAttr = modelClass.getSpefificAttributeByFullName(className+attrName);
+			if(foundAttr != null){
+				return foundAttr;
 			}
 		}
 		return null;
 	}
 
 	/**
-	 * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}
+	 * * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}
 	 * and initializes it with given parameter
-	 * @param name Name of attribute
-	 * @param type type (Class, Interface...) of Attribue
-	 * @param optional if its an optional or mandatory attribute
-	 * @param isList if its a list of attributes
-	 * @return the created ClassAttribute
+	 * @param eClassifier can be an EAttribute or an EReference
+	 * @param className the class in which the attribute is defined
+	 * @return
 	 */
 	private <T extends EStructuralFeature> ClassAttribute createModelAttribute(T eClassifier, String className) {
 		String name = eClassifier.getName();
@@ -192,10 +207,12 @@ public class CreatorEMF implements ICreator {
 		boolean isList = false;
 		AttributeKind kind;
 		if(eClassifier instanceof EAttribute){
-			type = ((EAttribute) eClassifier).getEAttributeType().getName();
+			type = ((EAttribute) eClassifier).getEAttributeType().getInstanceClassName();
 		}
 		else if(eClassifier instanceof EReference){
-			type = ((EReference) eClassifier).getEReferenceType().getInstanceClassName();
+			EReference ref = (EReference) eClassifier;
+			// Cut the package from the type (packages are imported automatically)
+			type = ref.getEType().getName();
 		}
 		else
 			throw new IllegalArgumentException("Parameter eClassifier " +WRONG_ARG_TYPE);
