@@ -53,6 +53,11 @@
         name="nested"
         eType="#//Nested"
         eOpposite="#//Nested/creator"/>
+    <eStructuralFeatures
+        xsi:type="ecore:EReference"
+        name="nestedNoOpposite"
+        lowerBound="1"
+        eType="#//Nested"/>
   </eClassifiers>
   <eClassifiers
       xsi:type="ecore:EClass"

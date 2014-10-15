@@ -135,6 +135,7 @@ public class CreatorRegexTest_Creation {
 	@Test
 	public void testCreateForumDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(FORUM_DESCRIPTION);
+		System.out.println(creator.getGenerationModel().printModel());
 		this.createDSL(creator, "ForumComplex");
 	}
 	

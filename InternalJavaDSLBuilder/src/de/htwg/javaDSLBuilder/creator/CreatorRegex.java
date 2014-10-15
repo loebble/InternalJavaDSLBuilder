@@ -234,29 +234,29 @@ public class CreatorRegex implements ICreator{
 		while(attrDefMatcher.find()){
 			Matcher singleAttrMatcher = ATTRIBUTE_ALL_PATTERN.matcher(attrDefMatcher.group());
 			while(singleAttrMatcher.find()){
-				ClassAttribute currentAttr = genModel.new ClassAttribute();
-				currentAttr.setClassName(modelClass.getClassName());
 				String attrDef = singleAttrMatcher.group();
+				String attrName = getNameOfDefinition(attrDef);
+				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
+				String attrType = getTypeOfDefinition(attrDef);
 				AttributeKind kind = getKind(attrDef);
+				boolean optional = false;
+				if(!isClassDefined(attrType)){
+					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE)
+						optional = true;
+				}else // if class is defined make sure uppcase is used
+					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
+				ClassAttribute currentAttr = genModel.new ClassAttribute(attrName,attrType,modelClass.getClassName());
 				currentAttr.setAttributeKind(kind);
 				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
 					this.genModel.setHasList(true);
 				}
-				String attrName = getNameOfDefinition(attrDef);
-				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
 				if(modelClass.getSpefificAttribute(attrName) != null)
 					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
 							+ " attribute "+attrName +" in class" + modelClass.getClassName());
 				currentAttr.setAttributeName(attrName);
-				currentAttr.setAttributeFullName(modelClass.getClassName()+"."+attrName);
-				String attrType = getTypeOfDefinition(attrDef);
-				if(!isClassDefined(attrType)){
-					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE)
-						modelClass.addOptionalAttribute(currentAttr);
-				}else // if class is defined make sure uppcase is used
-					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
-				currentAttr.setType(attrType);
+				currentAttr.setAttributeFullName(modelClass.getClassName()+attrName);
+				
 				attributes.add(currentAttr);
 				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
 					setOppositeAttribute(currentAttr,attrDef);

@@ -83,6 +83,9 @@ public class DSLGenerationModel {
 		}
 
 		public void addAttribute(ClassAttribute attribute) {
+			attribute.setModelClass(this);
+			attribute.setClassName(this.className);
+			attribute.setAttributeFullName(this.className + attribute.attributeName);
 			this.attributes.add(attribute);
 		}
 		
@@ -132,21 +135,27 @@ public class DSLGenerationModel {
 		private String attributeName;
 		private String attributeFullName;
 		private String className;
+		private ModelClass modelClass;
 		private String type;
-		private boolean optional = false; //TODO used in EMFCreator
+		private boolean optional = false;
+		private boolean lastAttribute = false;
+		private boolean isList = false;
+		private boolean isReference;
+		private boolean isReferencedByAttribute = false;
+		private boolean isCreatorOfOpposite = false;
 		private AttributeKind kind;
 		private ClassAttribute nextAttribute; //TODO also List?
 		private List<ClassAttribute> nextOptionalAttributes;
-		private boolean isReference;
 		private List<String> nextClass;
 		private List<String> nextOptionalClasses;
-		private boolean lastAttribute = false;
-		private boolean isList = false;
 		private ClassAttribute opposite;
-		private boolean isReferencedByAttribute = false;
 		private ClassAttribute referencedBy = null;
 		
-		public ClassAttribute(){
+		public ClassAttribute(String name, String type, String className){
+			this.attributeName = name;
+			this.type = type;
+			this.className = className;
+			this.attributeFullName = type + name;
 			this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
 			this.nextClass = new ArrayList<String>();
 			this.nextOptionalClasses = new ArrayList<String>();
@@ -216,9 +225,9 @@ public class DSLGenerationModel {
 		public String getAttributeFullName() {
 			return attributeFullName;
 		}
-
-		public void setAttributeFullName(String attributeFullName) {
-			this.attributeFullName = attributeFullName;
+		
+		public String setAttributeFullName(String fullName) {
+			return fullName;
 		}
 
 		public boolean isLastAttribute() {
@@ -275,6 +284,22 @@ public class DSLGenerationModel {
 		public void setList(boolean isList) {
 			this.isList = isList;
 		}
+
+		public ModelClass getModelClass() {
+			return modelClass;
+		}
+
+		public void setModelClass(ModelClass modelClass) {
+			this.modelClass = modelClass;
+		}
+
+		public boolean isCreatorOfOpposite() {
+			return isCreatorOfOpposite;
+		}
+
+		public void setCreatorOfOpposite(boolean isCreatorOfOpposite) {
+			this.isCreatorOfOpposite = isCreatorOfOpposite;
+		}
 		
 	}
 	
@@ -303,7 +328,7 @@ public class DSLGenerationModel {
 						+ " optional: " +attr.isOptional()+" " +"\n");
 			}
 			for (ClassAttribute referencedCl : modelClass.referencedByOpposite) {
-				sb.append("\t" + referencedCl.getOpposite().getAttributeFullName() +" referenced by nestedClassAttr: "+referencedCl.getAttributeFullName() +"\n");
+				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." + referencedCl.getOpposite().getAttributeName() +" referenced by nestedClassAttr: "+referencedCl.getClassName() + "." + referencedCl.getAttributeName() +"\n");
 			}
 		}
 		return sb.toString();
