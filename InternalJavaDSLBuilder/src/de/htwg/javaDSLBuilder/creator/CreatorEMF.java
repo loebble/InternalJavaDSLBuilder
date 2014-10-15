@@ -1,10 +1,7 @@
 package de.htwg.javaDSLBuilder.creator;
 
-import java.lang.reflect.Method;
-import java.security.KeyStore.Entry;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -16,11 +13,11 @@ import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EFactory;
-import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
+import de.htwg.javaDSLBuilder.dslmodel.AttributeKind;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ClassAttribute;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
@@ -192,13 +189,29 @@ public class CreatorEMF implements ICreator {
 	private <T extends EStructuralFeature> ClassAttribute createModelAttribute(T eClassifier, String className) {
 		String name = eClassifier.getName();
 		String type = "";
-		if(eClassifier instanceof EAttribute)
+		boolean isList = false;
+		AttributeKind kind;
+		if(eClassifier instanceof EAttribute){
 			type = ((EAttribute) eClassifier).getEAttributeType().getName();
-		else if(eClassifier instanceof EReference)
+		}
+		else if(eClassifier instanceof EReference){
 			type = ((EReference) eClassifier).getEReferenceType().getInstanceClassName();
+		}
 		else
 			throw new IllegalArgumentException("Parameter eClassifier " +WRONG_ARG_TYPE);
+		
+		boolean optional = !eClassifier.isRequired();
+		if(optional)
+			kind = AttributeKind.ATTRIBUTE;
+		else
+			kind = AttributeKind.OPTIONAL_ATTRIBUTE;
+		if(eClassifier.isMany()){
+			kind = AttributeKind.LIST_OF_ATTRIBUTES;
+			isList = true;
+		}
 		ClassAttribute attribute = genModel.new ClassAttribute(name,type,className);
+		attribute.setAttributeKind(kind);
+		attribute.setList(isList);
 		return attribute;
 	}
 
