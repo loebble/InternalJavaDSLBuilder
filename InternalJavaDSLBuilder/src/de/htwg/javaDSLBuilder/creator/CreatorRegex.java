@@ -240,10 +240,7 @@ public class CreatorRegex implements ICreator{
 				String attrType = getTypeOfDefinition(attrDef);
 				AttributeKind kind = getKind(attrDef);
 				boolean optional = false;
-				if(!isClassDefined(attrType)){
-					if(kind == AttributeKind.OPTIONAL_ATTRIBUTE)
-						optional = true;
-				}else // if class is defined make sure uppcase is used
+				if(isClassDefined(attrType)) // if class is defined make sure uppcase is used
 					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
 				ClassAttribute currentAttr = genModel.new ClassAttribute(attrName,attrType,modelClass.getClassName());
 				currentAttr.setAttributeKind(kind);
@@ -313,7 +310,7 @@ public class CreatorRegex implements ICreator{
 			if(firstClass == null) //Map is LinkedHasMap which has Order saved
 				firstClass = modelClass; 
 			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
-			removeOptionalAttributes(optionalAttrs, modelClass);
+			handleOptionalAttributes(optionalAttrs, modelClass);
 		}
 		
 	}
@@ -328,6 +325,7 @@ public class CreatorRegex implements ICreator{
 		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
+//			System.out.println(currentAtt.getAttributeName());
 			if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
 				currentAtt.setReference(true);
 			}
@@ -380,10 +378,17 @@ public class CreatorRegex implements ICreator{
 		}
 	}
 
-	
-	private void removeOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
-		for (ClassAttribute classAttribute : optionalAttrs) {
-			modelClass.getAttributes().remove(classAttribute);
+	/**
+	 * Handles the simple optionalAttributes of a ModelClass.
+	 * It removes them from the attributes list
+	 * and adds them to the optionalAttrubutes list for separation purpose
+	 * @param optionalAttrs List of simple optional attributes 
+	 * @param modelClass the ModelClass in wich the attribute is defined
+	 */
+	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
+		for (ClassAttribute optAttr : optionalAttrs) {
+			modelClass.addOptionalAttribute(optAttr);
+			modelClass.getAttributes().remove(optAttr);
 		}
 		
 	}

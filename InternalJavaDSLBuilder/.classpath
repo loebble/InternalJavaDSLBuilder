@@ -2,12 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
-	<classpathentry exported="true" kind="lib" path="/SimpleDSLBuilder/lib/antlr-4.3-complete.jar"/>
-	<classpathentry exported="true" kind="lib" path="/SimpleDSLBuilder/lib/ST-4.0.8.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/eclipse_kepler_java/plugins/org.eclipse.emf.common_2.9.2.v20131212-0545.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/eclipse_kepler_java/plugins/org.eclipse.emf.ecore_2.9.2.v20131212-0545.jar"/>
-	<classpathentry exported="true" kind="lib" path="D:/eclipse_kepler_java/plugins/org.eclipse.emf.ecore.xmi_2.9.1.v20131212-0545.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
+	<classpathentry exported="true" kind="lib" path="lib/ST-4.0.8.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.emf.ecore_2.10.1.v20140901-1043.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.emf.ecore.xmi_2.10.1.v20140901-1043.jar"/>
+	<classpathentry exported="true" kind="lib" path="lib/org.eclipse.emf.common_2.10.1.v20140901-1043.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

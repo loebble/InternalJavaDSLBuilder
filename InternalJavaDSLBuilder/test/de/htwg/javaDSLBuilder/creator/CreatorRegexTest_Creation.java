@@ -117,29 +117,30 @@ public class CreatorRegexTest_Creation {
 	@Test
 	public void testCreateUserDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(USER_DESCRIPTION);
-		this.createDSL(creator, "User");
+//		System.out.println(creator.getGenerationModel().printModel());
+//		System.out.println(creator.getGenerationModel().printOrder());
+		createDSL(creator, "User");
 	}
 	
 	@Test
 	public void testCreateUserOPTOnlyDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(USER_OPT_ONLY_DESCRIPTION);
-		this.createDSL(creator, "UserOPT");
+		createDSL(creator, "UserOPT");
 	}
 	
 	@Test
 	public void testCreateSimpleForumDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(SIMPLE_FORUM_DESCRIPTION);
-		this.createDSL(creator, "Forum");
+		createDSL(creator, "Forum");
 	}
 	
 	@Test
 	public void testCreateForumDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(FORUM_DESCRIPTION);
-		System.out.println(creator.getGenerationModel().printModel());
-		this.createDSL(creator, "ForumComplex");
+		createDSL(creator, "ForumComplex");
 	}
 	
-	private void createDSL(CreatorRegex creator, String modelName) {
+	public static void createDSL(CreatorRegex creator, String modelName) {
 		GeneratorRegex.buildDSL(creator, GeneratorRegex.MODEL_MIXED_IN_TEMPLATE, PACKAGE_DEST);
 		String modelDestination = PACKAGE_DEST+"."+modelName;
 		String modelPath =  Paths.get(".").toAbsolutePath().normalize().toString() + "\\src\\" +modelDestination.replace('.', '\\');
