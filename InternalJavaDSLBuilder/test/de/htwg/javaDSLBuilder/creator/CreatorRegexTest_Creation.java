@@ -117,8 +117,6 @@ public class CreatorRegexTest_Creation {
 	@Test
 	public void testCreateUserDSL() {
 		CreatorRegex creator = CreatorRegex.getInstance(USER_DESCRIPTION);
-//		System.out.println(creator.getGenerationModel().printModel());
-//		System.out.println(creator.getGenerationModel().printOrder());
 		createDSL(creator, "User");
 	}
 	
