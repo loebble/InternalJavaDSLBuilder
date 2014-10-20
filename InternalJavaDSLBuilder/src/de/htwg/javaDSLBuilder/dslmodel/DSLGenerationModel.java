@@ -16,6 +16,7 @@ public class DSLGenerationModel {
 	private String modelName;
 	private List<String> imports;
 	private boolean hasList = false;
+	private String emfFactoryName;
 	
 	public final Map<String,ModelClass> classes;
 	public final Map<String,String> nestedCalls;
@@ -39,7 +40,7 @@ public class DSLGenerationModel {
 	
 	public ModelClass addModelClass(String className) {
 		if(!classes.containsKey(className))
-			classes.put(className,new ModelClass(className));
+			classes.put(className,new ModelClass(className,this));
 		return classes.get(className);
 	}
 	
@@ -57,18 +58,24 @@ public class DSLGenerationModel {
 	
 	public class ModelClass{
 		
-		public ModelClass(String name){
+
+		public ModelClass(String name, DSLGenerationModel model){
+			this.model = model;
 			className = name;
 			attributes = new ArrayList<ClassAttribute>();
 			optionalAttributes = new ArrayList<ClassAttribute>();
 			referencedByOpposite = new ArrayList<ClassAttribute>();
+			this.imports = new ArrayList<String>();
 		}
 		
+		private DSLGenerationModel model;
 		private String className;
 		private List<ClassAttribute> attributes;
 		private List<ClassAttribute> optionalAttributes;
 		private List<ClassAttribute> referencedByOpposite;
 		private boolean simpleOptionalsOnly;
+		private List<String> imports;
+		private boolean hasList = false;
 
 		public boolean isSimpleOptionalsOnly() {
 			return simpleOptionalsOnly;
@@ -127,6 +134,27 @@ public class DSLGenerationModel {
 
 		public void setSimpleOptionalsOnly(boolean b) {
 			this.simpleOptionalsOnly = b;
+		}
+
+		public List<String> getImports() {
+			return imports;
+		}
+
+		public void addImport(String importString) {
+			if(!imports.contains(importString))
+				imports.add(importString);
+		}
+
+		public DSLGenerationModel getModel() {
+			return model;
+		}
+
+		public boolean isHasList() {
+			return hasList;
+		}
+
+		public void setHasList(boolean hasList) {
+			this.hasList = hasList;
 		}
 		
 	}
@@ -315,8 +343,13 @@ public class DSLGenerationModel {
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
 			sb.append("\n" + "ModelClass: "+modelClass.className +"\n");
+			sb.append("Imports: ");
+			for (String imp : modelClass.getImports()) {
+				sb.append(imp + "; ");
+			}
+			sb.append("\n");
 			for (ClassAttribute attr : modelClass.attributes) {
-				sb.append("\t" + "FullName: " +attr.getAttributeFullName() + " type: " +attr.getType() 
+				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
 				if(attr.getOpposite()!=null)
@@ -324,7 +357,7 @@ public class DSLGenerationModel {
 				sb.append("\n");
 			}
 			for (ClassAttribute attr : modelClass.optionalAttributes) {
-				sb.append("\t" + "FullName: " +attr.getAttributeFullName() + " type: " +attr.getType() 
+				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional()+" " +"\n");
 			}
@@ -361,6 +394,14 @@ public class DSLGenerationModel {
 
 	public void setHasList(boolean hasList) {
 		this.hasList = hasList;
+	}
+
+	public String getEmfFactoryName() {
+		return emfFactoryName;
+	}
+
+	public void setEmfFactoryName(String emfFactoryName) {
+		this.emfFactoryName = emfFactoryName;
 	}
 	
 }

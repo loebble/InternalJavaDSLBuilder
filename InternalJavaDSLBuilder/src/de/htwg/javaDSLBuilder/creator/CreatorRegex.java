@@ -19,13 +19,7 @@ import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
  *
  */
 public class CreatorRegex implements ICreator{
-	@Deprecated
-	private static final String REGEX_DSLNAME = "(?i)modelName=\\w+";
-	@Deprecated
-	public static final String MODEL_NAME = "modelName=\\w+";
-	@Deprecated
-	private static final Pattern MODEL_NAME_PATTERN = Pattern.compile(MODEL_NAME, Pattern.CASE_INSENSITIVE);
-	
+
 	/**
 	 * Regular expression for the attributes in a class definition
 	 */
@@ -95,21 +89,20 @@ public class CreatorRegex implements ICreator{
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
 	
 	//Matcher
-	@Deprecated
-	private Matcher modelNameMatcher;
 	private Matcher classDefinitionMatcher;
 	private Matcher namingMatcher;
 	private Matcher typingMatcher;
-	private Matcher buildMatcher;
 	private Matcher importMatcher;
 	private Matcher importParameterMatcher;
 	
+	/**
+	 * The DSLGenerationModel which holds all the classes, 
+	 * attributes(as well as their order) and imports defined by the language description.
+	 */
 	private DSLGenerationModel genModel;
 	private String languageDescr;
 	private String dslName;
 	private List<String> imports;
-	private String firstAttribute;
-	private Map<String,String> lastAttribute;
 	private Map<String,String> definedClasses= new LinkedHashMap<>();
 	
 	private CreatorRegex(){}
@@ -139,19 +132,19 @@ public class CreatorRegex implements ICreator{
 		return creator;
 	}
 	
+	/**
+	 * Returns the name of the DSL which is the same as the first Class defined
+	 * @return String dslName
+	 */
+	public String getDslName() {
+		return dslName;
+	}
+	
 	@Override
 	public DSLGenerationModel getGenerationModel() {
 		return this.genModel;
 	}
 	
-	@Deprecated
-	public String retrieveDslName(){
-		if(this.dslName == null && this.modelNameMatcher.find()){
-			String modelNameDef = modelNameMatcher.group();
-			this.genModel.setModelName(getNameOfDefinition(modelNameDef));
-		}
-		return this.genModel.getModelName();
-	}
 	
 	private String getNameOfDefinition(String def){
 		this.namingMatcher = NAMING_PATTERN.matcher(def);
@@ -197,16 +190,24 @@ public class CreatorRegex implements ICreator{
 			//a className's first letter should be upper case
 			className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 			//set modelName to first Class found, since its the root class
-			if(this.genModel.getModelName() == null)
+			if(this.genModel.getModelName() == null){
 				this.genModel.setModelName(className);
+				this.dslName = className;
+			}
 			addClassDef(className,classDef);
 		}
 		for (Map.Entry<String,String> classEntry: definedClasses.entrySet()) {
 			ModelClass modelClass = this.genModel.addModelClass(classEntry.getKey());
-			retrieveAttributes(classEntry.getValue(),modelClass);//TODO exception if no Attribute is defined (cannot happen, because regex?!)
+			retrieveAttributes(classEntry.getValue(),modelClass);
 		}
 	}
 	
+	/**
+	 * Adds a defined class to the DSLGenerationModel {@link #genModel}.
+	 * Throws an IllegalArgumentException if the class is defined multiple times.
+	 * @param className unique class name
+	 * @param classDef class definition from the language description
+	 */
 	private void addClassDef(String className, String classDef){
 		if(isClassDefined(className))
 			throw new IllegalArgumentException("Failed to define class of name: "+className+ ". "
@@ -214,6 +215,11 @@ public class CreatorRegex implements ICreator{
 		else this.definedClasses.put(className,classDef);
 	}
 	
+	/**
+	 * Checks if a class is defined and saved in the DSLGenerationModel
+	 * @param className
+	 * @return true if its defined and found otherwise false is returned
+	 */
 	private boolean isClassDefined(String className){
 		className = Character.toUpperCase(className.charAt(0)) + className.substring(1);
 		if(this.definedClasses.containsKey(className)){
@@ -239,8 +245,8 @@ public class CreatorRegex implements ICreator{
 				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
 				String attrType = getTypeOfDefinition(attrDef);
 				AttributeKind kind = getKind(attrDef);
-				boolean optional = false;
-				if(isClassDefined(attrType)) // if class is defined make sure uppcase is used
+				// if class is defined make sure capital letter is used
+				if(isClassDefined(attrType)) 
 					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
 				ClassAttribute currentAttr = genModel.new ClassAttribute(attrName,attrType,modelClass.getClassName());
 				currentAttr.setAttributeKind(kind);
@@ -266,7 +272,7 @@ public class CreatorRegex implements ICreator{
 	/**
 	 * Retrieves Opposite definitions and sets the corresponding opposite attribute to the given one.
 	 * @param currentAttr the attribute which needs a opposite reference
-	 * @param attrDef String with attribute definitition defined by {@link REGEX_ATTRIBUTE}
+	 * @param attrDef String with attribute definition which is again defined by {@link REGEX_ATTRIBUTE}
 	 */
 	private void setOppositeAttribute(ClassAttribute currentAttr, String attrDef) {
 		Matcher oppositeMatcher = OPPOSITE_ATTRIBUTE_PATTERN.matcher(attrDef);
@@ -295,28 +301,45 @@ public class CreatorRegex implements ICreator{
 		}
 	}
 
-	private void checkForMatchingType(ClassAttribute currentAttr,
+	/**
+	 * Checks if the attribute's opposite ClassAttribute has the correct type.
+	 * Throws a IllegalArgumentException if the types doesnt match.
+	 * @param attribute one side of the opposite relation
+	 * @param oppositeAttribute the other side of the relation
+	 */
+	private void checkForMatchingType(ClassAttribute attribute,
 			ClassAttribute oppositeAttribute) {
-		if(!currentAttr.getType().equals(oppositeAttribute.getClassName()) ||
-				   !oppositeAttribute.getType().equals(currentAttr.getClassName()))
-					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" + currentAttr.getAttributeName()+":"+currentAttr.getType() 
-							+ "' referencing attribute '" +oppositeAttribute.getAttributeName() +":"+oppositeAttribute.getType()+"'");
+		if(!attribute.getType().equals(oppositeAttribute.getClassName()) ||
+				   !oppositeAttribute.getType().equals(attribute.getClassName()))
+					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" 
+							+ oppositeAttribute.getAttributeName()+":"+oppositeAttribute.getType() 
+							+ "' referencing attribute '" +attribute.getAttributeName() +":"+attribute.getType()+"'");
+//		if(!oppositeAttribute.getType().equals(attribute.getClassName()) || TODO check if vice versa also in RegexModel needed!!!
+//				   !attribute.getType().equals(oppositeAttribute.getClassName()))
+//					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" 
+//							+ attribute.getAttributeName()+":"+attribute.getType() 
+//							+ "' referencing attribute '" +oppositeAttribute.getAttributeName() 
+//							+":"+oppositeAttribute.getType()+"'");
 	}
 
+	/**
+	 * Handles the order of the ClassAttributes for the generated ModelClasses in the DSLGenerationModel
+	 * {@link #genModel}.
+	 */
 	private void setAttributeOrder() {
 		ModelClass firstClass = null;
 		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
-			if(firstClass == null) //Map is LinkedHasMap which has Order saved
+			//Map is LinkedHasMap which has Order saved
+			if(firstClass == null)
 				firstClass = modelClass; 
 			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
 			handleOptionalAttributes(optionalAttrs, modelClass);
 		}
-		
 	}
 	
 	/**
-	 * Sets the attribute order in a ModelClass
+	 * Sets the ClassAttributes order in a ModelClass
 	 * @param modelClass The ModelClass object to order attributes in
 	 * @return a List<ClassAttribute> with the optionalAttributes
 	 */
@@ -325,8 +348,8 @@ public class CreatorRegex implements ICreator{
 		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-//			System.out.println(currentAtt.getAttributeName());
-			if(isClassDefined(currentAtt.getType())){ //If current Attribute is a Reference to a defined Class set reference
+			if(isClassDefined(currentAtt.getType())){
+				//If current Attribute is a Reference to a defined Class set reference
 				currentAtt.setReference(true);
 			}
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
@@ -346,7 +369,8 @@ public class CreatorRegex implements ICreator{
 					if(currentAtt.isReference()){
 						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
 						previousRequiredAttr = currentAtt;
-					}else{ // type is not a modeled Class e.g. a simple types
+					}else{
+						// type is not a modeled Class e.g. a simple types
 						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
 						simpleOptionalAttrs.add(currentAtt);
 					}
@@ -383,7 +407,7 @@ public class CreatorRegex implements ICreator{
 	 * It removes them from the attributes list
 	 * and adds them to the optionalAttrubutes list for separation purpose
 	 * @param optionalAttrs List of simple optional attributes 
-	 * @param modelClass the ModelClass in wich the attribute is defined
+	 * @param modelClass the ModelClass in which the attribute is defined
 	 */
 	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
 		for (ClassAttribute optAttr : optionalAttrs) {
@@ -401,6 +425,11 @@ public class CreatorRegex implements ICreator{
 		return className;
 	}
 	
+	/**
+	 * Returns the matching AttributeKind depending on the Start of the attribute definition
+	 * @param attrDef the attribute defined in the language description
+	 * @return the matching AttributeKind or null if none is found
+	 */
 	private AttributeKind getKind(String attrDef){
 		if(attrDef.startsWith(ATTR_START))
 			return AttributeKind.ATTRIBUTE;
@@ -412,17 +441,12 @@ public class CreatorRegex implements ICreator{
 			return AttributeKind.OPPOSITE_ATTRIBUTE;
 		else return null;
 	}
-
-	public Map<String, String> getLastAttribute() {
-		return lastAttribute;
-	}
 	
 	
-	public String getFirstAttribute() {
-		return firstAttribute;
-	}
-	
-	
+	/**
+	 * Retrieves the defined import Classes from the language description
+	 * and adds them to the import list of the DSGenerationModel {@link #genModel}
+	 */
 	public void retrieveImports(){
 		if(this.imports == null && this.importMatcher.find()){
 			imports = new ArrayList<>();

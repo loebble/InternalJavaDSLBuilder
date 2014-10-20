@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/InternalJavaDSLBuilder/src" modelPluginID="InternalJavaDSLBuilder"
+    modelName="SimpleForum" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="8.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>SimpleForum.ecore</foreignModel>
+  <genPackages prefix="SimpleForum" basePackage="de.htwg.generated.emf.model" disposableProviderFactory="true"
+      ecorePackage="SimpleForum.ecore#/">
+    <genDataTypes ecoreDataType="SimpleForum.ecore#//URL"/>
+    <genClasses ecoreClass="SimpleForum.ecore#//Forum">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//Forum/name"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//Forum/url"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SimpleForum.ecore#//Forum/users"/>
+    </genClasses>
+    <genClasses ecoreClass="SimpleForum.ecore#//User">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//User/firstName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//User/lastName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//User/nickName"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//User/email"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//User/age"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SimpleForum.ecore#//User/posts"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SimpleForum.ecore#//User/forum"/>
+      <genOperations ecoreOperation="SimpleForum.ecore#//User/hasPosts">
+        <genParameters ecoreParameter="SimpleForum.ecore#//User/hasPosts/chain"/>
+        <genParameters ecoreParameter="SimpleForum.ecore#//User/hasPosts/map"/>
+      </genOperations>
+    </genClasses>
+    <genClasses ecoreClass="SimpleForum.ecore#//Post">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//Post/title"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//Post/text"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute SimpleForum.ecore#//Post/views"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference SimpleForum.ecore#//Post/creator"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

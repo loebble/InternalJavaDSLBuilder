@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder;
+package de.htwg.javaDSLBuilder.generator;
 
 import java.io.File;
 import java.io.FileNotFoundException;

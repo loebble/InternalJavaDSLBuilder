@@ -1,24 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
     xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/InternalJavaDSLBuilder/src" modelPluginID="InternalJavaDSLBuilder"
-    modelName="ForumMulti" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
-    importerID="org.eclipse.emf.importer.ecore" complianceLevel="7.0" copyrightFields="false"
+    modelName="ForumMulti" modelPluginClass="" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" containmentProxies="true" minimalReflectiveMethods="false"
+    complianceLevel="7.0" copyrightFields="false" interfaceNamePattern="" classNamePattern=""
     operationReflection="true" importOrganizing="true">
   <foreignModel>ForumMulti.ecore</foreignModel>
-  <genPackages prefix="ForumMulti" basePackage="de.htwg.generated.emf" disposableProviderFactory="true"
-      ecorePackage="ForumMulti.ecore#/">
+  <genPackages prefix="ForumMulti" basePackage="de.htwg.generated.emf" resource="XMI"
+      disposableProviderFactory="true" contentTypeIdentifier="" ecorePackage="ForumMulti.ecore#/">
     <genClasses ecoreClass="ForumMulti.ecore#//User">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//User/firstName"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//User/lastName"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//User/email"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//User/phone"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//User/age"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//User/posts"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//User/friend"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//User/post"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//User/nested"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//User/nestedNoOpposite"/>
     </genClasses>
     <genClasses ecoreClass="ForumMulti.ecore#//Post">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//Post/topic"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//Post/text"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//Post/nested"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//Post/creator"/>
+    </genClasses>
+    <genClasses ecoreClass="ForumMulti.ecore#//Nested">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//Nested/creator"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference ForumMulti.ecore#//Nested/post"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute ForumMulti.ecore#//Nested/someText"/>
+      <genOperations ecoreOperation="ForumMulti.ecore#//Nested/creatorIsPostCreator">
+        <genParameters ecoreParameter="ForumMulti.ecore#//Nested/creatorIsPostCreator/chain"/>
+        <genParameters ecoreParameter="ForumMulti.ecore#//Nested/creatorIsPostCreator/map"/>
+      </genOperations>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

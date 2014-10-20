@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator;
+package de.htwg.javaDSLBuilder.creator.regex;
 
 import static org.junit.Assert.assertTrue;
 

@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator;
+package de.htwg.javaDSLBuilder.creator.regex;
 
 import static org.junit.Assert.*;
 
@@ -8,7 +8,8 @@ import java.nio.file.Paths;
 
 import org.junit.Test;
 
-import de.htwg.javaDSLBuilder.GeneratorRegex;
+import de.htwg.javaDSLBuilder.creator.CreatorRegex;
+import de.htwg.javaDSLBuilder.generator.GeneratorRegex;
 
 /**
  * Test class for wrong language descriptions
@@ -79,8 +80,8 @@ public class CreatorRegexTest_Creation {
 	public final static String FORUM_DESCRIPTION =
 			".class=Forum{.A=name:String, .A=url:URL, .LA=sections:Section, .LA=user:User}"
 			+ ".class=Section{.A=name:String, .LA=moderators:User}"
-			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=nickName:String, .A=rating:Rating, .LA=posts:Post, .OP=moderatorOfSection:Section->moderators}"
-			+ ".class=Post{.A=title:String, .A=text:String, .OA=views:int, .LA=replier:User, .A=rating:Rating, .OP=creator:User->posts}"
+			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String,.A=nickName:String, .A=rating:Rating, .LA=posts:Post, .OP=moderatorOfSection:Section->moderators}"
+			+ ".class=Post{.A=title:String, .A=text:String, .OA=views:int, .LA=repliers:User, .A=rating:Rating, .OP=creator:User->posts}"
 			+ ".class=Rating{.OA=upps:int, .OA=downs:int, .OP=forUser:User->rating, .OP=forPost:Post->rating}"
 			+ ".imp={java.net.URL}"
 			;

@@ -27,9 +27,9 @@ public class <genModel.modelName>{
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
 		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
-	
+	<! for every other class than the root class a new ModelClass has to be defined !>
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
-
+	<! one builder for every generated Class !>
 	<genModel.classes.keys:{className|<createClassBuilder(className, genModel.classes.(className), genModel.classes, genModel)>}>
 
 }
