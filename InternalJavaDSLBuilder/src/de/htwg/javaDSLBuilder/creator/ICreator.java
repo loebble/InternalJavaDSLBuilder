@@ -5,8 +5,8 @@ import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
 public interface ICreator {
 	
 	/**
-	 * Returns the DSLGenationModel created by this creator
+	 * Returns the created {@link DSLGenationModel} for code generation
 	 */
 	DSLGenerationModel getGenerationModel();
-
+	
 }

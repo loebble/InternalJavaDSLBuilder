@@ -19,28 +19,24 @@ import org.eclipse.emf.ecore.EStructuralFeature;
 
 import de.htwg.javaDSLBuilder.dslmodel.AttributeKind;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ClassAttribute;
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
+import de.htwg.javaDSLBuilder.dslmodel.ClassAttribute;
+import de.htwg.javaDSLBuilder.dslmodel.ModelClass;
 
 public class CreatorEMF implements ICreator {
 	private String modelPackage;
 	private EPackage ePackage;
-	private Set<String> primitiveTypes;
 	private Map<String, String> definedEClasses;
 	private Map<String, Map<String, String>> eclassWithMethods;
 
 	private String dslName;
 	private String buildMethodName;
 	private ArrayList<String> imports;
-	@Deprecated
-	private List<EReference> incompleteOpposites = new ArrayList<>();
-
+	
 	private final DSLGenerationModel genModel;
 	
 	private final String OPPOSITES_DEFINED_WRONG = "Opposite releation not correct defined. ";
 	private final String WRONG_ECORE = "Make sure to have a correct Ecore Model which you can save and generate code from. ";
 	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
-	private final String NO_OPPOSITE = "Reference has no opposite";
 	private String packageName;
 	
 	@Override
@@ -63,7 +59,7 @@ public class CreatorEMF implements ICreator {
 		creator.setAttributeOrder();
 		// creator.factoryClass = Class.forName(fullyQUalifiedFactoryName);
 		// creator.modelPackage = creator.factoryClass.getPackage().getName();
-		// creator.builderModel.addImports(creator.modelPackage);
+		// creator.builderModel.addImport(creator.modelPackage);
 		return creator;
 	}
 
@@ -79,7 +75,7 @@ public class CreatorEMF implements ICreator {
 			return;
 		}
 		
-		for (Iterator iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
+		for (Iterator<EClassifier> iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
 			
 			EClassifier classifier = (EClassifier) iter.next();
 			if (classifier instanceof EClass) {
@@ -90,7 +86,7 @@ public class CreatorEMF implements ICreator {
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
 				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
 				this.genModel.getClasses().put(eClassName, modelClass);
-				for (Iterator ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
+				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
 					EStructuralFeature feature = (EStructuralFeature)ai.next();
 					if (feature instanceof EAttribute) {
 						EAttribute foundAttribute = (EAttribute) feature;
@@ -127,12 +123,11 @@ public class CreatorEMF implements ICreator {
 //								System.out.println("Creator is "+creator.getAttributeFullName());
 								creator.setReferencedByAttribute(true);
 								creator.setReferencedBy(creator.getOpposite());
-								this.incompleteOpposites.add(reference);
 							}
 						}
 					}else if (feature instanceof EEnum){ //TODO Enums
 						EEnum eEnum = (EEnum)classifier;
-						for (Iterator ei = eEnum.getELiterals().iterator();ei.hasNext();){
+						for (Iterator<EEnumLiteral> ei = eEnum.getELiterals().iterator();ei.hasNext();){
 							EEnumLiteral literal = (EEnumLiteral) ei.next();
 							System.out.println("ENUM: "+literal.getName());
 						}
@@ -153,7 +148,7 @@ public class CreatorEMF implements ICreator {
 	 */
 	private void setAttributeOrder() {
 		ModelClass firstClass = null;
-		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
+		for (Map.Entry<String,ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
 			//Map is LinkedHasMap which has Order saved
 			if(firstClass == null)
@@ -173,10 +168,6 @@ public class CreatorEMF implements ICreator {
 		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-			if(isClassDefined(currentAtt.getType())){
-				//If current Attribute is a Reference to a defined Class set reference
-				currentAtt.setReference(true);
-			}
 			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
 			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
 				if(previousRequiredAttr==null){
@@ -227,11 +218,6 @@ public class CreatorEMF implements ICreator {
 		}
 	}
 	
-	private boolean isClassDefined(String type) {
-		// TODO Auto-generated method stub
-		return false;
-	}
-
 	/** TODO duplicate with RegexCreator
 	 * Handles the simple optionalAttributes of a ModelClass.
 	 * It removes them from the attributes list
@@ -248,37 +234,10 @@ public class CreatorEMF implements ICreator {
 	}
 
 	/**
-	 * Completes the opposite relations of references.
-	 * Only call Method after {@link #retrieveAttributes()}
-	 * @param opposites
-	 */
-	@Deprecated
-	private void completeOppositeRelation() {
-		for (EReference eReference : this.incompleteOpposites) {
-			System.out.println("Completing Opp Relation");
-			System.out.println(eReference.getName());
-			EReference oppositeRef = eReference.getEOpposite();
-			if(oppositeRef == null)
-				throw new IllegalArgumentException(NO_OPPOSITE);
-			ClassAttribute existingOpAttribute = findAttribute(eReference.getEReferenceType().getName(), eReference.getName());
-			ClassAttribute newOpAttribute = findAttribute(oppositeRef.getEReferenceType().getName(), oppositeRef.getName());
-			//Is set by retrieve attributes
-			if(newOpAttribute.isCreatorOfOpposite()){
-				System.out.print("found Creator for this opposite");
-				newOpAttribute.setOpposite(existingOpAttribute);
-				newOpAttribute.setReferencedBy(existingOpAttribute);
-			}
-		}
-		
-	}
-
-	/**
 	 * Searches the DSLGenerationModel for the opposite ClassAttribute which is defined by the the references EOpposite object
 	 * @param reference the EReference which has an opposite attribute defined
 	 * @return the found ClassAttribute in the DSLGenerationModel or null if none has been found
 	 */
-	
-	
 	private ClassAttribute findAttribute(String className, String attrName){
 		for (Map.Entry<String,ModelClass> classEntry: genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
@@ -297,7 +256,8 @@ public class CreatorEMF implements ICreator {
 	 * and initializes it with given parameter
 	 * @param eClassifier can be an EAttribute or an EReference
 	 * @param modelClass the class in which the attribute is defined
-	 * @return
+	 * @throws IllegalArgumentException if eClassifier is neither instance of {@link EAttribute} or {@link EReference}
+	 * @return the created classAttribute within the ModelClass
 	 */
 	private <T extends EStructuralFeature> ClassAttribute createModelAttribute(T eClassifier, ModelClass modelClass) {
 		String clName = eClassifier.getName();
@@ -327,7 +287,7 @@ public class CreatorEMF implements ICreator {
 			kind = AttributeKind.LIST_OF_ATTRIBUTES;
 			isList = true;
 		}
-		ClassAttribute attribute = genModel.new ClassAttribute(clName,type,modelClass.getClassName());
+		ClassAttribute attribute = new ClassAttribute(clName,type,modelClass.getClassName());
 		attribute.setAttributeKind(kind);
 		attribute.setReference(isRef);
 		attribute.setList(isList);
@@ -336,30 +296,6 @@ public class CreatorEMF implements ICreator {
 		return attribute;
 	}
 
-//	private void retrieveSetters(String eclassName, String qualifiedClass,
-//			ModelClass modelClass) throws ClassNotFoundException {
-//		Class eClass = Class.forName(qualifiedClass);
-//		Map<String, String> setterMethods = new LinkedHashMap<>();
-//		for (Method m : eClass.getDeclaredMethods()) {
-//			String methodName = m.getName();
-//			Class[] parameterTypes = m.getParameterTypes();
-//			if (!methodName.startsWith("set") || parameterTypes.length != 1)
-//				continue;
-//			for (Class paramType : parameterTypes) {
-//				ClassAttribute attr = genModel.new ClassAttribute();
-//				String canocicalType = paramType.getCanonicalName();
-//				setterMethods.put(methodName, canocicalType); // TODO annotation
-//																// for optional
-//																// and default
-//																// value
-//				attr.setType(canocicalType);
-//				attr.setAttributeName(methodName);
-//				modelClass.addAttribute(attr);
-//			}
-//			if (setterMethods.size() != 0)
-//				this.eclassWithMethods.put(eclassName, setterMethods);
-//		}
-//	}
 
 	public void printEclassWithMethods() {
 		if (this.eclassWithMethods.size() <= 0)
@@ -378,14 +314,6 @@ public class CreatorEMF implements ICreator {
 						+ ")");
 			}
 		}
-	}
-
-	public Set<String> getPrimitiveTypes() {
-		return primitiveTypes;
-	}
-
-	public void setPrimitiveTypes(Set<String> primitiveTypes) {
-		this.primitiveTypes = primitiveTypes;
 	}
 
 	public String getModelPackage() {

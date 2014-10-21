@@ -5,333 +5,119 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Model for the generation of a internal Java DSL.
+ * An Instance of this class describes the structure of a another model 
+ * (or more specifically the classes and attributes) which can be used
+ * to generate a internal DSL for the model instantiation.
+ *
+ */
 public class DSLGenerationModel {
 	
+	/**
+	 * Constructor for the DSLGenerationModel
+	 */
 	public DSLGenerationModel(){
 		imports = new ArrayList<String>();
-		classes = new LinkedHashMap<String,DSLGenerationModel.ModelClass>();
-		nestedCalls = new LinkedHashMap<String,String>();
+		classes = new LinkedHashMap<String,ModelClass>();
 	}
 	
+	/**
+	 * The name of the model
+	 */
 	private String modelName;
+	
+	/**
+	 * A list of imports the model has
+	 */
 	private List<String> imports;
+	
+	/**
+	 * Indicator if the model uses Lists of attributes
+	 */
 	private boolean hasList = false;
+	
+	/**
+	 * the name of the factory if the model is a emf model
+	 */
 	private String emfFactoryName;
 	
+	/**
+	 * Map of classes the model has.
+	 * Key of map is the ModelClass name and value the ModelClass object.
+	 */
 	public final Map<String,ModelClass> classes;
-	public final Map<String,String> nestedCalls;
 	
+	/**
+	 * Returns the value of {@link#modelName}
+	 */
 	public String getModelName() {
 		return modelName;
 	}
 
+	/**
+	 * Sets the value of {@link#modelName}
+	 * @param modelName
+	 */
 	public void setModelName(String modelName) {
 		this.modelName = modelName;
 	}
 
+	/**
+	 * Returns List of imports the model has
+	 * @see {@link #imports}
+	 */
 	public List<String> getImports() {
 		return imports;
 	}
 
-	public void addImports(String importString) {
+	/**
+	 * Adds a single import to the list of imports
+	 * @param importString the full name of an import
+	 * @see {@link #imports}
+	 */
+	public void addImport(String importString) {
 		if(!imports.contains(importString))
 			imports.add(importString);
 	}
 	
+	/**
+	 * Adds a single ModelClass to this generation model.
+	 * If a ModelClass with the same name already was in the list {@link #classes}
+	 * it will not be added or replaced.
+	 * @param className the ModelClass obj to be added
+	 * @return the ModelClass object which is finally in the list {@link #classes}
+	 */
 	public ModelClass addModelClass(String className) {
 		if(!classes.containsKey(className))
 			classes.put(className,new ModelClass(className,this));
 		return classes.get(className);
 	}
 	
+	/**
+	 * Retrieves a ModelClass object from the list {@link #classes} by the given className.
+	 * Can throw an Exception if a className which isnt in the list 
+	 * @param className the name of the ModelClass
+	 * @return
+	 */
 	public ModelClass getClass(String className){
 		return classes.get(className);
 	}
 	
 	/**
-	 * returns a Map (Classname as Key and the {@code ModelClass} Object as Value) for all the Classes defined in the Model.
-	 * classes can be added via the put method of the Map interface
+	 * Returns the Map {@link #classes} which has all defined classes of this Model.
+	 * Classes can be added {@link #addModelClass(String)}
 	 */
 	public Map<String,ModelClass> getClasses() {
 		return classes;
 	}
 	
-	public class ModelClass{
-		
 
-		public ModelClass(String name, DSLGenerationModel model){
-			this.model = model;
-			className = name;
-			attributes = new ArrayList<ClassAttribute>();
-			optionalAttributes = new ArrayList<ClassAttribute>();
-			referencedByOpposite = new ArrayList<ClassAttribute>();
-			this.imports = new ArrayList<String>();
-		}
-		
-		private DSLGenerationModel model;
-		private String className;
-		private List<ClassAttribute> attributes;
-		private List<ClassAttribute> optionalAttributes;
-		private List<ClassAttribute> referencedByOpposite;
-		private boolean simpleOptionalsOnly;
-		private List<String> imports;
-		private boolean hasList = false;
-
-		public boolean isSimpleOptionalsOnly() {
-			return simpleOptionalsOnly;
-		}
-
-		public List<ClassAttribute> getAttributes() {
-			return attributes;
-		}
-		
-		public List<ClassAttribute> getOptionalAttributes() {
-			return optionalAttributes;
-		}
-
-		public void addAttribute(ClassAttribute attribute) {
-			attribute.setModelClass(this);
-			attribute.setClassName(this.className);
-			attribute.setAttributeFullName(this.className + attribute.attributeName);
-			this.attributes.add(attribute);
-		}
-		
-		public void addOptionalAttribute(ClassAttribute attribute) {
-			this.optionalAttributes.add(attribute);
-		}
-
-		public String getClassName() {
-			return className;
-		}
-
-		public void setClassName(String className) {
-			this.className = className;
-		}
-		
-		public ClassAttribute getSpefificAttributeByFullName(String fullAttributeName) {
-			for (ClassAttribute attr : this.attributes) {
-				if(attr.attributeFullName.equals(fullAttributeName))
-					return attr;
-			}
-			return null;
-		}
-		
-		public ClassAttribute getSpefificAttribute(String attributeName) {
-			for (ClassAttribute attr : this.attributes) {
-				if(attr.attributeName.equals(attributeName))
-					return attr;
-			}
-			return null;
-		}
-
-		public List<ClassAttribute> getReferencedByOpposite() {
-			return referencedByOpposite;
-		}
-
-		public void addReferencedByOpposite(ClassAttribute referencedByOpposite) {
-			this.referencedByOpposite.add(referencedByOpposite);
-		}
-
-		public void setSimpleOptionalsOnly(boolean b) {
-			this.simpleOptionalsOnly = b;
-		}
-
-		public List<String> getImports() {
-			return imports;
-		}
-
-		public void addImport(String importString) {
-			if(!imports.contains(importString))
-				imports.add(importString);
-		}
-
-		public DSLGenerationModel getModel() {
-			return model;
-		}
-
-		public boolean isHasList() {
-			return hasList;
-		}
-
-		public void setHasList(boolean hasList) {
-			this.hasList = hasList;
-		}
-		
-	}
-
-	public class ClassAttribute{
-		private String attributeName;
-		private String attributeFullName;
-		private String className;
-		private ModelClass modelClass;
-		private String type;
-		private boolean optional = false;
-		private boolean lastAttribute = false;
-		private boolean isList = false;
-		private boolean isReference;
-		private boolean isReferencedByAttribute = false;
-		private boolean isCreatorOfOpposite = false;
-		private AttributeKind kind;
-		private ClassAttribute nextAttribute; //TODO also List?
-		private List<ClassAttribute> nextOptionalAttributes;
-		private List<String> nextClass;
-		private List<String> nextOptionalClasses;
-		private ClassAttribute opposite;
-		private ClassAttribute referencedBy = null;
-		
-		public ClassAttribute(String name, String type, String className){
-			this.attributeName = name;
-			this.type = type;
-			this.className = className;
-			this.attributeFullName = className + name;
-			this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
-			this.nextClass = new ArrayList<String>();
-			this.nextOptionalClasses = new ArrayList<String>();
-		}
-		
-		public String getType() {
-			return type;
-		}
-		public void setType(String type) {
-			this.type = type;
-		}
-		public boolean isOptional() {
-			return optional;
-		}
-		public void setOptional(boolean optional) {
-			this.optional = optional;
-		}
-		public ClassAttribute getNextAttribute() {
-			return nextAttribute;
-		}
-		public void setNextAttribute(ClassAttribute nextAttribute) {
-			this.nextAttribute = nextAttribute;
-		}
-		public List<ClassAttribute> getNextOptionalAttributes() {
-			return nextOptionalAttributes;
-		}
-		public void addNextOptionalAttribute(ClassAttribute nextOptionalAttribute) {
-			this.nextOptionalAttributes.add(nextOptionalAttribute);
-		}
-		public void setNextOptionalAttributes(
-				List<ClassAttribute> nextOptionalAttributes) {
-			this.nextOptionalAttributes = nextOptionalAttributes;
-		}
-		public String getAttributeName() {
-			return attributeName;
-		}
-		public void setAttributeName(String attributeName) {
-			this.attributeName = attributeName;
-		}
-		public List<String> getNextClass() {
-			return nextClass;
-		}
-		public void setNextClass(List<String> nextClasses) {
-			this.nextClass = nextClasses;
-		}
-		public void addNextClass(String nextClasse) {
-			this.nextClass.add(nextClasse);
-		}
-		public List<String> getNextOptionalClass() {
-			return nextOptionalClasses;
-		}
-		public void setNextOptionalClass(List<String> nextOptionalClass) {
-			this.nextOptionalClasses = nextOptionalClass;
-		}
-		public void addNextOptionalClass(String nextOptionalAttribute) {
-			this.nextOptionalClasses.add(nextOptionalAttribute);
-		}
-
-		public AttributeKind getAttributeKind() {
-			return kind;
-		}
-
-		public void setAttributeKind(AttributeKind kind) {
-			this.kind = kind;
-		}
-
-		public String getAttributeFullName() {
-			return attributeFullName;
-		}
-		
-		public String setAttributeFullName(String fullName) {
-			return fullName;
-		}
-
-		public boolean isLastAttribute() {
-			return lastAttribute;
-		}
-
-		public void setLastAttribute(boolean lastAttribute) {
-			this.lastAttribute = lastAttribute;
-		}
-
-		public boolean isReference() {
-			return isReference;
-		}
-
-		public void setReference(boolean isReference) {
-			this.isReference = isReference;
-		}
-
-		public void setOpposite(ClassAttribute opp) {
-			this.opposite=opp;
-		}
-		
-		public ClassAttribute getOpposite() {
-			return this.opposite;
-		}
-
-		public ClassAttribute getReferencedBy() {
-			return referencedBy;
-		}
-
-		public void setReferencedBy(ClassAttribute referencedBy) {
-			this.referencedBy = referencedBy;
-			this.getModelClass().addReferencedByOpposite(referencedBy);
-		}
-
-		public boolean isReferencedByAttribute() {
-			return isReferencedByAttribute;
-		}
-
-		public void setReferencedByAttribute(boolean isReferencedByAttribute) {
-			this.isReferencedByAttribute = isReferencedByAttribute;
-		}
-		
-		public String getClassName() {
-			return className;
-		}
-		public void setClassName(String className) {
-			this.className = className;
-		}
-
-		public boolean isList() {
-			return isList;
-		}
-
-		public void setList(boolean isList) {
-			this.isList = isList;
-		}
-
-		public ModelClass getModelClass() {
-			return modelClass;
-		}
-
-		public void setModelClass(ModelClass modelClass) {
-			this.modelClass = modelClass;
-		}
-
-		public boolean isCreatorOfOpposite() {
-			return isCreatorOfOpposite;
-		}
-
-		public void setCreatorOfOpposite(boolean isCreatorOfOpposite) {
-			this.isCreatorOfOpposite = isCreatorOfOpposite;
-		}
-		
-	}
-	
+	/**
+	 * Creates a String representation of this generation model with all the classes and attributes
+	 * as well as the attributes properties
+	 * @return the created String
+	 */
 	public String printModel() {
 		StringBuffer sb = new StringBuffer();
 		sb.append("DSL for: "+this.modelName +"\n");
@@ -342,13 +128,13 @@ public class DSLGenerationModel {
 		sb.append("\n"+"CLASSES: ");
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
-			sb.append("\n" + "ModelClass: "+modelClass.className +"\n");
+			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
 			sb.append("Imports: ");
 			for (String imp : modelClass.getImports()) {
 				sb.append(imp + "; ");
 			}
 			sb.append("\n");
-			for (ClassAttribute attr : modelClass.attributes) {
+			for (ClassAttribute attr : modelClass.getAttributes()) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
@@ -356,27 +142,33 @@ public class DSLGenerationModel {
 					sb.append(" opposite: " +attr.getOpposite().getAttributeFullName());
 				sb.append("\n");
 			}
-			for (ClassAttribute attr : modelClass.optionalAttributes) {
+			for (ClassAttribute attr : modelClass.getOptionalAttributes()) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional()+" " +"\n");
 			}
-			for (ClassAttribute referencedCl : modelClass.referencedByOpposite) {
+			for (ClassAttribute referencedCl : modelClass.getReferencedByOpposite()) {
 				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." + referencedCl.getOpposite().getAttributeName() +" referenced by nestedClassAttr: "+referencedCl.getClassName() + "." + referencedCl.getAttributeName() +"\n");
 			}
 		}
 		return sb.toString();
 	}
 	
+	/**
+	 * Creates a String representation of the order the classes and attributes 
+	 * are in the model.
+	 * 
+	 * @return the created string with the corresponding order
+	 */
 	public String printOrder(){
 		StringBuffer sb = new StringBuffer();
 		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
 			ModelClass modelClass = (ModelClass) entry.getValue();
-			sb.append("\n" + "ModelClass: "+modelClass.className +"\n");
+			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
 			int i = 0;
-			for (ClassAttribute attr : modelClass.attributes) {
+			for (ClassAttribute attr : modelClass.getAttributes()) {
 				if(i == 0)
-					sb.append(" "+attr.attributeName +":" +attr.getType());
+					sb.append(" "+attr.getAttributeName() +":" +attr.getType());
 				if(attr.getNextAttribute() != null)
 					sb.append("-> "+ attr.getNextAttribute().getAttributeName() +":" +attr.getNextAttribute().getType());
 				for (ClassAttribute nextOptional : attr.getNextOptionalAttributes()) {
@@ -388,18 +180,34 @@ public class DSLGenerationModel {
 		return sb.toString();
 	}
 
+	/**
+	 * Returns the {@link #hasList} value
+	 * @return true if model uses at least one list of attributes
+	 */
 	public boolean isHasList() {
 		return hasList;
 	}
 
+	/**
+	 * Sets the {@link #hasList} value.
+	 * @param hasList true if model uses at least one list of attributes
+	 */
 	public void setHasList(boolean hasList) {
 		this.hasList = hasList;
 	}
 
+	/**
+	 * Returns the {@link #emfFactoryName} value
+	 * @return the excact name of the factory
+	 */
 	public String getEmfFactoryName() {
 		return emfFactoryName;
 	}
 
+	/**
+	 * Sets the {@link #emfFactoryName} value.
+	 * @param the excact name of the factory
+	 */
 	public void setEmfFactoryName(String emfFactoryName) {
 		this.emfFactoryName = emfFactoryName;
 	}

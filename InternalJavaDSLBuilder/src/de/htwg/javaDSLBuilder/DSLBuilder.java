@@ -22,7 +22,15 @@ import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
 import de.htwg.javaDSLBuilder.generator.GeneratorEMF;
 
 public class DSLBuilder {
+	/*
+	 * Template options
+	 */
+	public static final String SINGLE_BUILDER_TEMPLATE = "single";
+	public static final String MULTIPLE_BUILDER_TEMPLATE = "multi"; // TODO
 	
+	/*
+	 * Exception messages
+	 */
 	private static final String GENMODEL_NO_FILE = "The given path doesnt lead to a valid file!";
 	private static final String WRONG_BUILDER_KIND= "The given BuilderKind argument was not correct";
 	private static final String GENMODEL_HAS_NO_GENERATIONMODEL = "The genmodel File has no generation model declared!"
@@ -38,11 +46,17 @@ public class DSLBuilder {
 		createDSLForEMF(args[0],args[1],args[2]);
 	}
 
+	/**
+	 * 
+	 * @param genModelFilePath
+	 * @param builderKind
+	 * @param targetPackage
+	 */
 	public static void createDSLForEMF(String genModelFilePath, String builderKind, String targetPackage) {
 		if(!new File(genModelFilePath).isFile())
 			throw new IllegalArgumentException(GENMODEL_NO_FILE + " Path: "+genModelFilePath);
-		if(builderKind.equals(GeneratorEMF.MULTIPLE_BUILDER_TEMPLATE) 
-				&& builderKind.equals(GeneratorEMF.SINGLE_BUILDER_TEMPLATE))
+		if(builderKind.equals(MULTIPLE_BUILDER_TEMPLATE) 
+				&& builderKind.equals(SINGLE_BUILDER_TEMPLATE))
 			throw new IllegalArgumentException(WRONG_BUILDER_KIND);
 		org.eclipse.emf.common.util.URI genModelURI = org.eclipse.emf.common.util.URI
 				.createFileURI(genModelFilePath);
@@ -64,21 +78,25 @@ public class DSLBuilder {
 		List<GenPackage> genPkgs = genModel.getGenPackages();
 		if(genPkgs.size() > 1)
 			throw new IllegalStateException(NO_MULTIPLE_PACKAGES_SUPPORTED);
-		EPackage rootPackage = null;
-		String packagePath = "";
+		EPackage rootEPackage = null;
+		String packageName = "";
 		String factoryName = "";
 		for (GenPackage genPackage : genPkgs) {
 			String basePackage = genPackage.getBasePackage();
-			rootPackage = genPackage.getEcorePackage();
+			rootEPackage = genPackage.getEcorePackage();
 			factoryName = genPackage.getFactoryName();
-			genPackage.initialize(rootPackage);
+			genPackage.initialize(rootEPackage);
 			String prefix = genPackage.getPrefix();
-			packagePath = basePackage;
+			if(basePackage != null)
+				packageName = basePackage + ".";
+			else
+				System.out.println("The EMF generation model has no base package defined. \n "
+						+ "This is not recommended. Please check the import statements of the generated Classes.");
 			if (prefix != null && !prefix.equals(""))
-				packagePath = packagePath + "." + prefix;
+				packageName = packageName  + prefix;
 		}
 		
-		CreatorEMF creator = CreatorEMF.getInstance(rootPackage, packagePath,
+		CreatorEMF creator = CreatorEMF.getInstance(rootEPackage, packageName,
 				factoryName);
 		GeneratorEMF.buildDSL(creator, builderKind,
 				targetPackage);

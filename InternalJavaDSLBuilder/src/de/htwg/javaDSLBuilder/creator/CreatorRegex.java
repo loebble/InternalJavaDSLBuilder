@@ -9,8 +9,8 @@ import java.util.regex.Pattern;
 
 import de.htwg.javaDSLBuilder.dslmodel.AttributeKind;
 import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ClassAttribute;
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel.ModelClass;
+import de.htwg.javaDSLBuilder.dslmodel.ClassAttribute;
+import de.htwg.javaDSLBuilder.dslmodel.ModelClass;
 
 /**-
  * Defines DSL Meta Model through regular expression 
@@ -48,7 +48,7 @@ public class CreatorRegex implements ICreator{
 	private static final String REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{"+REGEX_ATTRIBUTE+FOLLOWING_REGEX_ATTRIBUTE+"*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})";
 //	private static final String MAND_ATTR_FIRTS_REGEX_CLASS_DEFINITION = "(\\.class=\\w+\\{(.A|.LA)=\\w+:\\w+(\\s?\\,\\s?(\\.A|\\.OA|\\.LA|\\.OLA)=\\w+:\\w+)*(\\s?\\,\\s?\\.OP=\\w+:\\w+->\\w+)*\\})"; //Must start with mandatory Attribute
 	
-	public static final String REGEX_PATTERN= 
+	public static final String REGEX_LANGUAGE_PATTERN= 
 			REGEX_CLASS_DEFINITION + "+"
 			+ REGEX_IMPORT + "?"
 			;
@@ -80,7 +80,7 @@ public class CreatorRegex implements ICreator{
 	private static final Pattern IMPORT_PARAMETER_PATTERN = Pattern.compile(IMPORT_PARAMETER, Pattern.CASE_INSENSITIVE);
 	
 	//Error Messages
-	private static final String NO_MATCH = "Given String does not match BuildPatternCreator Regex Pattern: \n" +REGEX_PATTERN;
+	private static final String NO_MATCH = "Given String does not match BuildPatternCreator Regex Pattern: \n" +REGEX_LANGUAGE_PATTERN;
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
 	private static final String WRONG_DECLARATION = "Attribute not declared correctly";
 	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
@@ -108,7 +108,7 @@ public class CreatorRegex implements ICreator{
 	private CreatorRegex(){}
 	
 	public static CreatorRegex getInstance(String languageDescr){
-		if(!languageDescr.matches(REGEX_PATTERN)){ //TODO better error-handling and -printing
+		if(!languageDescr.matches(REGEX_LANGUAGE_PATTERN)){ //TODO better error-handling and -printing
 			Pattern p = Pattern.compile(REGEX_CLASS_DEFINITION);
 			Matcher m = p.matcher(languageDescr);
 			int endOfLastCorrectClass = 0;
@@ -248,7 +248,7 @@ public class CreatorRegex implements ICreator{
 				// if class is defined make sure capital letter is used
 				if(isClassDefined(attrType)) 
 					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
-				ClassAttribute currentAttr = genModel.new ClassAttribute(attrName,attrType,modelClass.getClassName());
+				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass.getClassName());
 				currentAttr.setAttributeKind(kind);
 				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
@@ -328,7 +328,7 @@ public class CreatorRegex implements ICreator{
 	 */
 	private void setAttributeOrder() {
 		ModelClass firstClass = null;
-		for (Map.Entry<String,DSLGenerationModel.ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
+		for (Map.Entry<String,ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
 			//Map is LinkedHasMap which has Order saved
 			if(firstClass == null)
@@ -456,7 +456,7 @@ public class CreatorRegex implements ICreator{
 			while(this.importParameterMatcher.find()){
 				String toImport = importParameterMatcher.group();
 				if(!toImport.equals(""))
-					this.genModel.addImports(toImport);
+					this.genModel.addImport(toImport);
 			}
 		}
 	}

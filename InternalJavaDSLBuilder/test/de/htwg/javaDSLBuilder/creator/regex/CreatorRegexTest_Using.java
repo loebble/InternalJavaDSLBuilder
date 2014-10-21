@@ -6,9 +6,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.junit.Test;
-import org.omg.CORBA.RepositoryIdHelper;
 
-import de.htwg.generated.regex.Forum.*;
 import de.htwg.generated.regex.Forum;
 import de.htwg.generated.regex.SimpleForum;
 import de.htwg.generated.regex.SimpleForum.SimplePostBuilder;
@@ -38,6 +36,8 @@ public class CreatorRegexTest_Using {
 	String zipCode = "78462";
 	String countryName = "Germany";
 	boolean unMemer = true;
+	String email = "MaMue@asd.com";
+	String otherEMail = "ROBA@asd.com";
 	
 	/*
 	 * Forum Data
@@ -103,12 +103,12 @@ public class CreatorRegexTest_Using {
 	
 	@Test
 	public void testForumDSL() throws MalformedURLException {
-		Forum.User replierWithoutPosts = Forum.UserBuilder.createUser().nickName("nick").rating(
+		Forum.User replierWithoutPosts = Forum.UserBuilder.createUser().email(email).nickName("nick").rating(
 				Forum.RatingBuilder.createRating().optionalUpps(1).optionalDowns(0).buildRating()
 				).noPosts().buildUser();
-		Forum.User userWithPost = Forum.UserBuilder.createUser().nickName(nickName).rating(
+		Forum.User userWithPost = Forum.UserBuilder.createUser().email(otherEMail).nickName(nickName).rating(
 				Forum.RatingBuilder.createRating().optionalDowns(5).buildRating()
-				).addPosts(Forum.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addReplier(replierWithoutPosts).noReplier().rating(
+				).addPosts(Forum.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
 						Forum.RatingBuilder.createRating().buildRating()
 						)
 				 .buildPost()
@@ -127,7 +127,7 @@ public class CreatorRegexTest_Using {
 		assertTrue(forum.getUser().get(0).getNickName().equals(nickName));
 		assertTrue(forum.getUser().get(0).getPosts().get(0).getText().equals("Hello my Nickname is "+nickName));
 		assertTrue( forum.getUser().get(0).getPosts().get(0).getCreator().getNickName().equals(nickName));
-		assertTrue( forum.getUser().get(0).getPosts().get(0).getReplier().get(0).getNickName().equals(replierWithoutPosts.getNickName()));
+		assertTrue( forum.getUser().get(0).getPosts().get(0).getRepliers().get(0).getNickName().equals(replierWithoutPosts.getNickName()));
 		assertTrue( forum.getSections().get(0).getName().equals("mainSection"));
 		
 		// because the rating was created by a User object the opposite Reference to Post is null

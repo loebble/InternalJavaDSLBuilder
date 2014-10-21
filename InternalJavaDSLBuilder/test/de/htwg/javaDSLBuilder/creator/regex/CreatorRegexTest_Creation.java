@@ -3,7 +3,6 @@ package de.htwg.javaDSLBuilder.creator.regex;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.net.URLClassLoader;
 import java.nio.file.Paths;
 
 import org.junit.Test;

@@ -22,7 +22,7 @@ public class GeneratorRegex {
 	public static void buildDSL(CreatorRegex creator, String template, String targetPackage){
 		DSLGenerationModel dslModel = creator.getGenerationModel();
 		String templatePath = "";
-		File templateDirecorty = new File(currentPath+"/templates/regex_templates");
+		File templateDirecorty = new File(currentPath+"/string_templates/regex_templates");
 		templatePath = templateDirecorty.toString();
 		switch (template) {
 		case MODEL_MIXED_IN_TEMPLATE:

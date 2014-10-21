@@ -82,16 +82,9 @@ public class CreatorEMFTest_Using {
 									.noUsers()
 							 .buildForum();
 		
-		System.out.println(simpleForum.toString());
-		simpleForum.getUsers().forEach(u -> {
-			System.out.println("\t " +u);
-			u.getPosts().forEach(p -> System.out.println("\t \t " +p));
-		});
-		System.out.println("---");
-		
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
-		assertTrue(user1.getPosts().size() == 0);
+		assertTrue(user2.getPosts().size() == 0);
 		assertTrue(simpleForum.getUsers().size() == 2);
 		// check for same opposite objects, regardless from which side they were set
 		assertTrue(EcoreUtil.equals(user1.getPosts().get(0) , post1));
@@ -102,11 +95,6 @@ public class CreatorEMFTest_Using {
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(user1.getForum() , simpleForum));
-	}
-	
-	@Test
-	public void ForumTest(){
-		fail("not yet implemented");
 	}
 	
 }
