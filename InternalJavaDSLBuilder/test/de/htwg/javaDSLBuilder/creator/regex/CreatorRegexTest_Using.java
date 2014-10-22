@@ -7,20 +7,22 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.Forum;
-import de.htwg.generated.regex.SimpleForum;
-import de.htwg.generated.regex.SimpleForum.SimplePostBuilder;
-import de.htwg.generated.regex.SimpleForum.SimpleUserBuilder;
-import de.htwg.generated.regex.User.AddressBuilder;
-import de.htwg.generated.regex.User.CountryBuilder;
-import de.htwg.generated.regex.User.UserBuilder;
-import de.htwg.generated.regex.UserOPT.AddressOPTBuilder;
-import de.htwg.generated.regex.UserOPT.CountryOPTBuilder;
-import de.htwg.generated.regex.UserOPT.UserOPTBuilder;
+import de.htwg.generated.regex.forum.Forum;
+import de.htwg.generated.regex.simpleforum.SimpleForum;
+import de.htwg.generated.regex.simpleforum.SimpleForum.SimplePostBuilder;
+import de.htwg.generated.regex.simpleforum.SimpleForum.SimpleUserBuilder;
+import de.htwg.generated.regex.user.User;
+import de.htwg.generated.regex.user.User.AddressBuilder;
+import de.htwg.generated.regex.user.User.CountryBuilder;
+import de.htwg.generated.regex.user.User.UserBuilder;
+import de.htwg.generated.regex.useropt.UserOPT;
+import de.htwg.generated.regex.useropt.UserOPT.AddressOPTBuilder;
+import de.htwg.generated.regex.useropt.UserOPT.CountryOPTBuilder;
+import de.htwg.generated.regex.useropt.UserOPT.UserOPTBuilder;
 
 /**
- * Test class for using created DSL from CreatorRegex.
- * 
+ * Test For Using the Regex DSL.
+ * If imports are not correct pls make sure {@link CreatorRegexTest_Creation} was run
  *
  */
 public class CreatorRegexTest_Using {
@@ -53,7 +55,7 @@ public class CreatorRegexTest_Using {
 
 	@Test
 	public void testUserDSL() {
-		de.htwg.generated.regex.User user = UserBuilder.createUser().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		User user = UserBuilder.createUser().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
 				.address(
 					AddressBuilder.createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
 						.country(
@@ -70,7 +72,7 @@ public class CreatorRegexTest_Using {
 	
 	@Test
 	public void testUserOPTOnlyDSL() throws MalformedURLException {
-		de.htwg.generated.regex.UserOPT user = UserOPTBuilder.createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		UserOPT user = UserOPTBuilder.createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
 				.address(
 					AddressOPTBuilder.createAddressOPT().optionalStreet(street).optionalHouseNumber(houseNumber).optionalZipCode(zipCode)
 						.country(

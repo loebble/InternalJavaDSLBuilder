@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.dslmodel;
+package de.htwg.javafluentdsl.dslmodel;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;

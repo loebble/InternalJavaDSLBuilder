@@ -1,10 +1,9 @@
-package de.htwg.javaDSLBuilder.creator;
+package de.htwg.javafluentdsl.creator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
@@ -17,10 +16,10 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import de.htwg.javaDSLBuilder.dslmodel.AttributeKind;
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
-import de.htwg.javaDSLBuilder.dslmodel.ClassAttribute;
-import de.htwg.javaDSLBuilder.dslmodel.ModelClass;
+import de.htwg.javafluentdsl.dslmodel.AttributeKind;
+import de.htwg.javafluentdsl.dslmodel.ClassAttribute;
+import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
+import de.htwg.javafluentdsl.dslmodel.ModelClass;
 
 public class CreatorEMF implements ICreator {
 	private String modelPackage;
@@ -34,8 +33,6 @@ public class CreatorEMF implements ICreator {
 	
 	private final DSLGenerationModel genModel;
 	
-	private final String OPPOSITES_DEFINED_WRONG = "Opposite releation not correct defined. ";
-	private final String WRONG_ECORE = "Make sure to have a correct Ecore Model which you can save and generate code from. ";
 	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
 	private String packageName;
 	

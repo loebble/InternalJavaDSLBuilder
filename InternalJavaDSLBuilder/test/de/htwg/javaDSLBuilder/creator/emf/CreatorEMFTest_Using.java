@@ -8,13 +8,22 @@ import java.net.URL;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
+/*
+ * Imports for EMF Model and DSL Builders
+ */
 import de.htwg.generated.emf.model.SimpleForum.Forum;
 import de.htwg.generated.emf.model.SimpleForum.Post;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import static de.htwg.generated.emfdsl.simpleForum.ForumBuilder.*;
-import static de.htwg.generated.emfdsl.simpleForum.PostBuilder.*;
-import static de.htwg.generated.emfdsl.simpleForum.UserBuilder.*;
+import static de.htwg.generated.emf.dsl.simpleForum.ForumBuilder.*;
+import static de.htwg.generated.emf.dsl.simpleForum.PostBuilder.*;
+import static de.htwg.generated.emf.dsl.simpleForum.UserBuilder.*;
 
+/**
+ * Test For Using the EMF DSL.
+ * If imports are not correct pls make sure emf genmodel has 
+ * created EMF models and {@link CreatorEMFTest_Creation} was run
+ *
+ */
 public class CreatorEMFTest_Using {
 	
 	/*

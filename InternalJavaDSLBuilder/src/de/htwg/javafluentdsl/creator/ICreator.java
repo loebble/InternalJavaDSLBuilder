@@ -1,6 +1,6 @@
-package de.htwg.javaDSLBuilder.creator;
+package de.htwg.javafluentdsl.creator;
 
-import de.htwg.javaDSLBuilder.dslmodel.DSLGenerationModel;
+import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 
 public interface ICreator {
 	
