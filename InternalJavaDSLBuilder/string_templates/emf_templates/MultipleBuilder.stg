@@ -130,8 +130,8 @@ emfBuildScopeClass(modelClass) ::= <<
 buildEMFObjectMethod(modelClass) ::= <<
 /**
 * Build Method for <modelClass.className> instances.
-* Calls the corresponding EMF factory {@link <modelClass.model.emfFactoryName>} to create a <modelClass.className> instance.
 * @return a new <modelClass.className> instance with attributes filled from this builder class.
+* @see <modelClass.className>Builder#create<modelClass.className>Instance(builder) create<modelClass.className>Instance - for factory calling
 */
 public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
 	<modelClass.className>Builder builder = <modelClass.className>Builder.this;
@@ -219,11 +219,15 @@ getNextScopeAttr(className,classAttribute) ::= <<
 
 
 createSimpleOptAttrMethod(className, scopeName, optionalAttribute) ::= <<
+/**
+* Setter method for the optional attribute <optionalAttribute.attributeName>
+*/
 public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
 	return <className;format="cap">Builder.this.<scopeName>Scope;
 }
+
 >>
 
 createListMethod(className, classAttribute) ::= <<

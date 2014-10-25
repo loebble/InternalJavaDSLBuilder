@@ -9,19 +9,18 @@ import org.junit.Test;
 
 import de.htwg.javafluentdsl.creator.CreatorRegex;
 import de.htwg.javafluentdsl.generator.Generator;
-import de.htwg.javafluentdsl.main.StartEMF;
 import de.htwg.javafluentdsl.main.StartRegex;
 
 /**
  * Test class for wrong language descriptions
  *
  */
-public class CreatorRegexTest_Creation {
+public class RegexTest_CreationIntern {
 	
 	/*
 	 * Package Declarations
 	 */
-	public final static String PACKAGE_DEST = "de.htwg.generated.regex";
+	public final static String PACKAGE_DEST = "de.htwg.generated.regex.intern";
 	public final static String USER_PACKAGE_DEST = PACKAGE_DEST+".user";
 	public final static String USER_OPT_DEST = PACKAGE_DEST+".useropt";
 	public final static String SIMPLE_FORUM_PACKAGE_DEST = PACKAGE_DEST+".simpleforum";

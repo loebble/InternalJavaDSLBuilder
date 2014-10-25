@@ -276,6 +276,9 @@ getNextScopeAttr(className,classAttribute) ::= <<
 
 
 createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
+/**
+* Setter method for the optional attribute <optionalAttribute.attributeName>
+*/
 public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;

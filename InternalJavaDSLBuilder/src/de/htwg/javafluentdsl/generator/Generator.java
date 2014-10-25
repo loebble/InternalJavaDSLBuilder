@@ -53,6 +53,9 @@ public class Generator {
 	private static final String INTERN_BUILDER_FILE = "InternBuilder.stg";
 	private static final String SEPERATED_BUILDER_FILE = "SeperatedBuilder.stg";
 
+	/**
+	 * No instantiation needed
+	 */
 	private Generator() {
 	}
 
@@ -80,12 +83,11 @@ public class Generator {
 			emfGenerateMultipleBuilderDSL(dslModel, targetPackage, filesCreated);
 			break;
 		case INTERN_MODEL_OPTION:
-			filePath = regexGenerateModelInternDSL(dslModel, targetPackage,
-					targetPackage);
+			filePath = regexGenerateModelInternDSL(dslModel, targetPackage);
 			break;
 		case SEPERATED_MODEL_OPTION:
 			regexGenerateModelSeperatedDSL(dslModel, targetPackage,
-					targetPackage);
+					filesCreated);
 			break;
 		default:
 			break;
@@ -107,15 +109,12 @@ public class Generator {
 	 * 
 	 * @param dslModel
 	 *            {@link DSLGenerationModel}
-	 * @param templatePath
-	 *            String with the template location
 	 * @param targetPackage
 	 *            the target package the files are generated at
 	 * @return path of DSL File which was created
 	 */
 	private static String regexGenerateModelInternDSL(
-			DSLGenerationModel dslModel, String templatePath,
-			String targetPackage) {
+			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH,
 				INTERN_BUILDER_FILE);
 		ST simpleBT = group.getInstanceOf("BuilderTemplate");
@@ -142,8 +141,17 @@ public class Generator {
 	 * @return path of DSL File which was created
 	 */
 	private static String regexGenerateModelSeperatedDSL(
-			DSLGenerationModel dslModel, // TODO
-			String templatePath, String targetPackage) {
+			DSLGenerationModel dslModel, String targetPackage,
+			List<String> filesCreated) {
+		String modelFilePath = regexGenerateSeperatedModel(dslModel,
+				targetPackage);
+		if (modelFilePath != null)
+			filesCreated.add(modelFilePath);
+		
+		String builderFilePath = regexGenerateSeperatedBuilder(dslModel,
+				targetPackage);
+		if (builderFilePath != null)
+			filesCreated.add(builderFilePath);
 		// String modelPackage = targetPackage+".model";
 		// STGroup group = new STGroupFile(templatePath);
 		// group.registerRenderer(String.class, new StringRenderer());
@@ -161,6 +169,32 @@ public class Generator {
 		// return writeToJavaFile(builderPackage, dslMoel.getModelName(),
 		// builderCode);
 		return null;
+	}
+
+	private static String regexGenerateSeperatedModel(DSLGenerationModel dslModel,
+			String targetPackage) {
+		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH,
+				SEPERATED_BUILDER_FILE);
+		group.registerRenderer(String.class, new StringRenderer());
+		ST modelTemplate = group.getInstanceOf("Model");
+		modelTemplate.add("packageName", targetPackage);
+		modelTemplate.add("genModel", dslModel);
+		String modelCode = modelTemplate.render();
+		return Generator.writeToJavaFile(targetPackage,
+				dslModel.getModelName(), modelCode);
+	}
+	
+	private static String regexGenerateSeperatedBuilder(DSLGenerationModel dslModel,
+			String targetPackage) {
+		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH,
+				SEPERATED_BUILDER_FILE);
+		group.registerRenderer(String.class, new StringRenderer());
+		ST modelTemplate = group.getInstanceOf("Builder");
+		modelTemplate.add("packageName", targetPackage);
+		modelTemplate.add("genModel", dslModel);
+		String modelCode = modelTemplate.render();
+		return Generator.writeToJavaFile(targetPackage,
+				dslModel.getModelName() + "Builder", modelCode);
 	}
 
 	/**
@@ -188,7 +222,6 @@ public class Generator {
 					targetPackage);
 			if (filePath != null)
 				filesCreated.add(filePath);
-
 		}
 	}
 
@@ -275,8 +308,7 @@ public class Generator {
 			if (!targetDirectory.exists()) {
 				targetDirectory.mkdirs();
 			}
-			String filePath = pathForDSL + "/" + fileName
-					+ ".java";
+			String filePath = pathForDSL + "/" + fileName + ".java";
 			PrintWriter writer = new PrintWriter(filePath);
 			writer.print(generatedCode);
 			writer.close();

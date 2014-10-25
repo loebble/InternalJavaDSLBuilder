@@ -7,25 +7,25 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.forum.Forum;
-import de.htwg.generated.regex.simpleforum.SimpleForum;
-import de.htwg.generated.regex.simpleforum.SimpleForum.SimplePostBuilder;
-import de.htwg.generated.regex.simpleforum.SimpleForum.SimpleUserBuilder;
-import de.htwg.generated.regex.user.User;
-import de.htwg.generated.regex.user.User.AddressBuilder;
-import de.htwg.generated.regex.user.User.CountryBuilder;
-import de.htwg.generated.regex.user.User.UserBuilder;
-import de.htwg.generated.regex.useropt.UserOPT;
-import de.htwg.generated.regex.useropt.UserOPT.AddressOPTBuilder;
-import de.htwg.generated.regex.useropt.UserOPT.CountryOPTBuilder;
-import de.htwg.generated.regex.useropt.UserOPT.UserOPTBuilder;
+import de.htwg.generated.regex.intern.forum.Forum;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimplePostBuilder;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleUserBuilder;
+import de.htwg.generated.regex.intern.user.User;
+import de.htwg.generated.regex.intern.user.User.AddressBuilder;
+import de.htwg.generated.regex.intern.user.User.CountryBuilder;
+import de.htwg.generated.regex.intern.user.User.UserBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT;
+import de.htwg.generated.regex.intern.useropt.UserOPT.AddressOPTBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT.CountryOPTBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder;
 
 /**
  * Test For Using the Regex DSL.
- * If imports are not correct pls make sure {@link CreatorRegexTest_Creation} was run
+ * If imports are not correct pls make sure {@link RegexTest_CreationIntern} was run
  *
  */
-public class CreatorRegexTest_Using {
+public class RegexTest_UsingIntern {
 	/*
 	 * User Data
 	 */

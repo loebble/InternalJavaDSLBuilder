@@ -5,14 +5,15 @@
   <eClassifiers xsi:type="ecore:EClass" name="Forum">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="url" lowerBound="1" eType="#//URL"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="sections" eType="#//Section"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sections" upperBound="-1"
+        eType="#//Section"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="users" lowerBound="1" upperBound="-1"
         eType="#//User"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Section">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="moderators" upperBound="-1"
-        eType="#//User"/>
+        eType="#//User" eOpposite="#//User/moderatorOfSection"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="User">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
@@ -30,8 +31,8 @@
         eType="#//Rating" eOpposite="#//Rating/forUser"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="posts" upperBound="-1"
         eType="#//Post" eOpposite="#//Post/creator"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="moderatorOfSection" lowerBound="1"
-        eType="#//Section"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moderatorOfSection" eType="#//Section"
+        eOpposite="#//Section/moderators"/>
   </eClassifiers>
   <eClassifiers xsi:type="ecore:EClass" name="Post">
     <eOperations name="creatorIsPostCreator" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
@@ -46,7 +47,8 @@
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="text" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="views" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="repliers" eType="#//User"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="repliers" upperBound="-1"
+        eType="#//User"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="rating" lowerBound="1"
         eType="#//Rating" eOpposite="#//Rating/forPost"/>
     <eStructuralFeatures xsi:type="ecore:EReference" name="creator" lowerBound="1"
@@ -55,9 +57,9 @@
   <eClassifiers xsi:type="ecore:EClass" name="Rating">
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="upps" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
     <eStructuralFeatures xsi:type="ecore:EAttribute" name="downs" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="forUser" upperBound="-1"
-        eType="#//User" eOpposite="#//User/rating"/>
-    <eStructuralFeatures xsi:type="ecore:EReference" name="forPost" upperBound="-1"
-        eType="#//Post" eOpposite="#//Post/rating"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="forUser" eType="#//User"
+        eOpposite="#//User/rating"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="forPost" eType="#//Post"
+        eOpposite="#//Post/rating"/>
   </eClassifiers>
 </ecore:EPackage>
