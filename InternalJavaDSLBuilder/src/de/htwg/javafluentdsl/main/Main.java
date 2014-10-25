@@ -31,7 +31,7 @@ public class Main {
 		String templateOption = args[1];
 		String targetPackage = args[2].toLowerCase();
 		if(targetPackage.endsWith("."))
-			targetPackage = targetPackage.substring(0, targetPackage.length()-2);
+			targetPackage = targetPackage.substring(0, targetPackage.length()-1);
 		if(source.endsWith(GENMODEL_FILE)){
 			new StartEMF().startDSLGenerationProcess(source, templateOption, targetPackage);
 		}else if (source.startsWith(RegexUtil.CLASS_NAME)) {
