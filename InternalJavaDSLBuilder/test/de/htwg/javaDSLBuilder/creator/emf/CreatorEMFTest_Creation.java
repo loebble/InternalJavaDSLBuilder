@@ -8,7 +8,7 @@ import de.htwg.javafluentdsl.main.StartEMF;
 
 public class CreatorEMFTest_Creation {
 	
-	private static final String EMFModelPath = Paths.get(".").toAbsolutePath()
+	private static final String EMFGenModelPath = Paths.get(".").toAbsolutePath()
 	.normalize().toString()+ "/emfmodel/";
 	public final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
 	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
@@ -16,7 +16,7 @@ public class CreatorEMFTest_Creation {
 	
 	@Test
 	public void SimpleForum_MultiBuilderTest() {
-		String genModelPath = EMFModelPath + "SimpleForum.genmodel";
+		String genModelPath = EMFGenModelPath + "SimpleForum.genmodel";
 		new StartEMF().startDSLGenerationProcess(genModelPath, "multi", SIMPLE_FORUM_DEST);
 	}
 	

@@ -21,18 +21,45 @@ public class ModelClass {
 			this.model = model;
 			className = name;
 			attributes = new ArrayList<ClassAttribute>();
-			optionalAttributes = new ArrayList<ClassAttribute>();
-			referencedByOpposite = new ArrayList<ClassAttribute>();
+			simpleOptAttr = new ArrayList<ClassAttribute>();
+			createdByOpposite = new ArrayList<ClassAttribute>();
 			this.imports = new ArrayList<String>();
 		}
-		
+		/**
+		 * Reference to the {@link DSLGenerationModel} this ModelClass is part of
+		 */
 		private DSLGenerationModel model;
+		/**
+		 * The unique class name
+		 */
 		private String className;
+		/**
+		 * Holds the mandatory, list and reference attribute
+		 * of this ModelClass
+		 */
 		private List<ClassAttribute> attributes;
-		private List<ClassAttribute> optionalAttributes;
-		private List<ClassAttribute> referencedByOpposite;
+		/**
+		 * Holds the simple optional attributes this ModelClass has
+		 */
+		private List<ClassAttribute> simpleOptAttr;
+		/**
+		 * Holds the opposite Attributes which are created
+		 * by their opposite (creator)
+		 */
+		private List<ClassAttribute> createdByOpposite;
+		/**
+		 * True if this ModelClass only consists of simple optional attributes
+		 * @see #simpleOptAttr
+		 */
 		private boolean simpleOptionalsOnly;
+		/**
+		 * Holds the imports this ModelClass needs
+		 */
 		private List<String> imports;
+		/**
+		 * True if this ModelClass has at least one list attribute
+		 * @see ClassAttribute#isList()
+		 */
 		private boolean hasList = false;
 
 		public boolean isSimpleOptionalsOnly() {
@@ -43,8 +70,8 @@ public class ModelClass {
 			return attributes;
 		}
 		
-		public List<ClassAttribute> getOptionalAttributes() {
-			return optionalAttributes;
+		public List<ClassAttribute> getSimpleOptAttr() {
+			return simpleOptAttr;
 		}
 
 		public void addAttribute(ClassAttribute attribute) {
@@ -55,7 +82,7 @@ public class ModelClass {
 		}
 		
 		public void addOptionalAttribute(ClassAttribute attribute) {
-			this.optionalAttributes.add(attribute);
+			this.simpleOptAttr.add(attribute);
 		}
 
 		public String getClassName() {
@@ -82,12 +109,12 @@ public class ModelClass {
 			return null;
 		}
 
-		public List<ClassAttribute> getReferencedByOpposite() {
-			return referencedByOpposite;
+		public List<ClassAttribute> getCreatedByOpposite() {
+			return createdByOpposite;
 		}
 
-		public void addReferencedByOpposite(ClassAttribute referencedByOpposite) {
-			this.referencedByOpposite.add(referencedByOpposite);
+		public void addCreatedByOpposite(ClassAttribute referencedByOpposite) {
+			this.createdByOpposite.add(referencedByOpposite);
 		}
 
 		public void setSimpleOptionalsOnly(boolean b) {

@@ -15,8 +15,8 @@ import java.util.ArrayList;
 public class <modelClass.className>Builder{
 	<if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
 	<modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
-	<if(!modelClass.optionalAttributes.empty)>// simple optional attributes<endif>
-	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
+	<if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
+	<modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
 	<! simpleOptionalsOnly classes dont have build scopes !>
 	<if(!modelClass.simpleOptionalsOnly)>private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; <endif>
@@ -79,7 +79,7 @@ private static <modelClass.className> create<modelClass.className>Instance(<mode
 		<modelClass.attributes:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")>
 		<else><transferListValuesToEClass(attribute,"builder","instance")>
 		<endif>}>
-		<modelClass.optionalAttributes:{attribute|<transferOptValuesToEClass(attribute,"builder","instance")>}>
+		<modelClass.simpleOptAttr:{attribute|<transferOptValuesToEClass(attribute,"builder","instance")>}>
 		return instance;
 	}
 
@@ -165,7 +165,7 @@ createAttributeScopeClass(className,classAttribute) ::= <<
 public class <classAttribute.attributeName;format="cap">Scope{
 	<createAttributeMethod(className,classAttribute)>
 	<! foreach simple optional attribute !>
-	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
+	<classAttribute.nextSimpleOptAttr:{optAttr|<createSimpleOptAttrMethod(className, classAttribute.attributeName, optAttr)>}>
 }
 >>
 
@@ -174,7 +174,7 @@ simpleOptionalsOnlyScopeClass(modelClass) ::= <<
 public class SimpleOptionalsOnlyScope{
 	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
 	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
-	<modelClass.optionalAttributes:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
+	<modelClass.simpleOptAttr:{optAttr|<createSimpleOptAttrMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
 	<buildObjectMethod(modelClass)>
 }
 >>
@@ -218,7 +218,7 @@ getNextScopeAttr(className,classAttribute) ::= <<
 >>
 
 
-createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
+createSimpleOptAttrMethod(className, scopeName, optionalAttribute) ::= <<
 public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;

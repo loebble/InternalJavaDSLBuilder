@@ -4,33 +4,96 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ClassAttribute{
+	/**
+	 * Value of the name
+	 */
 	private String attributeName;
+	/**
+	 * Fully identifying name consists of the
+	 * class name + the attributes name
+	 */
 	private String attributeFullName;
+	/**
+	 * the name of the ModelClass the attribute
+	 * is part of
+	 */
 	private String className;
+	/**
+	 * a reference to the ModelClass the attribute
+	 * is part of
+	 */
 	private ModelClass modelClass;
+	/**
+	 * the type of this ClassAttribute
+	 */
 	private String type;
+	/**
+	 * True if the attribute is not mandatory
+	 * in the model
+	 */
 	private boolean optional = false;
+	/**
+	 * True if this is the last attribute of
+	 * a ModelClass
+	 */
 	private boolean lastAttribute = false;
+	/**
+	 * True if this attribute is a List
+	 */
 	private boolean isList = false;
+	
+	/**
+	 * True if this attribute is a reference of an ModelClass
+	 */
 	private boolean isReference;
+	
+	/**
+	 * True if this attribute is Referenced by a opposite attribute
+	 */
 	private boolean isReferencedByAttribute = false;
+	
+	/**
+	 * True if this attribute creates (or assigns the value)
+	 * of a referencing (opposite) attribute
+	 */
 	private boolean isCreatorOfOpposite = false;
+	/**
+	 * Holds the kind of this attribute {@link AttributeKind}
+	 */
 	private AttributeKind kind;
-	private ClassAttribute nextAttribute; //TODO also List?
-	private List<ClassAttribute> nextOptionalAttributes;
-	private List<String> nextClass;
-	private List<String> nextOptionalClasses;
+	/**
+	 * Holds the next mandatory attribute to set in the
+	 * ModelClass
+	 */
+	private ClassAttribute nextAttribute;
+	/**
+	 * Holds a List of optional Attributes which can be
+	 * set in the same scope
+	 */
+	private List<ClassAttribute> nextSimpleOptAttr;
+	/**
+	 * Holds the opposite ClassAttribute if there is one
+	 */
 	private ClassAttribute opposite;
+	/**
+	 * Holds the opposite Attribute which references to this one
+	 * @see #isReferencedByAttribute
+	 */
 	private ClassAttribute referencedBy = null;
 	
+	/**
+	 * Constructor for creating a new ClassAttribute
+	 * which always has to have at least a name, a type and a className
+	 * @param name
+	 * @param type
+	 * @param className
+	 */
 	public ClassAttribute(String name, String type, String className){
 		this.attributeName = name;
 		this.type = type;
 		this.className = className;
 		this.attributeFullName = className + name;
-		this.nextOptionalAttributes = new ArrayList<ClassAttribute>();
-		this.nextClass = new ArrayList<String>();
-		this.nextOptionalClasses = new ArrayList<String>();
+		this.nextSimpleOptAttr = new ArrayList<ClassAttribute>();
 	}
 	
 	public String getType() {
@@ -51,15 +114,15 @@ public class ClassAttribute{
 	public void setNextAttribute(ClassAttribute nextAttribute) {
 		this.nextAttribute = nextAttribute;
 	}
-	public List<ClassAttribute> getNextOptionalAttributes() {
-		return nextOptionalAttributes;
+	public List<ClassAttribute> getNextSimpleOptAttr() {
+		return nextSimpleOptAttr;
 	}
-	public void addNextOptionalAttribute(ClassAttribute nextOptionalAttribute) {
-		this.nextOptionalAttributes.add(nextOptionalAttribute);
+	public void addNextSimpleOptAttr(ClassAttribute nextOptionalAttribute) {
+		this.nextSimpleOptAttr.add(nextOptionalAttribute);
 	}
-	public void setNextOptionalAttributes(
+	public void setNextSimpleOptAttr(
 			List<ClassAttribute> nextOptionalAttributes) {
-		this.nextOptionalAttributes = nextOptionalAttributes;
+		this.nextSimpleOptAttr = nextOptionalAttributes;
 	}
 	public String getAttributeName() {
 		return attributeName;
@@ -67,25 +130,6 @@ public class ClassAttribute{
 	public void setAttributeName(String attributeName) {
 		this.attributeName = attributeName;
 	}
-	public List<String> getNextClass() {
-		return nextClass;
-	}
-	public void setNextClass(List<String> nextClasses) {
-		this.nextClass = nextClasses;
-	}
-	public void addNextClass(String nextClasse) {
-		this.nextClass.add(nextClasse);
-	}
-	public List<String> getNextOptionalClass() {
-		return nextOptionalClasses;
-	}
-	public void setNextOptionalClass(List<String> nextOptionalClass) {
-		this.nextOptionalClasses = nextOptionalClass;
-	}
-	public void addNextOptionalClass(String nextOptionalAttribute) {
-		this.nextOptionalClasses.add(nextOptionalAttribute);
-	}
-
 	public AttributeKind getAttributeKind() {
 		return kind;
 	}
@@ -132,7 +176,7 @@ public class ClassAttribute{
 
 	public void setReferencedBy(ClassAttribute referencedBy) {
 		this.referencedBy = referencedBy;
-		this.getModelClass().addReferencedByOpposite(referencedBy);
+		this.getModelClass().addCreatedByOpposite(referencedBy);
 	}
 
 	public boolean isReferencedByAttribute() {

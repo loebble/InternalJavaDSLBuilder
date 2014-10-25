@@ -68,7 +68,7 @@ public class CreatorRegex implements ICreator{
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();
 		creator.retrieveImports();
-		creator.setAttributeOrder();
+		creator.genModel.setAttributeOrder();
 		return creator;
 	}
 	
@@ -200,8 +200,11 @@ public class CreatorRegex implements ICreator{
 				String attrType = getTypeOfDefinition(attrDef);
 				AttributeKind kind = getKind(attrDef);
 				// if class is defined make sure capital letter is used
-				if(isClassDefined(attrType)) 
-					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1); 
+				boolean isRef = false;
+				if(isClassDefined(attrType)){
+					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1);
+					isRef = true;
+				}
 				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass.getClassName());
 				currentAttr.setAttributeKind(kind);
 				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
@@ -213,7 +216,7 @@ public class CreatorRegex implements ICreator{
 							+ " attribute "+attrName +" in class" + modelClass.getClassName());
 				currentAttr.setAttributeName(attrName);
 				currentAttr.setAttributeFullName(modelClass.getClassName()+attrName);
-				
+				currentAttr.setReference(isRef);
 				attributes.add(currentAttr);
 				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
 					setOppositeAttribute(currentAttr,attrDef);
@@ -224,9 +227,9 @@ public class CreatorRegex implements ICreator{
 	}
 	
 	/**
-	 * Retrieves Opposite definitions and sets the corresponding opposite attribute to the given one.
+	 * Retrieves Opposite definitions and sets the corresponding opposite attribute to the given ClassAttribute.
 	 * @param currentAttr the attribute which needs a opposite reference
-	 * @param attrDef String with attribute definition which is again defined by {@link REGEX_ATTRIBUTE}
+	 * @param attrDef String with attribute definition which is defined by {@link REGEX_ATTRIBUTE}
 	 */
 	private void setOppositeAttribute(ClassAttribute currentAttr, String attrDef) {
 		Matcher oppositeMatcher = RegexUtil.OPPOSITE_ATTRIBUTE_PATTERN.matcher(attrDef);
@@ -242,16 +245,19 @@ public class CreatorRegex implements ICreator{
 				ModelClass mc = genModel.getClass(opType);
 				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
 				checkForMatchingType(currentAttr, oppositeAttribute);
-				mc.addReferencedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
+				mc.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
 				currentAttr.setReferencedByAttribute(true);
 				if(oppositeAttribute != null){
 					currentAttr.setOpposite(oppositeAttribute);
 				}
 				else
-					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED + "for given "+name+":"+opType+". Class attribute "+ opType +"."+ nameOfOpposite+" not found.");
+					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED 
+							+ "for given "+name+":"+opType+". Class attribute "
+							+ opType +"."+ nameOfOpposite+" not found.");
 			}
 			else 
-				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  + " referenced by " + opDef);
+				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  
+						+ " referenced by " + opDef);
 		}
 	}
 
@@ -277,100 +283,10 @@ public class CreatorRegex implements ICreator{
 	}
 
 	/**
-	 * Handles the order of the ClassAttributes for the generated ModelClasses in the DSLGenerationModel
-	 * {@link #genModel}.
+	 * Retrieves the class name of a modeled class from a definition
+	 * @param classDef the class definition as defined by {@link RegexUtil#CLASS_DEFINITION}
+	 * @return the class name as a String
 	 */
-	private void setAttributeOrder() {
-		ModelClass firstClass = null;
-		for (Map.Entry<String,ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
-			ModelClass modelClass = classEntry.getValue();
-			//Map is LinkedHasMap which has Order saved
-			if(firstClass == null)
-				firstClass = modelClass; 
-			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
-			handleOptionalAttributes(optionalAttrs, modelClass);
-		}
-	}
-	
-	/**
-	 * Sets the ClassAttributes order in a ModelClass
-	 * @param modelClass The ModelClass object to order attributes in
-	 * @return a List<ClassAttribute> with the optionalAttributes
-	 */
-	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) { //TODO refactor with attributeKind SIMPLE:OPTIONAL_ATTRIBUTE, to reduce complexity
-		List<ClassAttribute> firstOptAttr= new ArrayList<>();
-		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
-		ClassAttribute previousRequiredAttr = null;
-		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-			if(isClassDefined(currentAtt.getType())){
-				//If current Attribute is a Reference to a defined Class set reference
-				currentAtt.setReference(true);
-			}
-			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
-			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
-				if(previousRequiredAttr==null){
-					previousRequiredAttr = currentAtt;
-					// optional attributes before first mandatory then add them to the first mandatory attribute(scope)
-					currentAtt.setNextOptionalAttributes(firstOptAttr);
-				}
-				else if(previousRequiredAttr!=null){
-					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-					previousRequiredAttr = currentAtt;
-				}
-			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE){ // an optional attribute
-				currentAtt.setOptional(true);
-				if(previousRequiredAttr!=null){
-					if(currentAtt.isReference()){
-						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-						previousRequiredAttr = currentAtt;
-					}else{
-						// type is not a modeled Class e.g. a simple types
-						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}else{
-					if(currentAtt.isReference()){
-						previousRequiredAttr = currentAtt;
-						currentAtt.setNextOptionalAttributes(firstOptAttr);
-					}else{
-						firstOptAttr.add(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}
-				
-			}
-		}
-		//Special Case if no required Attribute in Class
-		if(previousRequiredAttr == null){
-			boolean simpleOptionalsOnly = true;
-			for (ClassAttribute attr : modelClass.getOptionalAttributes()) {
-				if(attr.isReference())
-					simpleOptionalsOnly = false;
-			}
-			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			return simpleOptionalAttrs;
-		}
-		else{
-			previousRequiredAttr.setLastAttribute(true);
-			return simpleOptionalAttrs;
-		}
-	}
-
-	/**
-	 * Handles the simple optionalAttributes of a ModelClass.
-	 * It removes them from the attributes list
-	 * and adds them to the optionalAttrubutes list for separation purpose
-	 * @param optionalAttrs List of simple optional attributes 
-	 * @param modelClass the ModelClass in which the attribute is defined
-	 */
-	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
-		for (ClassAttribute optAttr : optionalAttrs) {
-			modelClass.addOptionalAttribute(optAttr);
-			modelClass.getAttributes().remove(optAttr);
-		}
-		
-	}
-
 	private String retrieveClassName(String classDef) {
 		Matcher classNameMatcher = RegexUtil.CLASS_NAME_PATTERN.matcher(classDef);
 		String className = "";
@@ -415,6 +331,11 @@ public class CreatorRegex implements ICreator{
 		}
 	}
 
+	/**
+	 * Returns the model description of this Creator
+	 * which was given when the creator was initialized
+	 * @return description as String
+	 */
 	public String getModelDescr() {
 		return modelDescr;
 	}

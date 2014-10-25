@@ -36,6 +36,8 @@ public class StartEMF implements IStart {
 			+ " See EMFs documentation for correct genmodel creation";
 	private static final String NO_MULTIPLE_GENPACKAGES_SUPPORTED = "The current version does not support multiple genPackage declarations in a genmodel";
 	private static final String NO_MULTIPLE_PACKAGES_SUPPORTED = "The current version does not support multiple package declarations in a genmodel";
+	private static final String NO_EPACKAGE_FOUND = "There was no defined EPackage found. Make sure the genmodel and the ecore files are correct."
+			+ " Try to put both files under the same directory if its still not working";
 	
 	
 	/**
@@ -47,7 +49,7 @@ public class StartEMF implements IStart {
 	public void startDSLGenerationProcess(String source, String templateOption, String targetPackage){
 		if(!new File(source).isFile())
 			throw new IllegalArgumentException(GENMODEL_NO_FILE + " Path: "+source);
-		if(templateOption.equals(Generator.MULTIPLE_BUILDER_OPTION) 
+		if(templateOption.equals(Generator.MULTIPLE_BUILDER_OPTION)
 				&& templateOption.equals(Generator.SINGLE_BUILDER_OPTION))
 			throw new IllegalArgumentException(WRONG_TEMPLATE_OPTION);
 		org.eclipse.emf.common.util.URI genModelURI = org.eclipse.emf.common.util.URI
@@ -90,6 +92,8 @@ public class StartEMF implements IStart {
 		List<GenPackage> genPkgs = genModel.getGenPackages();
 		if(genPkgs.size() > 1)
 			throw new IllegalStateException(NO_MULTIPLE_PACKAGES_SUPPORTED);
+		if(genPkgs.size() == 0)
+			throw new IllegalStateException(NO_EPACKAGE_FOUND);
 		GenPackage genPackage = null;
 		for (GenPackage gPck : genPkgs) {
 			genPackage = gPck;

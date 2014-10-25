@@ -53,10 +53,7 @@ public class CreatorEMF implements ICreator {
 		creator.genModel.setModelName(eP.getName());
 		creator.genModel.setEmfFactoryName(factoryName);
 		creator.retrieveAttributes();
-		creator.setAttributeOrder();
-		// creator.factoryClass = Class.forName(fullyQUalifiedFactoryName);
-		// creator.modelPackage = creator.factoryClass.getPackage().getName();
-		// creator.builderModel.addImport(creator.modelPackage);
+		creator.genModel.setAttributeOrder();
 		return creator;
 	}
 
@@ -100,9 +97,10 @@ public class CreatorEMF implements ICreator {
 						if(opposite != null){
 							// Opposite attribute could not have been processed yet
 //							System.out.println(modelAttribute.getAttributeFullName() + " refBy " + reference.getEReferenceType().getName()+ opposite.getName());
-							ClassAttribute oppositeAttr = findAttribute(reference.getEReferenceType().getName(), opposite.getName());
+							ClassAttribute oppositeAttr = this.genModel.findAttribute(reference.getEReferenceType().getName(), opposite.getName());
 							if(oppositeAttr == null){
-								// if not processed the current attribute is the "creator" and is Referenced by the other one
+								//Sets the start of an opposite relation
+								// -> if not processed the current attribute is the "creator" and is Referenced by the other one
 //								System.out.println("creator: "+ modelAttribute.getAttributeFullName());
 								modelAttribute.setCreatorOfOpposite(true);
 							}else{
@@ -129,7 +127,7 @@ public class CreatorEMF implements ICreator {
 							System.out.println("ENUM: "+literal.getName());
 						}
 					}
-					else if (feature instanceof EDataType) { //TODO EDATA
+					else if (feature instanceof EDataType) { //TODO Not needed, because EData only defines type
 						EDataType eDataType = (EDataType)classifier;
 						System.out.println("EDATATYPE: "+eDataType.getName());
 					}
@@ -139,114 +137,6 @@ public class CreatorEMF implements ICreator {
 		
 	}
 	
-	/** TODO duplicate with RegexCreator
-	 * Handles the order of the ClassAttributes for the generated ModelClasses in the DSLGenerationModel
-	 * {@link #genModel}.
-	 */
-	private void setAttributeOrder() {
-		ModelClass firstClass = null;
-		for (Map.Entry<String,ModelClass> classEntry : this.genModel.getClasses().entrySet()) {
-			ModelClass modelClass = classEntry.getValue();
-			//Map is LinkedHasMap which has Order saved
-			if(firstClass == null)
-				firstClass = modelClass; 
-			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
-			handleOptionalAttributes(optionalAttrs, modelClass);
-		}
-	}
-	
-	/** TODO duplicate with RegexCreator
-	 * Sets the ClassAttributes order in a ModelClass
-	 * @param modelClass The ModelClass object to order attributes in
-	 * @return a List<ClassAttribute> with the optionalAttributes
-	 */
-	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) { //TODO refactor with attributeKind SIMPLE:OPTIONAL_ATTRIBUTE, to reduce complexity
-		List<ClassAttribute> firstOptAttr= new ArrayList<>();
-		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
-		ClassAttribute previousRequiredAttr = null;
-		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // a mandatory attribute
-			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){
-				if(previousRequiredAttr==null){
-					previousRequiredAttr = currentAtt;
-					// optional attributes before first mandatory then add them to the first mandatory attribute(scope)
-					currentAtt.setNextOptionalAttributes(firstOptAttr);
-				}
-				else if(previousRequiredAttr!=null){
-					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-					previousRequiredAttr = currentAtt;
-				}
-			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE){ // an optional attribute
-				currentAtt.setOptional(true);
-				if(previousRequiredAttr!=null){
-					if(currentAtt.isReference()){
-						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-						previousRequiredAttr = currentAtt;
-					}else{
-						// type is not a modeled Class e.g. a simple types
-						previousRequiredAttr.addNextOptionalAttribute(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}else{
-					if(currentAtt.isReference()){
-						previousRequiredAttr = currentAtt;
-						currentAtt.setNextOptionalAttributes(firstOptAttr);
-					}else{
-						firstOptAttr.add(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}
-				
-			}
-		}
-		//Special Case if no required Attribute in Class
-		if(previousRequiredAttr == null){
-			boolean simpleOptionalsOnly = true;
-			for (ClassAttribute attr : modelClass.getOptionalAttributes()) {
-				if(attr.isReference())
-					simpleOptionalsOnly = false;
-			}
-			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			return simpleOptionalAttrs;
-		}
-		else{
-			previousRequiredAttr.setLastAttribute(true);
-			return simpleOptionalAttrs;
-		}
-	}
-	
-	/** TODO duplicate with RegexCreator
-	 * Handles the simple optionalAttributes of a ModelClass.
-	 * It removes them from the attributes list
-	 * and adds them to the optionalAttrubutes list for separation purpose
-	 * @param optionalAttrs List of simple optional attributes 
-	 * @param modelClass the ModelClass in which the attribute is defined
-	 */
-	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
-		for (ClassAttribute optAttr : optionalAttrs) {
-			modelClass.addOptionalAttribute(optAttr);
-			modelClass.getAttributes().remove(optAttr);
-		}
-		
-	}
-
-	/**
-	 * Searches the DSLGenerationModel for the opposite ClassAttribute which is defined by the the references EOpposite object
-	 * @param reference the EReference which has an opposite attribute defined
-	 * @return the found ClassAttribute in the DSLGenerationModel or null if none has been found
-	 */
-	private ClassAttribute findAttribute(String className, String attrName){
-		for (Map.Entry<String,ModelClass> classEntry: genModel.getClasses().entrySet()) {
-			ModelClass modelClass = classEntry.getValue();
-			if(!modelClass.getClassName().equals(className))
-				continue;
-			ClassAttribute foundAttr = modelClass.getSpefificAttributeByFullName(className+attrName);
-			if(foundAttr != null){
-				return foundAttr;
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}

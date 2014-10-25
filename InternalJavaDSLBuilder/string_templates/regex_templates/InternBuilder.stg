@@ -17,15 +17,15 @@ import java.util.ArrayList;
 public class <genModel.modelName>{
 
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createClassAttribute(modelAttribute,"")>}>
-	<genModel.classes.(genModel.modelName).optionalAttributes:{modelAttribute|<createClassAttribute(modelAttribute,"")>}>
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createClassAttribute(modelAttribute,"")>}>
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelGetter(modelAttribute)>}>
-	<genModel.classes.(genModel.modelName).optionalAttributes:{modelAttribute|<createModelGetter(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelGetter(modelAttribute)>}>
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelSetter(modelAttribute)>}>
-	<genModel.classes.(genModel.modelName).optionalAttributes:{modelAttribute|<createModelSetter(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelSetter(modelAttribute)>}>
 	
 	private <genModel.modelName>(<genModel.modelName>Builder builder){
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
-		<genModel.classes.(genModel.modelName).optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
+		<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	<! for every other class than the root class a new ModelClass has to be defined !>
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
@@ -51,18 +51,18 @@ createModelClass(className, modelClass,modelName) ::= <<
 */
 public static class <className>{
 	<modelClass.attributes:{attribute|<createClassAttribute(attribute,"")>}>
-	<modelClass.optionalAttributes:{attribute|<createClassAttribute(attribute,"")>}>
+	<modelClass.simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
 	
 	<! constructor !>
 	private <className>(<className;format="cap">Builder builder){
 		<modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
-		<modelClass.optionalAttributes:{attribute|<transferOptValues(attribute,"builder")>}>
+		<modelClass.simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
 	
 	<modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
-	<modelClass.optionalAttributes:{attribute|<createModelGetter(attribute)>}>
+	<modelClass.simpleOptAttr:{attribute|<createModelGetter(attribute)>}>
 	<modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
-	<modelClass.optionalAttributes:{attribute|<createModelSetter(attribute)>}>
+	<modelClass.simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
 }
 
 >>
@@ -126,8 +126,8 @@ createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
 public static class <className>Builder{
 	<if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
 	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
-	<if(!modelClass.optionalAttributes.empty)>// simple optional attributes<endif>
-	<modelClass.optionalAttributes:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
+	<if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
+	<modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
 	<! simpleOptionalsOnly classes dont have build scopes !>
 	<if(!modelClass.simpleOptionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
@@ -168,13 +168,14 @@ buildObjectMethod(modelClass) ::= <<
 */
 public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
 	<modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
-	<modelClass.referencedByOpposite:{nestedAttributeRef|<setOpAttribute(modelClass,nestedAttributeRef)>}>
+	<modelClass.createdByOpposite:{nestedAttributeRef|<setOpAttribute(modelClass,nestedAttributeRef)>}>
 	return <modelClass.className;format="lower">;
 }
 >>
 
 setOpAttribute(modelClass,nestedAttributeRef) ::= <<
-<! if a list attribute is referenced by an opposite attribute, the opposite relation for every list item has to be set !>
+<! if a list attribute is referenced by an opposite attribute, 
+the opposite relation for every list item has to be set !>
 <if(nestedAttributeRef.opposite.list)>
 for (<nestedAttributeRef.opposite.type> item : <modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>) {
 	item.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);
@@ -209,7 +210,7 @@ createAttributeScopeClass(className,classAttribute, genModel) ::= <<
 public class <classAttribute.attributeName;format="cap">Scope{
 	<createAttributeMethod(className,classAttribute,genModel.modelName)>
 	<! foreach simple optional attribute !>
-	<classAttribute.nextOptionalAttributes:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
+	<classAttribute.nextSimpleOptAttr:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
 }
 >>
 
@@ -218,7 +219,7 @@ simpleOptionalsOnlyScopeClass(modelClass) ::= <<
 public class SimpleOptionalsOnlyScope{
 	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
 	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
-	<modelClass.optionalAttributes:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
+	<modelClass.simpleOptAttr:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
 	<buildObjectMethod(modelClass)>
 }
 >>
@@ -290,12 +291,12 @@ createListMethod(className, classAttribute, optionalAttribute) ::= <<
 *@param val the <classAttribute.type> object 
 */
 public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap"> (<classAttribute.type> val){
-	<if(!classAttribute.ReferencedByAttribute)><className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val)<endif>;
+	<className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val);
 	return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
 }
 /**
 * Ends the adding of <classAttribute.type> objects to the <classAttribute.attributeName> List.
-* By calling this method before adding any objects leaves the <classAttribute.attributeName> List empty.
+* By calling this method before adding any objects it leaves the <classAttribute.attributeName> List empty.
 <if(classAttribute.lastAttribute)>
 *@return {@link #<className;format="cap">BuildScope}
 *@see {@link #add<classAttribute.attributeName;format="cap">}
