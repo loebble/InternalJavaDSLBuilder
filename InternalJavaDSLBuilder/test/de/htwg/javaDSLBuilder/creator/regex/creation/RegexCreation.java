@@ -1,34 +1,27 @@
-package de.htwg.javaDSLBuilder.creator.regex;
+package de.htwg.javaDSLBuilder.creator.regex.creation;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.nio.file.Paths;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Suite;
+import org.junit.runners.Suite.SuiteClasses;
 
 import de.htwg.javafluentdsl.creator.CreatorRegex;
-import de.htwg.javafluentdsl.generator.Generator;
 import de.htwg.javafluentdsl.main.StartRegex;
-
 /**
- * Test class for wrong language descriptions
+ * Util Class for language descriptions.
+ * Also test class forwrong language descriptions
  *
  */
-public class RegexTest_CreationIntern {
-	
+@RunWith(Suite.class)
+@SuiteClasses({ Regex_CreationIntern.class, Regex_CreationSeperated.class })
+public class RegexCreation {
 	/*
-	 * Package Declarations
-	 */
-	public final static String PACKAGE_DEST = "de.htwg.generated.regex.intern";
-	public final static String USER_PACKAGE_DEST = PACKAGE_DEST+".user";
-	public final static String USER_OPT_DEST = PACKAGE_DEST+".useropt";
-	public final static String SIMPLE_FORUM_PACKAGE_DEST = PACKAGE_DEST+".simpleforum";
-	public final static String FORUM_PACKAGE_DEST = PACKAGE_DEST+".forum";
-	
-	
-	/*
-	 * Wrong declarations
+	 * Wrong descriptions
 	 */
 	public final static String FORUM_WRONG_DECL =
 			".class=Forum{.A=name=String, url:URL, .a=asd:int}"
@@ -61,7 +54,7 @@ public class RegexTest_CreationIntern {
 	
 	
 	/*
-	 * Correct declarations
+	 * Correct descriptions
 	 */
 	
 	public final static String USER_DESCRIPTION =
@@ -117,30 +110,6 @@ public class RegexTest_CreationIntern {
 		CreatorRegex.getInstance(FORUM_OP_WRONG_REFERENCE_TYPE);
 	}
 	
-	
-	/*
-	 * Right declarations
-	 */
-	@Test
-	public void testCreateUserDSL() {
-		createDSL(USER_DESCRIPTION, Generator.INTERN_MODEL_OPTION,USER_PACKAGE_DEST);
-	}
-	
-	@Test
-	public void testCreateUserOPTOnlyDSL() {
-		createDSL(USER_OPT_ONLY_DESCRIPTION, Generator.INTERN_MODEL_OPTION,USER_OPT_DEST);
-	}
-	
-	@Test
-	public void testCreateSimpleForumDSL() {
-		createDSL(SIMPLE_FORUM_DESCRIPTION, Generator.INTERN_MODEL_OPTION,SIMPLE_FORUM_PACKAGE_DEST);
-	}
-	
-	@Test
-	public void testCreateForumDSL() {
-		createDSL(FORUM_DESCRIPTION, Generator.INTERN_MODEL_OPTION,FORUM_PACKAGE_DEST);
-	}
-	
 	public static void createDSL(String modelDescription, String templateOption, String targetPackage) {
 		new StartRegex().startDSLGenerationProcess(modelDescription, templateOption, targetPackage);
 		String modelPath =  Paths.get(".").toAbsolutePath().normalize().toString() + "\\src\\" +targetPackage.replace('.', '\\');
@@ -152,5 +121,5 @@ public class RegexTest_CreationIntern {
 		    fail();
 		}
 	}
-	
+
 }

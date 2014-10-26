@@ -2,7 +2,6 @@ package de.htwg.javafluentdsl.creator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.emf.ecore.EAttribute;
@@ -34,6 +33,9 @@ public class CreatorEMF implements ICreator {
 	private final DSLGenerationModel genModel;
 	
 	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
+	private final String PACKAGENAME_NOT_EQUAL_ECLASSNAME = "The ePackage name is not equal to the first modeled "
+			+ "EClass. This is not recomended. Only the multiBuilder option is suited for such models.";
+	private final String NO_ECLASS_DEFINED = "The Package has no EClass modeled. Therefore no DSL can be created";
 	private String packageName;
 	
 	@Override
@@ -69,6 +71,8 @@ public class CreatorEMF implements ICreator {
 			return;
 		}
 		
+		this.checkFirstEClass(ePackage);
+		
 		for (Iterator<EClassifier> iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
 			
 			EClassifier classifier = (EClassifier) iter.next();
@@ -79,6 +83,7 @@ public class CreatorEMF implements ICreator {
 				String eClassName = eClass.getName();
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
 				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
+				this.genModel.addImport(this.packageName +"."+modelClass.getClassName());
 				this.genModel.getClasses().put(eClassName, modelClass);
 				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
 					EStructuralFeature feature = (EStructuralFeature)ai.next();
@@ -137,6 +142,31 @@ public class CreatorEMF implements ICreator {
 		
 	}
 	
+	/**
+	 * Checks if the first EClass has the same Name as the {@link EPackage} ePackage
+	 * And gives a prints a warning if thats not the case
+	 * @param ePackage the EPackage to analyze
+	 * @throws IllegalStateException if ePackage has no EClasses defined
+	 */
+	private void checkFirstEClass(EPackage ePackage) {
+		EClass firstClass = null;
+		for (Iterator<EClassifier> iter = ePackage.getEClassifiers().iterator(); iter.hasNext();) {
+			EClassifier classifier = (EClassifier) iter.next();
+			if (classifier instanceof EClass) {
+				firstClass = (EClass) classifier;
+				break;
+			}else
+				continue;
+		}
+		if(firstClass != null){
+			if(!ePackage.getName().equals(firstClass.getName()))
+					System.err.println("Warning: "+ePackage.getName()
+							+ " "+PACKAGENAME_NOT_EQUAL_ECLASSNAME);
+		}else{
+			throw new IllegalStateException(NO_ECLASS_DEFINED);
+		}
+		
+	}
 
 	/**
 	 * * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}
@@ -160,6 +190,8 @@ public class CreatorEMF implements ICreator {
 			type = ref.getEType().getName();
 			modelClass.addImport(this.packageName +"."+type);
 			modelClass.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
+			this.genModel.addImport(this.packageName +"."+type);
+			this.genModel.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
 			isRef = true;
 		}
 		else
@@ -180,6 +212,8 @@ public class CreatorEMF implements ICreator {
 		attribute.setList(isList);
 		if(!modelClass.isHasList() && isList)
 			modelClass.setHasList(isList);
+		if(!this.genModel.isHasList() && isList)
+			this.genModel.setHasList(isList);
 		return attribute;
 	}
 

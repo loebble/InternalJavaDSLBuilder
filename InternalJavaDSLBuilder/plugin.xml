@@ -22,19 +22,19 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated Forum -->
-      <package
-            uri="http://de.htwg.generated.emf.Forum"
-            class="de.htwg.generated.emf.model.ForumMulti.ForumMultiPackage"
-            genModel="emfmodel/Forum.genmodel"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated SimpleForum -->
       <package
             uri="http://de.htwg.generated.emf.SimpleForum"
             class="de.htwg.generated.emf.model.SimpleForum.SimpleForumPackage"
             genModel="emfmodel/SimpleForum.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Forum -->
+      <package
+            uri="http://de.htwg.generated.emf.Forum"
+            class="de.htwg.generated.emf.model.Forum.ForumPackage"
+            genModel="emfmodel/Forum.genmodel"/>
    </extension>
 
 </plugin>

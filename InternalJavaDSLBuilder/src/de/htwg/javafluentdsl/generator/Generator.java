@@ -28,10 +28,10 @@ public class Generator {
 	/*
 	 * Template options
 	 */
-	public static final String SINGLE_BUILDER_OPTION = "single";
-	public static final String MULTIPLE_BUILDER_OPTION = "multi"; // TODO
+	public static final String SINGLE_BUILDER_OPTION = "singleBuilder";
+	public static final String MULTIPLE_BUILDER_OPTION = "multiBuilder"; // TODO
 	public static final String INTERN_MODEL_OPTION = "internModel";
-	public static final String SEPERATED_MODEL_OPTION = "seperatedModel"; // TODO
+	public static final String SEPARATED_MODEL_OPTION = "separatedModel"; // TODO
 
 	/*
 	 * Template paths
@@ -51,7 +51,7 @@ public class Generator {
 	private static final String MULTI_TEMPLATE_FILE = "MultipleBuilder.stg";
 	private static final String SINGLE_TEMPLATE_FILE = "SingleBuilder.stg";
 	private static final String INTERN_BUILDER_FILE = "InternBuilder.stg";
-	private static final String SEPERATED_BUILDER_FILE = "SeperatedBuilder.stg";
+	private static final String SEPARATED_BUILDER_FILE = "SeparatedBuilder.stg";
 
 	/**
 	 * No instantiation needed
@@ -85,7 +85,7 @@ public class Generator {
 		case INTERN_MODEL_OPTION:
 			filePath = regexGenerateModelInternDSL(dslModel, targetPackage);
 			break;
-		case SEPERATED_MODEL_OPTION:
+		case SEPARATED_MODEL_OPTION:
 			regexGenerateModelSeperatedDSL(dslModel, targetPackage,
 					filesCreated);
 			break;
@@ -174,7 +174,7 @@ public class Generator {
 	private static String regexGenerateSeperatedModel(DSLGenerationModel dslModel,
 			String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH,
-				SEPERATED_BUILDER_FILE);
+				SEPARATED_BUILDER_FILE);
 		group.registerRenderer(String.class, new StringRenderer());
 		ST modelTemplate = group.getInstanceOf("Model");
 		modelTemplate.add("packageName", targetPackage);
@@ -187,7 +187,7 @@ public class Generator {
 	private static String regexGenerateSeperatedBuilder(DSLGenerationModel dslModel,
 			String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH,
-				SEPERATED_BUILDER_FILE);
+				SEPARATED_BUILDER_FILE);
 		group.registerRenderer(String.class, new StringRenderer());
 		ST modelTemplate = group.getInstanceOf("Builder");
 		modelTemplate.add("packageName", targetPackage);
@@ -262,11 +262,11 @@ public class Generator {
 			DSLGenerationModel dslModel, String targetPackage) { // TODO
 		STGroup group = getStringGroup(EMF_TEMPLATES_DIR_PATH,
 				SINGLE_TEMPLATE_FILE);
-		ST simpleBT = group.getInstanceOf("BuilderTemplate");
+		ST simpleBT = group.getInstanceOf("SingleBuilder");
 		simpleBT.add("packageName", targetPackage);
 		simpleBT.add("genModel", dslModel);
 		return Generator.writeToJavaFile(targetPackage,
-				dslModel.getModelName(), simpleBT.render());
+				dslModel.getModelName()+"Builder", simpleBT.render());
 	}
 
 	/**

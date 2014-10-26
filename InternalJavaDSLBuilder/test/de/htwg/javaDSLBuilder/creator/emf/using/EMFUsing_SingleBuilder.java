@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.emf;
+package de.htwg.javaDSLBuilder.creator.emf.using;
 
 import static org.junit.Assert.*;
 
@@ -8,23 +8,25 @@ import java.net.URL;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
+
+
+
 /*
  * Imports for EMF Model and DSL Builders
  */
-import de.htwg.generated.emf.model.SimpleForum.Forum;
+import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.Post;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import static de.htwg.generated.emf.dsl.simpleForum.ForumBuilder.*;
-import static de.htwg.generated.emf.dsl.simpleForum.PostBuilder.*;
-import static de.htwg.generated.emf.dsl.simpleForum.UserBuilder.*;
+import de.htwg.javaDSLBuilder.creator.emf.creation.EMFCreation_SingleBuilder;
+import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.*;
 
 /**
  * Test For Using the EMF DSL.
  * If imports are not correct pls make sure emf genmodel has 
- * created EMF models and {@link CreatorEMFTest_Creation} was run
+ * created EMF models and {@link EMFCreation_SingleBuilder} was run
  *
  */
-public class CreatorEMFTest_Using {
+public class EMFUsing_SingleBuilder {
 	
 	/*
 	 * User Data
@@ -63,45 +65,46 @@ public class CreatorEMFTest_Using {
 	String urlString = "http://MyForum.com";
 	
 	@Test
-	public void SimpleForumtest() throws MalformedURLException {
+	public void SimpleForumMultiBuilderTest() throws MalformedURLException {
 		
-		User user1 = createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
-					.optionalAge(age).email(email)
+		
+		SimpleForum simpleForum = createSimpleForum().name(forumName).url(new URL(urlString))
+				.addUsers(
+						createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
+						.optionalAge(age).email(email)
+							.addPosts(createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
+										.noCreator()
+										.buildPost()
+									 )
+							 .addPosts(createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
+									 	 .noCreator()
+										 .buildPost())
+							 .noPosts()
+							 .noForum()
+						.buildUser()
+				).addUsers(
+					createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
+					.optionalAge(age2).email(email2)
 						.noPosts()
 						.noForum()
-					.buildUser();
+					.buildUser()
+						)
+				.noUsers()
+		.buildSimpleForum();
 		
-		User user2 = createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
-				.optionalAge(age2).email(email2)
-					.noPosts()
-					.noForum()
-				.buildUser();
-		
-		Post post1 = createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
-							.creator(user1)
-					 .buildPost();
-		
-		
-		Post post2 = createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
-				.creator(user1)
-		 .buildPost();
-		
-		Forum simpleForum = createForum().name(forumName).url(new URL(urlString))
-									.addUsers(user1).addUsers(user2)
-									.noUsers()
-							 .buildForum();
+		User user1 = simpleForum.getUsers().get(0); 
+		User user2 = simpleForum.getUsers().get(1); 
 		
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
 		assertTrue(user2.getPosts().size() == 0);
 		assertTrue(simpleForum.getUsers().size() == 2);
 		// check for same opposite objects, regardless from which side they were set
-		assertTrue(EcoreUtil.equals(user1.getPosts().get(0) , post1));
-		assertTrue(EcoreUtil.equals(user1.getPosts().get(1) , post2));
-		assertTrue(EcoreUtil.equals(post2.getCreator() , post1.getCreator()));
+		assertTrue(EcoreUtil.equals(user1 , user1.getPosts().get(0).getCreator()));
+		assertTrue(EcoreUtil.equals(user1.getPosts().get(1).getCreator() , user1));
 		assertTrue(EcoreUtil.equals(simpleForum.getUsers().get(0) , user1));
 		assertTrue(EcoreUtil.equals(simpleForum.getUsers().get(1) , user2));
-		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
+		assertTrue(EcoreUtil.equals(simpleForum , user1.getForum()));
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(user1.getForum() , simpleForum));
 	}

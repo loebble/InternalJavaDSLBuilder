@@ -1,6 +1,7 @@
 Model(packageName, genModel) ::= <<
 <! Regex Template for seperated Model !>
 package <packageName>;
+<! IMPORTS !>
 <if(!genModel.imports.empty)>//user defined imports<endif>
 <if(genModel.hasList)>//uses ArrayList
 import java.util.List;
@@ -8,23 +9,22 @@ import java.util.ArrayList;
 <endif>
 <genModel.imports:{imp| import <imp>;<\n>}>
 // builder imports
-<! import <packageName>.<first(genModel.classes.keys)>Builder; !>
 <rest(genModel.classes.keys):{modelName|import <packageName>.<genModel.modelName>Builder.<modelName>Builder;
 }>
 
 public class <genModel.modelName>{
-
 	<genModel.classes.(genModel.modelName).attributes:{attribute|<createClassAttribute(attribute,"")>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
 	<genModel.classes.(genModel.modelName).attributes:{attribute|<createModelGetter(attribute,"")>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<createModelGetter(attribute,"")>}>
 	<genModel.classes.(genModel.modelName).attributes:{attribute|<createModelSetter(attribute)>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
+	<! CONSTRUCTOR FOR ROOT MODEL CLASS !>
 	public <genModel.modelName>(<genModel.modelName>Builder builder){
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<transferValues(attribute,"builder")>}>
 		<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
-	<! for every other class than the root class a new ModelClass has to be defined !>
+	<! OTHER MODEL CLASSES INSIDE ROOT MODEL !>
 	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
 }
 
@@ -34,16 +34,18 @@ Builder(packageName, genModel) ::= <<
 <! Regex Template for seperated Builder !>
 package <packageName>;
 
+<! IMPORTS !>
 <if(!genModel.imports.empty)>//user defined imports<endif>
 <genModel.imports:{imp| import <imp>;<\n>}>
-<! import <packageName>.<first(genModel.classes.keys)>; !>
 <if(genModel.hasList)>//uses ArrayList
 import java.util.List;
 import java.util.ArrayList;
 <endif>
 <rest(genModel.classes.keys):{modelName|import <packageName>.<genModel.modelName>.<modelName>;}>
 
+<! ROOT_BUILDER CLASS !>
 public class <genModel.modelName>Builder{
+<! VALUE ATTRIBUTES !>
 	<if(!genModel.classes.(genModel.modelName).attributes.empty)>//mandatory attributes
 <genModel.classes.(genModel.modelName).attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
 	<endif>
@@ -53,7 +55,7 @@ public class <genModel.modelName>Builder{
 	//scope attributes
 	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
 	private final <genModel.modelName;format="cap">BuildScope <genModel.classes.(genModel.modelName).className;format="lower">BuildScope;
-	
+	<! GETTER FOR VALUE ATTRIBUTES !>
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelGetter(modelAttribute,"Value")>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelGetter(modelAttribute,"Value")>}>
 	
@@ -62,11 +64,11 @@ public class <genModel.modelName>Builder{
 		<genModel.classes.(genModel.modelName).attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 		this.<genModel.classes.(genModel.modelName).className;format="lower">BuildScope = new <genModel.classes.(genModel.modelName).className;format="cap">BuildScope();
 	}
-	
+	<! ENTRY POINT FOR BUILDER - CREATE METHOD !>
 	<generateEntryPointMethod(genModel.classes.(genModel.modelName))>
-	
+	<! ATTRIBUTE SCOPE CLASSES !>
 	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createAttributeScopeClass(first(genModel.classes),classAttribute,genModel)>}>
-	
+	<! BUILD SOPE WITH BUILD METHOD FOR INSTANCE CREATION !>
 	public class <genModel.modelName;format="cap">BuildScope{
 		public <genModel.modelName;format="cap"> build<genModel.modelName;format="cap">() {
 			<genModel.modelName;format="cap"> <genModel.modelName;format="lower"> = new <genModel.modelName;format="cap">(<genModel.modelName;format="cap">Builder.this);
@@ -74,7 +76,7 @@ public class <genModel.modelName>Builder{
 			return <genModel.modelName;format="lower">;
 		}
 	}
-	
+	<! OTHER BUILDER CLASSES INSIDE THE ROOT BUILDER !>
 	<rest(genModel.classes.keys):{className|<createClassBuilder(className, genModel.classes.(className),genModel.classes,genModel)>}>
 }
 
