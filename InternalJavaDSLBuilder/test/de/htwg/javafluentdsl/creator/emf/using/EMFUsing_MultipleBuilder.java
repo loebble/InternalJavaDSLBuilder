@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.emf.using;
+package de.htwg.javafluentdsl.creator.emf.using;
 
 import static org.junit.Assert.*;
 
@@ -10,13 +10,14 @@ import org.junit.Test;
 
 
 
+
 /*
  * Imports for EMF Model and DSL Builders
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.Post;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import de.htwg.javaDSLBuilder.creator.emf.creation.EMFCreation_SingleBuilder;
+import de.htwg.javafluentdsl.creator.emf.creation.EMFCreation_SingleBuilder;
 import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder.*;
 import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder.*;
 import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder.*;

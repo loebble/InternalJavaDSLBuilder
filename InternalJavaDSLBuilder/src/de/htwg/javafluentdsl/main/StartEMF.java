@@ -77,7 +77,6 @@ public class StartEMF implements IStart {
 			packageName = packageName  + prefix;
 		CreatorEMF creator = CreatorEMF.getInstance(rootEPackage, packageName,
 				factoryName);
-		System.out.println(creator.getGenerationModel().printModel()); //TODO delete
 		Generator.buildDSL(creator, templateOption,
 				targetPackage);
 

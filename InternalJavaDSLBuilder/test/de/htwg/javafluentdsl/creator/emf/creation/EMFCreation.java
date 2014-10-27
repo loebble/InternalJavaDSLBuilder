@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.emf.creation;
+package de.htwg.javafluentdsl.creator.emf.creation;
 
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;

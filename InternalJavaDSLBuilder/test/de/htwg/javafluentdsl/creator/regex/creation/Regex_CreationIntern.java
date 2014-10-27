@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.regex.creation;
+package de.htwg.javafluentdsl.creator.regex.creation;
 
 import org.junit.Test;
 

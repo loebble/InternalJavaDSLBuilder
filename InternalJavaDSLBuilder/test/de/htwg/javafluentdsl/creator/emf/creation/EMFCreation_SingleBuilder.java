@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.emf.creation;
+package de.htwg.javafluentdsl.creator.emf.creation;
 
 import org.junit.Test;
 

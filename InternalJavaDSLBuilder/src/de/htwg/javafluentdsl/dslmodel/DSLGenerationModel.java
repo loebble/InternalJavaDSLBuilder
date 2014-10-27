@@ -206,7 +206,7 @@ public class DSLGenerationModel {
 	 * @param className the name of the ModelClass
 	 * @return
 	 */
-	public ModelClass getClass(String className){
+	public ModelClass getModelClass(String className){
 		return classes.get(className);
 	}
 	

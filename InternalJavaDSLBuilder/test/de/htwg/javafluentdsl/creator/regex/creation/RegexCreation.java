@@ -1,16 +1,14 @@
-package de.htwg.javaDSLBuilder.creator.regex.creation;
+package de.htwg.javafluentdsl.creator.regex.creation;
 
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.nio.file.Paths;
 
-import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
-import de.htwg.javafluentdsl.creator.CreatorRegex;
 import de.htwg.javafluentdsl.main.StartRegex;
 /**
  * Util Class for language descriptions.
@@ -18,40 +16,8 @@ import de.htwg.javafluentdsl.main.StartRegex;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ Regex_CreationIntern.class, Regex_CreationSeperated.class })
+@SuiteClasses({ RegexCreation_WrongDescription.class, Regex_CreationIntern.class, Regex_CreationSeperated.class })
 public class RegexCreation {
-	/*
-	 * Wrong descriptions
-	 */
-	public final static String FORUM_WRONG_DECL =
-			".class=Forum{.A=name=String, url:URL, .a=asd:int}"
-			+ ".imp={java.net.URL}"
-			;
-	
-	public final static String FORUM_DUPL_CLASSES =
-			".class=Forum{.A=name=String, url:URL, .A=asd:int}"
-			+ ".class=Forum{.A=asd=String}"
-			+ ".imp={java.net.URL}"
-			;
-	
-	public final static String FORUM_DUPL_ATTRIBUTENAME =
-			".class=Forum{.A=name=String, url:URL, .OA=name:int}"
-			+ ".imp={java.net.URL}"
-			;
-	
-	public final static String FORUM_OP_NO_REFERENCE =
-			".class=Forum{.A=name=String, url:URL, .OA=userABC:User}"
-			+ ".class=User{.OA=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .OP=forum:Forum->user}"
-			+ ".imp={java.net.URL}"
-			;
-	
-	public final static String FORUM_OP_WRONG_REFERENCE_TYPE =
-			".class=Forum{.A=name=String, url:URL, .OA=user:User}"
-			+ ".class=User{.OA=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .OP=forum:Forum->user}"
-			+ ".class=Post{.A=title:String, .A=text:String, .A=views:int, .OP=creator:User->forum}"
-			+ ".imp={java.net.URL}"
-			;
-	
 	
 	/*
 	 * Correct descriptions
@@ -84,31 +50,6 @@ public class RegexCreation {
 			+ ".class=Rating{.OA=upps:int, .OA=downs:int, .OP=forUser:User->rating, .OP=forPost:Post->rating}"
 			+ ".imp={java.net.URL}"
 			;
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testSimpleDeclFails() {
-		CreatorRegex.getInstance(FORUM_WRONG_DECL);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testDuplicateClasses() {
-		CreatorRegex.getInstance(FORUM_DUPL_CLASSES);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testDuplicateAttribute() {
-		CreatorRegex.getInstance(FORUM_DUPL_ATTRIBUTENAME);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testOP_NoRefAttr() {
-		CreatorRegex.getInstance(FORUM_OP_NO_REFERENCE);
-	}
-	
-	@Test(expected = IllegalArgumentException.class)
-	public void testOP_WrongRefType() {
-		CreatorRegex.getInstance(FORUM_OP_WRONG_REFERENCE_TYPE);
-	}
 	
 	public static void createDSL(String modelDescription, String templateOption, String targetPackage) {
 		new StartRegex().startDSLGenerationProcess(modelDescription, templateOption, targetPackage);

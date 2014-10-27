@@ -15,7 +15,8 @@ public class RegexUtil {
 	public RegexUtil(){}
 	
 	//Parts of regular expressions
-	public static final String CLASS_NAME = ".class=\\w+";
+	public static final String CLASS_START = ".class";
+	public static final String CLASS_NAME = CLASS_START+"=\\w+";
 	public static final String ATTR_START = ".A";
 	public static final String OPT_START = ".OA";
 	public static final String LIST_START = ".LA";
@@ -76,7 +77,7 @@ public class RegexUtil {
 	 * Regular expression for a complete Class definition.
 	 * Has to start with .class and go on with attribute declaration {@link #ALL_ATTR_DEFINITION}
 	 */
-	public static final String CLASS_DEFINITION = "(\\.class=\\w+"+ALL_ATTR_DEFINITION +")";
+	public static final String CLASS_DEFINITION = "("+CLASS_NAME+""+ALL_ATTR_DEFINITION +")";
 	
 	/**
 	 * Regular Expression for the complete model description 

@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.regex.using;
+package de.htwg.javafluentdsl.creator.regex.using;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,28 +7,26 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.separated.forum.Forum;
-import de.htwg.generated.regex.separated.forum.ForumBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForum;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimplePostBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimpleUserBuilder;
-import de.htwg.generated.regex.separated.user.User;
-import de.htwg.generated.regex.separated.user.UserBuilder;
-import de.htwg.generated.regex.separated.user.UserBuilder.AddressBuilder;
-import de.htwg.generated.regex.separated.user.UserBuilder.CountryBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPT;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.AddressOPTBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.CountryOPTBuilder;
-import de.htwg.javaDSLBuilder.creator.regex.creation.Regex_CreationIntern;
+import de.htwg.generated.regex.intern.forum.Forum;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimplePostBuilder;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleUserBuilder;
+import de.htwg.generated.regex.intern.user.User;
+import de.htwg.generated.regex.intern.user.User.AddressBuilder;
+import de.htwg.generated.regex.intern.user.User.CountryBuilder;
+import de.htwg.generated.regex.intern.user.User.UserBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT;
+import de.htwg.generated.regex.intern.useropt.UserOPT.AddressOPTBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT.CountryOPTBuilder;
+import de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder;
+import de.htwg.javafluentdsl.creator.regex.creation.Regex_CreationIntern;
 
 /**
  * Test For Using the Regex DSL.
  * If imports are not correct pls make sure {@link Regex_CreationIntern} was run
  *
  */
-public class Regex_UsingSeperated {
+public class Regex_UsingIntern {
 	/*
 	 * User Data
 	 */
@@ -93,7 +91,7 @@ public class Regex_UsingSeperated {
 	
 	@Test
 	public void testSimpleForumDSL() throws MalformedURLException {
-		SimpleForum simpleForum = SimpleForumBuilder
+		SimpleForum simpleForum = SimpleForum.SimpleForumBuilder
 		.createSimpleForum().name(forumName).url(new URL(urlString))
 				.addUser(
 					SimpleUserBuilder.createSimpleUser().optionalAge(age).optionalFirstName(firstName).lastName(lastName).nickName(nickName).post(
@@ -108,21 +106,21 @@ public class Regex_UsingSeperated {
 	
 	@Test
 	public void testForumDSL() throws MalformedURLException {
-		Forum.User replierWithoutPosts = ForumBuilder.UserBuilder.createUser().email(email).nickName("nick").rating(
-				ForumBuilder.RatingBuilder.createRating().optionalUpps(1).optionalDowns(0).buildRating()
+		Forum.User replierWithoutPosts = Forum.UserBuilder.createUser().email(email).nickName("nick").rating(
+				Forum.RatingBuilder.createRating().optionalUpps(1).optionalDowns(0).buildRating()
 				).noPosts().buildUser();
-		Forum.User userWithPost = ForumBuilder.UserBuilder.createUser().email(otherEMail).nickName(nickName).rating(
-				ForumBuilder.RatingBuilder.createRating().optionalDowns(5).buildRating()
-				).addPosts(ForumBuilder.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
-						ForumBuilder.RatingBuilder.createRating().buildRating()
+		Forum.User userWithPost = Forum.UserBuilder.createUser().email(otherEMail).nickName(nickName).rating(
+				Forum.RatingBuilder.createRating().optionalDowns(5).buildRating()
+				).addPosts(Forum.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
+						Forum.RatingBuilder.createRating().buildRating()
 						)
 				 .buildPost()
 				).noPosts()
 				.buildUser();
 		
-		Forum forum = ForumBuilder
+		Forum forum = Forum.ForumBuilder
 		.createForum().name(forumName).url(new URL(urlString))
-			.addSections(ForumBuilder.SectionBuilder.createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
+			.addSections(Forum.SectionBuilder.createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
 			.noSections()
 			.addUser(userWithPost)
 			.addUser(replierWithoutPosts)

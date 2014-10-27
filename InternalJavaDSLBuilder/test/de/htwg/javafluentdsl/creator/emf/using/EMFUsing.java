@@ -1,4 +1,4 @@
-package de.htwg.javaDSLBuilder.creator.emf.using;
+package de.htwg.javafluentdsl.creator.emf.using;
 
 import java.util.Iterator;
 

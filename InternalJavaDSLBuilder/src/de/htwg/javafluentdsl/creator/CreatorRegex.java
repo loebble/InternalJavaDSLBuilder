@@ -25,7 +25,9 @@ public class CreatorRegex implements ICreator{
 	private static final String SAME_ATTRIBUTE_MULTIPLE_TIMES = "An Attribute can only be declared once in the same class!";
 	private static final String CLASS_NOT_DEFINED = "class is not defined!";
 	private static final String OPPOSITE_DIFFERENT_TYPE = "The defined opposite attribute and its referencing attribute have different types.";
-	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Declared opposite attribute is not defined.";
+	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Defined opposite attributes other end was not found. ";
+	private static final String OPPOSITE_ATTRIBUTE_IN_SAME_CLASS = "The other end of a opposite attribute (its opposite) can "
+			+ "not be in the same class.";
 	
 	//Matcher
 	private Matcher classDefinitionMatcher;
@@ -213,14 +215,14 @@ public class CreatorRegex implements ICreator{
 				}
 				if(modelClass.getSpefificAttribute(attrName) != null)
 					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
-							+ " attribute "+attrName +" in class" + modelClass.getClassName());
+							+ " Attribute '"+attrName +"' in class " + modelClass.getClassName());
 				currentAttr.setAttributeName(attrName);
 				currentAttr.setAttributeFullName(modelClass.getClassName()+attrName);
 				currentAttr.setReference(isRef);
 				attributes.add(currentAttr);
+				modelClass.addAttribute(currentAttr);
 				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
 					setOppositeAttribute(currentAttr,attrDef);
-				modelClass.addAttribute(currentAttr);
 			}
 		}
 		return attributes;
@@ -242,16 +244,19 @@ public class CreatorRegex implements ICreator{
 			String nameOfOpposite = getOppositeNameOfDefinition(opDef);
 			nameOfOpposite = Character.toLowerCase(nameOfOpposite.charAt(0)) + nameOfOpposite.substring(1);
 			if(isClassDefined(opType)){
-				ModelClass mc = genModel.getClass(opType);
-				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
+				ModelClass oppModelClass = genModel.getModelClass(opType);
+				if(opType.equals
+						(currentAttr.getModelClass().getClassName()))
+					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_IN_SAME_CLASS 
+							+ " Given OP Attribute: "+opDef);
+				ClassAttribute oppositeAttribute = oppModelClass.getSpefificAttribute(nameOfOpposite);
 				if(oppositeAttribute == null)
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED 
-							+ "for given "+name+":"+opType+". Class attribute "
-							+ opType +"."+ nameOfOpposite+" not found.");
+							+ "Given OP Attribute: "+opDef);
 				else
 					currentAttr.setOpposite(oppositeAttribute);
 				checkForMatchingType(currentAttr, oppositeAttribute);
-				mc.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
+				oppModelClass.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
 				currentAttr.setReferencedByAttribute(true);
 			}
 			else 

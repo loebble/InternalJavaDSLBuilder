@@ -34,7 +34,7 @@ public class Main {
 			targetPackage = targetPackage.substring(0, targetPackage.length()-1);
 		if(source.endsWith(GENMODEL_FILE)){
 			new StartEMF().startDSLGenerationProcess(source, templateOption, targetPackage);
-		}else if (source.startsWith(RegexUtil.CLASS_NAME)) {
+		}else if (source.startsWith(RegexUtil.CLASS_START)) {
 			new StartRegex().startDSLGenerationProcess(source, templateOption, targetPackage);
 		}
 		else
