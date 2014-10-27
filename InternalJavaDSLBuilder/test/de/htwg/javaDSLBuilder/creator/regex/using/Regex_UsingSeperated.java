@@ -7,20 +7,20 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.seperated.forum.Forum;
-import de.htwg.generated.regex.seperated.forum.ForumBuilder;
-import de.htwg.generated.regex.seperated.simpleforum.SimpleForum;
-import de.htwg.generated.regex.seperated.simpleforum.SimpleForumBuilder;
-import de.htwg.generated.regex.seperated.simpleforum.SimpleForumBuilder.SimplePostBuilder;
-import de.htwg.generated.regex.seperated.simpleforum.SimpleForumBuilder.SimpleUserBuilder;
-import de.htwg.generated.regex.seperated.user.User;
-import de.htwg.generated.regex.seperated.user.UserBuilder.AddressBuilder;
-import de.htwg.generated.regex.seperated.user.UserBuilder.CountryBuilder;
-import de.htwg.generated.regex.seperated.user.UserBuilder;
-import de.htwg.generated.regex.seperated.useropt.UserOPT;
-import de.htwg.generated.regex.seperated.useropt.UserOPTBuilder.AddressOPTBuilder;
-import de.htwg.generated.regex.seperated.useropt.UserOPTBuilder.CountryOPTBuilder;
-import de.htwg.generated.regex.seperated.useropt.UserOPTBuilder;
+import de.htwg.generated.regex.separated.forum.Forum;
+import de.htwg.generated.regex.separated.forum.ForumBuilder;
+import de.htwg.generated.regex.separated.simpleforum.SimpleForum;
+import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder;
+import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimplePostBuilder;
+import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimpleUserBuilder;
+import de.htwg.generated.regex.separated.user.User;
+import de.htwg.generated.regex.separated.user.UserBuilder;
+import de.htwg.generated.regex.separated.user.UserBuilder.AddressBuilder;
+import de.htwg.generated.regex.separated.user.UserBuilder.CountryBuilder;
+import de.htwg.generated.regex.separated.useropt.UserOPT;
+import de.htwg.generated.regex.separated.useropt.UserOPTBuilder;
+import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.AddressOPTBuilder;
+import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.CountryOPTBuilder;
 import de.htwg.javaDSLBuilder.creator.regex.creation.Regex_CreationIntern;
 
 /**

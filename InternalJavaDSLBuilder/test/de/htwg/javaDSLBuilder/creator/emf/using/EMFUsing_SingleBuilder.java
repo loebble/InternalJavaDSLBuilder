@@ -1,24 +1,23 @@
 package de.htwg.javaDSLBuilder.creator.emf.using;
 
-import static org.junit.Assert.*;
+import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.createPost;
+import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.createSimpleForum;
+import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.createUser;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
-
-
-
+import de.htwg.generated.emf.dsl.testmodel.singleBuilder.TestModelBuilder;
+import de.htwg.generated.emf.model.TestModel.*;
 /*
  * Imports for EMF Model and DSL Builders
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
-import de.htwg.generated.emf.model.SimpleForum.Post;
 import de.htwg.generated.emf.model.SimpleForum.User;
 import de.htwg.javaDSLBuilder.creator.emf.creation.EMFCreation_SingleBuilder;
-import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.*;
 
 /**
  * Test For Using the EMF DSL.
@@ -65,7 +64,7 @@ public class EMFUsing_SingleBuilder {
 	String urlString = "http://MyForum.com";
 	
 	@Test
-	public void SimpleForumMultiBuilderTest() throws MalformedURLException {
+	public void SimpleForumSingleBuilderTest() throws MalformedURLException {
 		
 		
 		SimpleForum simpleForum = createSimpleForum().name(forumName).url(new URL(urlString))
@@ -73,20 +72,23 @@ public class EMFUsing_SingleBuilder {
 						createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
 						.optionalAge(age).email(email)
 							.addPosts(createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
-										.noCreator()
+										.creatorSetByOpposite()
 										.buildPost()
 									 )
 							 .addPosts(createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
-									 	 .noCreator()
+									     .creatorSetByOpposite()
 										 .buildPost())
 							 .noPosts()
-							 .noForum()
+							 .forumSetByOpposite()
 						.buildUser()
 				).addUsers(
 					createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
 					.optionalAge(age2).email(email2)
+						.addPosts(
+								createPost().optionalText(postText1).optionalViews(11).title(postTitle2).creatorSetByOpposite().buildPost()
+								)
 						.noPosts()
-						.noForum()
+						.forumSetByOpposite()
 					.buildUser()
 						)
 				.noUsers()
@@ -97,7 +99,7 @@ public class EMFUsing_SingleBuilder {
 		
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
-		assertTrue(user2.getPosts().size() == 0);
+		assertTrue(user2.getPosts().size() == 1);
 		assertTrue(simpleForum.getUsers().size() == 2);
 		// check for same opposite objects, regardless from which side they were set
 		assertTrue(EcoreUtil.equals(user1 , user1.getPosts().get(0).getCreator()));
@@ -107,6 +109,22 @@ public class EMFUsing_SingleBuilder {
 		assertTrue(EcoreUtil.equals(simpleForum , user1.getForum()));
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(user1.getForum() , simpleForum));
+		//Calling EMFs validateObject for validating
+		assertTrue(EMFUsing.validateObject(simpleForum));
+		simpleForum.getUsers().forEach(u -> assertTrue(EMFUsing.validateObject(u)));
+		simpleForum.getUsers().forEach(u -> u.getPosts().forEach(p->assertTrue(EMFUsing.validateObject(p))));
+		
 	}
+	
+//	private void rndTest() {
+//		TestModel test= TestModelBuilder.createTestModel().a(TestModelBuilder
+//				.createAClass()
+//					.bClassRef(TestModelBuilder.createBClass().AclassOPRefSetByOpposite().buildBClass())
+//				.buildAClass())
+//			.buildTestModel();
+//		TestModel test2= TestModelBuilder.createTestModel().a(TestModelBuilder.createAClass().noBClassRef().buildAClass()).buildTestModel();
+//
+//	}
+	
 	
 }

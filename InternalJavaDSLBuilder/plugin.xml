@@ -37,4 +37,12 @@
             genModel="emfmodel/Forum.genmodel"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated TestModel -->
+      <package
+            uri="myTestModelURI"
+            class="de.htwg.generated.emf.model.TestModel.TestModelPackage"
+            genModel="emfmodel/TestModel.genmodel"/>
+   </extension>
+
 </plugin>

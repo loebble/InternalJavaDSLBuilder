@@ -244,16 +244,15 @@ public class CreatorRegex implements ICreator{
 			if(isClassDefined(opType)){
 				ModelClass mc = genModel.getClass(opType);
 				ClassAttribute oppositeAttribute = mc.getSpefificAttribute(nameOfOpposite);
-				checkForMatchingType(currentAttr, oppositeAttribute);
-				mc.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
-				currentAttr.setReferencedByAttribute(true);
-				if(oppositeAttribute != null){
-					currentAttr.setOpposite(oppositeAttribute);
-				}
-				else
+				if(oppositeAttribute == null)
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED 
 							+ "for given "+name+":"+opType+". Class attribute "
 							+ opType +"."+ nameOfOpposite+" not found.");
+				else
+					currentAttr.setOpposite(oppositeAttribute);
+				checkForMatchingType(currentAttr, oppositeAttribute);
+				mc.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
+				currentAttr.setReferencedByAttribute(true);
 			}
 			else 
 				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  

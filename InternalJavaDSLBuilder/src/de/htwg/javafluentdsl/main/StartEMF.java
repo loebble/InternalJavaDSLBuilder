@@ -75,9 +75,9 @@ public class StartEMF implements IStart {
 					+ "This is not recommended. Please check the import statements of the generated Classes.");
 		if (prefix != null && !prefix.equals(""))
 			packageName = packageName  + prefix;
-		
 		CreatorEMF creator = CreatorEMF.getInstance(rootEPackage, packageName,
 				factoryName);
+		System.out.println(creator.getGenerationModel().printModel()); //TODO delete
 		Generator.buildDSL(creator, templateOption,
 				targetPackage);
 

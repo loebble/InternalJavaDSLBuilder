@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<genmodel:GenModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore"
+    xmlns:genmodel="http://www.eclipse.org/emf/2002/GenModel" modelDirectory="/InternalJavaDSLBuilder/src" modelPluginID="InternalJavaDSLBuilder"
+    modelName="TestModel" rootExtendsClass="org.eclipse.emf.ecore.impl.MinimalEObjectImpl$Container"
+    importerID="org.eclipse.emf.importer.ecore" complianceLevel="8.0" copyrightFields="false"
+    operationReflection="true" importOrganizing="true">
+  <foreignModel>TestModel.ecore</foreignModel>
+  <genPackages prefix="TestModel" basePackage="de.htwg.generated.emf.model" disposableProviderFactory="true"
+      ecorePackage="TestModel.ecore#/">
+    <genClasses ecoreClass="TestModel.ecore#//TestModel">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TestModel.ecore#//TestModel/a"/>
+    </genClasses>
+    <genClasses ecoreClass="TestModel.ecore#//AClass">
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute TestModel.ecore#//AClass/stringValue"/>
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TestModel.ecore#//AClass/bClassRef"/>
+    </genClasses>
+    <genClasses ecoreClass="TestModel.ecore#//BClass">
+      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference TestModel.ecore#//BClass/AclassOPRef"/>
+    </genClasses>
+  </genPackages>
+</genmodel:GenModel>

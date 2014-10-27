@@ -115,14 +115,16 @@ public class CreatorEMF implements ICreator {
 								oppositeAttr.setOpposite(modelAttribute);
 //								System.out.println("opposite created for "+oppositeAttr.getAttributeFullName() +" ->"+modelAttribute.getAttributeFullName());
 								ClassAttribute creator = null;
-								if(modelAttribute.isCreatorOfOpposite()) //TODO do it nicer
+								if(modelAttribute.isCreatorOfOpposite()){ //TODO do it nicer
 									creator = modelAttribute;
-								else if (oppositeAttr.isCreatorOfOpposite()) {
+									creator.setReferencedByAttribute(true);
+									creator.setReferencedBy(creator.getOpposite());
+								}else if (oppositeAttr.isCreatorOfOpposite()) {
 									creator = oppositeAttr;
+									creator.setReferencedByAttribute(true);
+									creator.setReferencedBy(creator.getOpposite());
 								}
 //								System.out.println("Creator is "+creator.getAttributeFullName());
-								creator.setReferencedByAttribute(true);
-								creator.setReferencedBy(creator.getOpposite());
 							}
 						}
 					}else if (feature instanceof EEnum){ //TODO Enums

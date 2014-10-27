@@ -23,7 +23,7 @@ public class <genModel.modelName>{
 	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelSetter(modelAttribute)>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelSetter(modelAttribute)>}>
 	
-	private <genModel.modelName>(<genModel.modelName>Builder builder){
+	private <genModel.modelName>(final <genModel.modelName>Builder builder){
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
 		<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
 	}
@@ -123,7 +123,7 @@ createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
 * Builder class for <className> instances.
 *
 */
-public static class <className>Builder{
+public static final class <className>Builder{
 	<if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
 	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
 	<if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
