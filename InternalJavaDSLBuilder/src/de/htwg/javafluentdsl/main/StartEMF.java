@@ -29,29 +29,30 @@ public class StartEMF implements IStart {
 	/*
 	 * Exception messages
 	 */
-	private static final String GENMODEL_NO_FILE = "The given path doesnt lead to a valid file!";
-	private static final String WRONG_TEMPLATE_OPTION= "The given template option (second argument) was not correct."
-			+ "For a given GenModel  only " + Generator.SINGLE_BUILDER_OPTION +" or "+ Generator.MULTIPLE_BUILDER_OPTION +"are allowed";
+	private static final String GENMODEL_NO_FILE = "The given path doesnt lead to a valid file!"
+			+ "For a given GenModel  only " + Generator.SINGLE_BUILDER_OPTION 
+			+" or "+ Generator.MULTIPLE_BUILDER_OPTION +"are allowed";
 	private static final String GENMODEL_HAS_NO_GENERATIONMODEL = "The genmodel File has no generation model declared!"
 			+ " See EMFs documentation for correct genmodel creation";
-	private static final String NO_MULTIPLE_GENPACKAGES_SUPPORTED = "The current version does not support multiple genPackage declarations in a genmodel";
-	private static final String NO_MULTIPLE_PACKAGES_SUPPORTED = "The current version does not support multiple package declarations in a genmodel";
-	private static final String NO_EPACKAGE_FOUND = "There was no defined EPackage found. Make sure the genmodel and the ecore files are correct."
-			+ " Try to put both files under the same directory if its still not working";
+	private static final String NO_MULTIPLE_GENPACKAGES_SUPPORTED = 
+			"The current version does not support multiple genPackage declarations in a genmodel";
+	private static final String NO_MULTIPLE_PACKAGES_SUPPORTED = 
+			"The current version does not support multiple package declarations in a genmodel";
+	private static final String NO_EPACKAGE_FOUND = 
+			"There was no defined EPackage found. Make sure the genmodel and the ecore files are correct."
+			+ " Try to put both files under the same directory "
+			+ "and give the absolute path of the genfile as source if its still not working";
 	
 	
 	/**
 	 * 
-	 * @param source the absolute path to the EMF GenModel file
+	 * @param source the absolute path to the EMF Generator Model file
 	 * 
 	 */
 	@Override
 	public void startDSLGenerationProcess(String source, String templateOption, String targetPackage){
 		if(!new File(source).isFile())
 			throw new IllegalArgumentException(GENMODEL_NO_FILE + " Path: "+source);
-		if(templateOption.equals(Generator.MULTIPLE_BUILDER_OPTION)
-				&& templateOption.equals(Generator.SINGLE_BUILDER_OPTION))
-			throw new IllegalArgumentException(WRONG_TEMPLATE_OPTION);
 		org.eclipse.emf.common.util.URI genModelURI = org.eclipse.emf.common.util.URI
 				.createFileURI(source);
 		

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 /**
  * Util Class for the {@link CreatorRegex} Class.
  * Contains Regular Expressions for the Model Description {@link #MODEL_DESCRIPTION}
- * and defines therefore the Model Meta Model through regular expression.
+ * and defines therefore the Models Meta Model through regular expression.
  * Also provides the Patterns for matching purposes.
  *
  */

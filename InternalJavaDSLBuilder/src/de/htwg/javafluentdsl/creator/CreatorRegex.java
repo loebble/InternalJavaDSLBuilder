@@ -13,12 +13,12 @@ import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
 
 /**
- * Class for Generating a {@link DSLGenerationModel} from a model description 
+ * Class for Creating a {@link DSLGenerationModel} from a model description 
  * defined by {@link de.htwg.javafluentdsl.creator.RegexUtil#MODEL_DESCRIPTION model description}
  * 
  * @see {@link ICreator}
  */
-public class CreatorRegex implements ICreator{
+public final class CreatorRegex implements ICreator{
 
 	//Error Messages
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
@@ -29,11 +29,31 @@ public class CreatorRegex implements ICreator{
 	private static final String OPPOSITE_ATTRIBUTE_IN_SAME_CLASS = "The other end of a opposite attribute (its opposite) can "
 			+ "not be in the same class.";
 	
-	//Matcher
+	//Matcher used for regular expression matching
+	/**
+	 * Matches the definition of a class
+	 * @see RegexUtil#CLASS_DEFINITION_PATTERN
+	 */
 	private Matcher classDefinitionMatcher;
+	/**
+	 * Matches the naming of an attribute or class
+	 * @see RegexUtil#NAMING_PATTERN
+	 */
 	private Matcher namingMatcher;
+	/**
+	 * Matches the type of an attribute
+	 * @see RegexUtil#TYPING_PATTERN
+	 */
 	private Matcher typingMatcher;
+	/**
+	 * Matches import whole import expression
+	 * @see RegexUtil#IMPORT_PATTERN
+	 */
 	private Matcher importMatcher;
+	/**
+	 * Matches a single import inside the RegexUtil#IMPORT_PATTERN
+	 * @see RegexUtil#IMPORT_PARAMETER_PATTERN
+	 */
 	private Matcher importParameterMatcher;
 	
 	/**
@@ -42,14 +62,27 @@ public class CreatorRegex implements ICreator{
 	 */
 	private DSLGenerationModel genModel;
 	private String modelDescr;
-	private String dslName;
 	private List<String> imports;
 	private Map<String,String> definedClasses= new LinkedHashMap<>();
 	
-	private CreatorRegex(){}
+	/**
+	 * Private Constructor. This class should  be instantiated via 
+	 * its {@link #getInstance(String)} method
+	 */
+	private CreatorRegex(){
+		this.genModel = new DSLGenerationModel();
+	}
 	
+	/**
+	 * Creates a new Instance of this class {@link CreatorRegex}.
+	 * An CreatorRegex need a model description. This description is defined
+	 * by the {@link RegexUtil#MODEL_DESCRIPTION}.
+	 * All the necessary methods are called in this method so that after it the Creators genModel can be used.
+	 * @param modelDescription the String with the whole model Description
+	 * @return new Instance of the CreatorRegex class
+	 */
 	public static CreatorRegex getInstance(String modelDescription){
-		if(!RegexUtil.doesModelDescriptionMatch(modelDescription)){ //TODO better error-handling and -printing
+		if(!RegexUtil.doesModelDescriptionMatch(modelDescription)){
 			//try to find class description which failed
 			Pattern p = Pattern.compile(RegexUtil.CLASS_DEFINITION);
 			Matcher m = p.matcher(modelDescription);
@@ -64,7 +97,6 @@ public class CreatorRegex implements ICreator{
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
 		CreatorRegex creator = new CreatorRegex();
-		creator.genModel = new DSLGenerationModel();
 		creator.modelDescr = modelDescription;
 		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
@@ -72,14 +104,6 @@ public class CreatorRegex implements ICreator{
 		creator.retrieveImports();
 		creator.genModel.setAttributeOrder();
 		return creator;
-	}
-	
-	/**
-	 * Returns the name of the DSL which is the same as the first Class defined
-	 * @return String dslName
-	 */
-	public String getDslName() {
-		return dslName;
 	}
 	
 	@Override
@@ -148,7 +172,6 @@ public class CreatorRegex implements ICreator{
 			//set modelName to first Class found, since its the root class
 			if(this.genModel.getModelName() == null){
 				this.genModel.setModelName(className);
-				this.dslName = className;
 			}
 			addClassDef(className,classDef);
 		}

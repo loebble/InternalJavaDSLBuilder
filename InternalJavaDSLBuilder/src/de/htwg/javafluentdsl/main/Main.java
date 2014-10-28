@@ -8,7 +8,13 @@ import de.htwg.javafluentdsl.creator.RegexUtil;
  */
 public class Main {
 	
+	/**
+	 * File Ending for a EMF Generator Model file
+	 */
 	public static final String GENMODEL_FILE = ".genmodel";
+	/**
+	 * Message that occurs if not a valid source was given
+	 */
 	public static final String WRONG_SOURCE = "The first Parameter is not a valid source. "
 			+ "It either has to the abolute path to a EMF GenModel File or a String describing the dsl model "
 			+ "(as defined in the de.htwg.javafluentdsl.creator.RegexUtil.MODEL_DESCRIPTION)";

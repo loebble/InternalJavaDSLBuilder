@@ -11,8 +11,6 @@ import java.net.URL;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
-import de.htwg.generated.emf.dsl.testmodel.singleBuilder.TestModelBuilder;
-import de.htwg.generated.emf.model.TestModel.*;
 /*
  * Imports for EMF Model and DSL Builders
  */

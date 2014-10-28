@@ -1,13 +1,12 @@
 package de.htwg.javafluentdsl.creator;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
+import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
+import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
 import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EDataType;
 import org.eclipse.emf.ecore.EEnum;
 import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EFactory;
@@ -20,33 +19,75 @@ import de.htwg.javafluentdsl.dslmodel.ClassAttribute;
 import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
 
-public class CreatorEMF implements ICreator {
-	private String modelPackage;
+/**
+ * Class for Creating a {@link DSLGenerationModel} from EMFs Generator Model
+ * or more precisely the {@link EPackage} defined inside the Generator Model.
+ * 
+ * @see {@link ICreator}
+ */
+public final class CreatorEMF implements ICreator {
+	/**
+	 * Holds the {@link EPackage} of this EMFCreator.
+	 * Which is received through a {@link GenModel}
+	 */
 	private EPackage ePackage;
-	private Map<String, String> definedEClasses;
-	private Map<String, Map<String, String>> eclassWithMethods;
-
-	private String dslName;
-	private String buildMethodName;
-	private ArrayList<String> imports;
 	
+	/**
+	 * Holds the created {@link DSLGenerationModel} 
+	 * which this Creator creates
+	 */
 	private final DSLGenerationModel genModel;
 	
+	/**
+	 * The absolute packageName the created files
+	 */
+	private String packageName;
+	
+	/*
+	 * Exception Messages 
+	 */
+	/**
+	 * Message for Wrong EClassifier
+	 * @see #createModelAttribute(EStructuralFeature, ModelClass)
+	 */
 	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
+	/**
+	 * Warning text that occurs if the EPackage 
+	 * name is different from the first modeled class
+	 */
 	private final String PACKAGENAME_NOT_EQUAL_ECLASSNAME = "The ePackage name is not equal to the first modeled "
 			+ "EClass. This is not recomended. Only the multiBuilder option is suited for such models.";
+	/**
+	 * Message if the message has not at least one EClass defined (empty EPackage)
+	 * @see #checkFirstEClass(EPackage)
+	 */
 	private final String NO_ECLASS_DEFINED = "The Package has no EClass modeled. Therefore no DSL can be created";
-	private String packageName;
 	
 	@Override
 	public DSLGenerationModel getGenerationModel() {
 		return this.genModel;
 	}
 
+	/**
+	 * Private Constructor. This class should  be instantiated via 
+	 * its {@link #getInstance(EPackage, String, String)} method
+	 */
 	private CreatorEMF() {
 		this.genModel = new DSLGenerationModel();
 	}
 
+	/**
+	 * Creates an Instance of this class {@link CreatorEMF} .
+	 * An CreatorEMF needs any kind of EPackage to analyze its attributes etc.
+	 * All the necessary methods are called in this method so that after it the
+	 * Creators {@link #genModel} can be used.
+	 * @param ePackage The {@link EPackage} to be analyzed
+	 * @param fullPackageName the full base package name of the corresponding
+	 * {@link GenPackage}. This tells the Creator where the generated EMF Models are located
+	 * @param factoryName the Factory of the {@link GenPackage} which can be used to
+	 * instantiate the EMF Models
+	 * @return a new CreatorEMF instance with the created {@link DSLGenerationModel}
+	 */
 	public static <T extends EPackage> CreatorEMF getInstance(T ePackage, String fullPackageName,String factoryName) {
 		CreatorEMF creator = new CreatorEMF();
 		EPackage eP = (EPackage) ePackage;
@@ -59,20 +100,27 @@ public class CreatorEMF implements ICreator {
 		return creator;
 	}
 
-
+	/**
+	 * Analyzes this {@link #ePackage} for its defined classes and attributes
+	 * to be able to generate a valid {@link DSLGenerationModel}
+	 */
 	private void retrieveAttributes() {
+		//check for no Classifier
 		if(this.ePackage.getEClassifiers().size() == 0){
-			System.err.println("No Classifiers in Package: "+this.ePackage.getClass().getCanonicalName());
+			System.err.println("No Classifiers in Package: "
+					+this.ePackage.getClass().getCanonicalName());
 			return;
 		}
 		EFactory eFactory = this.ePackage.getEFactoryInstance();
+		//Without factory there can be no model instantiation
 		if(eFactory == null){
-			System.err.println("No EFactoryInstance found for Package: "+this.ePackage.getClass().getCanonicalName());
+			System.err.println("No EFactoryInstance found for Package: "
+					+this.ePackage.getClass().getCanonicalName());
 			return;
 		}
 		
 		this.checkFirstEClass(ePackage);
-		
+		//traverse throug the EPackages classifiers to receive attributes and classes
 		for (Iterator<EClassifier> iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
 			
 			EClassifier classifier = (EClassifier) iter.next();
@@ -101,21 +149,19 @@ public class CreatorEMF implements ICreator {
 						EReference opposite = reference.getEOpposite();
 						if(opposite != null){
 							// Opposite attribute could not have been processed yet
-//							System.out.println(modelAttribute.getAttributeFullName() + " refBy " + reference.getEReferenceType().getName()+ opposite.getName());
 							ClassAttribute oppositeAttr = this.genModel.findAttribute(reference.getEReferenceType().getName(), opposite.getName());
 							if(oppositeAttr == null){
 								//Sets the start of an opposite relation
 								// -> if not processed the current attribute is the "creator" and is Referenced by the other one
-//								System.out.println("creator: "+ modelAttribute.getAttributeFullName());
 								modelAttribute.setCreatorOfOpposite(true);
 							}else{
 								//Sets the end of an opposite relation
 								modelAttribute.setOpposite(oppositeAttr);
-//								System.out.println("opposite created for "+modelAttribute.getAttributeFullName() +" ->"+oppositeAttr.getAttributeFullName());
 								oppositeAttr.setOpposite(modelAttribute);
-//								System.out.println("opposite created for "+oppositeAttr.getAttributeFullName() +" ->"+modelAttribute.getAttributeFullName());
 								ClassAttribute creator = null;
-								if(modelAttribute.isCreatorOfOpposite()){ //TODO do it nicer
+								//Decide which opposite is called first in the chain
+								//this is equal to the creator of the opposite relation
+								if(modelAttribute.isCreatorOfOpposite()){
 									creator = modelAttribute;
 									creator.setReferencedByAttribute(true);
 									creator.setReferencedBy(creator.getOpposite());
@@ -124,19 +170,14 @@ public class CreatorEMF implements ICreator {
 									creator.setReferencedByAttribute(true);
 									creator.setReferencedBy(creator.getOpposite());
 								}
-//								System.out.println("Creator is "+creator.getAttributeFullName());
 							}
 						}
-					}else if (feature instanceof EEnum){ //TODO Enums
+					}else if (feature instanceof EEnum){ // TODO Enums
 						EEnum eEnum = (EEnum)classifier;
 						for (Iterator<EEnumLiteral> ei = eEnum.getELiterals().iterator();ei.hasNext();){
 							EEnumLiteral literal = (EEnumLiteral) ei.next();
 							System.out.println("ENUM: "+literal.getName());
 						}
-					}
-					else if (feature instanceof EDataType) { //TODO Not needed, because EData only defines type
-						EDataType eDataType = (EDataType)classifier;
-						System.out.println("EDATATYPE: "+eDataType.getName());
 					}
 				}
 			}
@@ -217,50 +258,6 @@ public class CreatorEMF implements ICreator {
 		if(!this.genModel.isHasList() && isList)
 			this.genModel.setHasList(isList);
 		return attribute;
-	}
-
-
-	public void printEclassWithMethods() {
-		if (this.eclassWithMethods.size() <= 0)
-			return;
-		for (Map.Entry<String, Map<String, String>> eClass : this
-				.getEclassWithMethods().entrySet()) {
-			System.out.println("EClass: " + eClass.getKey());
-			System.out.println("Methods: ");
-			if (eClass.getValue().size() <= 0) {
-				System.out.println("No setters!");
-				continue;
-			}
-			for (Map.Entry<String, String> method : eClass.getValue()
-					.entrySet()) {
-				System.out.println(method.getKey() + "(" + method.getValue()
-						+ ")");
-			}
-		}
-	}
-
-	public String getModelPackage() {
-		return modelPackage;
-	}
-
-	public Map<String, String> getDefinedEClasses() {
-		return definedEClasses;
-	}
-
-	public Map<String, Map<String, String>> getEclassWithMethods() {
-		return eclassWithMethods;
-	}
-
-	public String getDslName() {
-		return dslName;
-	}
-
-	public String getBuildMethodName() {
-		return buildMethodName;
-	}
-
-	public ArrayList<String> getImports() {
-		return imports;
 	}
 
 }

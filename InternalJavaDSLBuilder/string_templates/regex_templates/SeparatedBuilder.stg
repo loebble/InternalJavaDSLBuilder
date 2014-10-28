@@ -68,11 +68,11 @@ public class <genModel.modelName>Builder{
 	<generateEntryPointMethod(genModel.classes.(genModel.modelName))>
 	<! ATTRIBUTE SCOPE CLASSES !>
 	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createAttributeScopeClass(first(genModel.classes),classAttribute,genModel)>}>
-	<! BUILD SOPE WITH BUILD METHOD FOR INSTANCE CREATION !>
+	<! BUILD SCOPE WITH BUILD METHOD FOR INSTANCE CREATION !>
 	public class <genModel.modelName;format="cap">BuildScope{
 		public <genModel.modelName;format="cap"> build<genModel.modelName;format="cap">() {
 			<genModel.modelName;format="cap"> <genModel.modelName;format="lower"> = new <genModel.modelName;format="cap">(<genModel.modelName;format="cap">Builder.this);
-			<genModel.classes.(genModel.modelName).referencedByOpposite:{nestedAttributeRef|<genModel.modelName;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<genModel.modelName;format="lower">);}>
+			<genModel.classes.(genModel.modelName).createdByOpposite:{nestedAttributeRef|<setOpAttribute(genModel.classes.(genModel.modelName),nestedAttributeRef)>}>
 			return <genModel.modelName;format="lower">;
 		}
 	}

@@ -52,10 +52,13 @@ public class Generator {
 	private static final String SEPARATED_BUILDER_FILE = "SeparatedBuilder.stg";
 	private static final String WRONG_OPTION_EMF = "Not a valid templateOption given. "
 			+ "For a genmodel source only:"
-			+SINGLE_BUILDER_OPTION +" OR " +MULTIPLE_BUILDER_OPTION +" allowed.";
+			+ SINGLE_BUILDER_OPTION
+			+ " OR "
+			+ MULTIPLE_BUILDER_OPTION + " allowed.";
 	private static final String WRONG_OPTION_REGEX = "Not a valid templateOption given. "
 			+ "For a string model description only:"
-			+INTERN_MODEL_OPTION +" OR " +SEPARATED_MODEL_OPTION +" allowed.";
+			+ INTERN_MODEL_OPTION
+			+ " OR " + SEPARATED_MODEL_OPTION + " allowed.";
 
 	/**
 	 * No instantiation needed
@@ -100,7 +103,7 @@ public class Generator {
 		}
 
 	}
-	
+
 	/**
 	 * Starts generation of files with given template.
 	 * 
@@ -151,7 +154,7 @@ public class Generator {
 	private static String regexGenerateModelInternDSL(
 			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH
-				+INTERN_BUILDER_FILE);
+				+ INTERN_BUILDER_FILE);
 		ST simpleBT = group.getInstanceOf("BuilderTemplate");
 		simpleBT.add("packageName", targetPackage);
 		simpleBT.add("genModel", dslModel);
@@ -182,7 +185,7 @@ public class Generator {
 				targetPackage);
 		if (modelFilePath != null)
 			filesCreated.add(modelFilePath);
-		
+
 		String builderFilePath = regexGenerateSeperatedBuilder(dslModel,
 				targetPackage);
 		if (builderFilePath != null)
@@ -190,10 +193,20 @@ public class Generator {
 		return null;
 	}
 
-	private static String regexGenerateSeperatedModel(DSLGenerationModel dslModel,
-			String targetPackage) {
+	/**
+	 * Generates a single model file for separated builder.
+	 * 
+	 * @param dslModel
+	 *            the generation model
+	 * @param targetPackage
+	 *            the target package the file is be written to
+	 * @return @return path of DSL File which was created
+	 * @see {@link #regexGenerateSeparateBuilderDSL(DSLGenerationModel, String, List)}
+	 */
+	private static String regexGenerateSeperatedModel(
+			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH
-				+SEPARATED_BUILDER_FILE);
+				+ SEPARATED_BUILDER_FILE);
 		group.registerRenderer(String.class, new StringRenderer());
 		ST modelTemplate = group.getInstanceOf("Model");
 		modelTemplate.add("packageName", targetPackage);
@@ -202,18 +215,28 @@ public class Generator {
 		return Generator.writeToJavaFile(targetPackage,
 				dslModel.getModelName(), modelCode);
 	}
-	
-	private static String regexGenerateSeperatedBuilder(DSLGenerationModel dslModel,
-			String targetPackage) {
+
+	/**
+	 * Generates a single builder file for separated builder.
+	 * 
+	 * @param dslModel
+	 *            the generation model
+	 * @param targetPackage
+	 *            the target package the file is be written to
+	 * @return @return path of DSL File which was created
+	 * @see {@link #regexGenerateSeparateBuilderDSL(DSLGenerationModel, String, List)}
+	 */
+	private static String regexGenerateSeperatedBuilder(
+			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH
-				+SEPARATED_BUILDER_FILE);
+				+ SEPARATED_BUILDER_FILE);
 		group.registerRenderer(String.class, new StringRenderer());
 		ST modelTemplate = group.getInstanceOf("Builder");
 		modelTemplate.add("packageName", targetPackage);
 		modelTemplate.add("genModel", dslModel);
 		String modelCode = modelTemplate.render();
-		return Generator.writeToJavaFile(targetPackage,
-				dslModel.getModelName() + "Builder", modelCode);
+		return Generator.writeToJavaFile(targetPackage, dslModel.getModelName()
+				+ "Builder", modelCode);
 	}
 
 	/**
@@ -245,17 +268,17 @@ public class Generator {
 	}
 
 	/**
-	 * Method for generating a single Builder file.
+	 * Method for generating a single Builder file for EMF multi builder option.
 	 * 
 	 * @param modelClass
 	 * @param targetPackage
-	 * @return {@link #writeToJavaFile(String, String, String) same as
-	 *         writeToJavaFile}
+	 * @return path of File which was created
+	 * @see #emfGenerateMultipleBuilderDSL(DSLGenerationModel, String, List)
 	 */
 	private static String emfGenerateMultiBuilderFile(ModelClass modelClass,
 			String targetPackage) {
 		STGroup group = getStringGroup(EMF_TEMPLATES_DIR_PATH
-				+MULTI_TEMPLATE_FILE);
+				+ MULTI_TEMPLATE_FILE);
 		group.registerRenderer(String.class, new StringRenderer());
 		ST modelTemplate = group.getInstanceOf("ClassBuilder");
 		modelTemplate.add("packageName", targetPackage);
@@ -280,12 +303,12 @@ public class Generator {
 	private static String emfGenerateSingleBuilderDSL(
 			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(EMF_TEMPLATES_DIR_PATH
-				+SINGLE_TEMPLATE_FILE);
+				+ SINGLE_TEMPLATE_FILE);
 		ST simpleBT = group.getInstanceOf("SingleBuilder");
 		simpleBT.add("packageName", targetPackage);
 		simpleBT.add("genModel", dslModel);
-		return Generator.writeToJavaFile(targetPackage,
-				dslModel.getModelName()+"Builder", simpleBT.render());
+		return Generator.writeToJavaFile(targetPackage, dslModel.getModelName()
+				+ "Builder", simpleBT.render());
 	}
 
 	/**
@@ -301,7 +324,7 @@ public class Generator {
 		group.registerRenderer(String.class, new StringRenderer());
 		return group;
 	}
-	
+
 	/**
 	 * Writes generatedCode to a java file located at src/targetPackage
 	 * 
@@ -312,7 +335,7 @@ public class Generator {
 	 *            name of the generated file (without .java)
 	 * @param generatedCode
 	 *            the java code
-	 * @return
+	 * @return the generated files name or null of exception is thrown
 	 */
 	public static String writeToJavaFile(String targetPackage, String fileName,
 			String generatedCode) {

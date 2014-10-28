@@ -251,8 +251,9 @@ public class DSLGenerationModel {
 	}
 	
 	/**
-	 * Creates a String representation of this generation model with all the classes and attributes
-	 * as well as the attributes properties
+	 * Creates a String representation of this generation
+	 * model with all the classes and attributes
+	 * as well as the attributes properties.
 	 * @return the created String
 	 */
 	public String printModel() {
@@ -295,9 +296,9 @@ public class DSLGenerationModel {
 	
 	/**
 	 * Creates a String representation of the order the classes and attributes 
-	 * are in the model.
+	 * that are in this model.
 	 * 
-	 * @return the created string with the corresponding order
+	 * @return the created String with the corresponding order
 	 */
 	public String printOrder(){
 		StringBuffer sb = new StringBuffer();

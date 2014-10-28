@@ -6,28 +6,13 @@ Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: .
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
-Export-Package: de.htwg.generated.emf.Forum,
- de.htwg.generated.emf.Forum.impl,
- de.htwg.generated.emf.Forum.util,
- ForumMulti,
- ForumMulti.impl,
- ForumMulti.util,
- de.htwg.generated.emf.ForumMulti,
- de.htwg.generated.emf.ForumMulti.impl,
- de.htwg.generated.emf.ForumMulti.util,
- de.htwg.generated.emf.model.SimpleForum,
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Export-Package: de.htwg.generated.emf.model.SimpleForum,
  de.htwg.generated.emf.model.SimpleForum.impl,
  de.htwg.generated.emf.model.SimpleForum.util,
- de.htwg.generated.emf.model.ForumMulti,
- de.htwg.generated.emf.model.ForumMulti.impl,
- de.htwg.generated.emf.model.ForumMulti.util,
  de.htwg.generated.emf.model.Forum,
  de.htwg.generated.emf.model.Forum.impl,
  de.htwg.generated.emf.model.Forum.util,
- de.htwg.generated.emf.dsl.TestModel,
- de.htwg.generated.emf.dsl.TestModel.impl,
- de.htwg.generated.emf.dsl.TestModel.util,
  de.htwg.generated.emf.model.TestModel,
  de.htwg.generated.emf.model.TestModel.impl,
  de.htwg.generated.emf.model.TestModel.util
