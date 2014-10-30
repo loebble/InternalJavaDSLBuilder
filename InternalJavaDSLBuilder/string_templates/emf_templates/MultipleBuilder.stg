@@ -176,7 +176,7 @@ public class SimpleOptionalsOnlyScope {
     <! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
     The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
     <modelClass.simpleOptAttr:{optAttr|<createSimpleOptAttrMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
-    <buildObjectMethod(modelClass)>
+    <buildEMFObjectMethod(modelClass)>
 }
 >>
 

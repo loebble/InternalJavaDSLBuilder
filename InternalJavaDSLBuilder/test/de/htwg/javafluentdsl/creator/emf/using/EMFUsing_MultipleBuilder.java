@@ -1,6 +1,9 @@
 package de.htwg.javafluentdsl.creator.emf.using;
 
-import static org.junit.Assert.*;
+import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder.createPost;
+import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder.createSimpleForum;
+import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder.createUser;
+import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -8,19 +11,16 @@ import java.net.URL;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
-
-
-
+import de.htwg.generated.emf.dsl.optonly.multiBuilder.OptOnlyBuilder;
+import de.htwg.generated.emf.dsl.optonly.multiBuilder.RefBuilder;
+import de.htwg.generated.emf.model.OptOnly.OptOnly;
+import de.htwg.generated.emf.model.SimpleForum.Post;
 /*
  * Imports for EMF Model and DSL Builders
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
-import de.htwg.generated.emf.model.SimpleForum.Post;
 import de.htwg.generated.emf.model.SimpleForum.User;
 import de.htwg.javafluentdsl.creator.emf.creation.EMFCreation_SingleBuilder;
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder.*;
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder.*;
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder.*;
 
 /**
  * Test For Using the EMF DSL.
@@ -108,6 +108,20 @@ public class EMFUsing_MultipleBuilder {
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(simpleForum , user2.getForum()));
 		assertTrue(EcoreUtil.equals(user1.getForum() , simpleForum));
+	}
+	
+	@Test
+	public void OptOnlyMultiBuilderTest(){
+		OptOnly opt = OptOnlyBuilder.createOptOnly().optionalName("ad").optionalSomeOtherAttr(12)
+					.ref(RefBuilder.createRef().optionalOtherName("otherName").optionalSomeNumber(true).buildRef())
+				.buildOptOnly();
+		
+		assertTrue(opt.getName().equals("ad"));
+		assertTrue(opt.getSomeOtherAttr() == 12);
+		assertTrue(opt.getRef() != null);
+		assertTrue(opt.getRef().getOtherName().equals("otherName"));
+		assertTrue(opt.getRef().isSomeNumber() ==true);
+		
 	}
 	
 }

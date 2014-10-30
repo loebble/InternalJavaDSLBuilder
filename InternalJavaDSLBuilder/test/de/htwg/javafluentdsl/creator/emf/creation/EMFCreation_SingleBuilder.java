@@ -13,6 +13,7 @@ public class EMFCreation_SingleBuilder {
 	public final static String FORUM_DEST = PACKAGE_DEST+".forum";
 	public final static String TESTMODEL_DEST = PACKAGE_DEST+".testmodel";
 	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
+	public final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
 	
 	
 	@Test
@@ -34,5 +35,12 @@ public class EMFCreation_SingleBuilder {
 		String genModelPath = EMFGenModelPath + "TestModel.genmodel";
 		new StartEMF().startDSLGenerationProcess(genModelPath, Generator.SINGLE_BUILDER_OPTION, TESTMODEL_DEST+".singleBuilder");
 		EMFCreation.fileExists(TESTMODEL_DEST+".singleBuilder.TestModelBuilder","java");
+	}
+	
+	@Test
+	public void OptOnly_SingleBuilderTest(){
+		String genModelPath = EMFGenModelPath + "OptOnly.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, Generator.SINGLE_BUILDER_OPTION, OPTONLY_DEST+".singleBuilder");
+		EMFCreation.fileExists(OPTONLY_DEST+".singleBuilder.OptOnlyBuilder","java");
 	}
 }

@@ -11,6 +11,9 @@ import java.net.URL;
 import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
+
+import de.htwg.generated.emf.dsl.optonly.singleBuilder.OptOnlyBuilder;
+import de.htwg.generated.emf.model.OptOnly.OptOnly;
 /*
  * Imports for EMF Model and DSL Builders
  */
@@ -112,6 +115,20 @@ public class EMFUsing_SingleBuilder {
 		assertTrue(EMFUsing.validateObject(simpleForum));
 		simpleForum.getUsers().forEach(u -> assertTrue(EMFUsing.validateObject(u)));
 		simpleForum.getUsers().forEach(u -> u.getPosts().forEach(p->assertTrue(EMFUsing.validateObject(p))));
+		
+	}
+	
+	@Test
+	public void OptOnly_SingleBuilderTest(){
+		OptOnly opt = OptOnlyBuilder.createOptOnly().optionalName("ad").optionalSomeOtherAttr(12)
+					.ref(OptOnlyBuilder.createRef().optionalOtherName("otherName").optionalSomeNumber(true).buildRef())
+				.buildOptOnly();
+		
+		assertTrue(opt.getName().equals("ad"));
+		assertTrue(opt.getSomeOtherAttr() == 12);
+		assertTrue(opt.getRef() != null);
+		assertTrue(opt.getRef().getOtherName().equals("otherName"));
+		assertTrue(opt.getRef().isSomeNumber() ==true);
 		
 	}
 	

@@ -163,7 +163,7 @@ public static <modelClass.className;format="cap">Builder.<first(modelClass.attri
 	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }<endif>
 <else>
-public static <modelClass.className;format="cap">.SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
+public static <modelClass.className;format="cap">Builder.SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
 	return new <modelClass.className>Builder().simpleOptionalsOnlyScope;
 }
 <endif>
@@ -271,7 +271,7 @@ public class SimpleOptionalsOnlyScope{
 	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
 	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
 	<modelClass.simpleOptAttr:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
-	<buildObjectMethod(modelClass)>
+	<buildEMFObjectMethod(modelClass)>
 }
 >>
 

@@ -131,6 +131,7 @@ public final class CreatorEMF implements ICreator {
 				String eClassName = eClass.getName();
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
 				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
+				modelClass.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
 				this.genModel.addImport(this.packageName +"."+modelClass.getClassName());
 				this.genModel.getClasses().put(eClassName, modelClass);
 				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
@@ -232,7 +233,6 @@ public final class CreatorEMF implements ICreator {
 			EReference ref = (EReference) eClassifier;
 			type = ref.getEType().getName();
 			modelClass.addImport(this.packageName +"."+type);
-			modelClass.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
 			this.genModel.addImport(this.packageName +"."+type);
 			this.genModel.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
 			isRef = true;

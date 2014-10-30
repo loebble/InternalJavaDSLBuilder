@@ -16,6 +16,7 @@ public class EMFCreation_MultipleBuilder {
 	public final static String FORUM_DEST = PACKAGE_DEST+".forum";
 	public final static String TESTMODEL_DEST = PACKAGE_DEST+".testmodel";
 	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
+	public final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
 	
 	
 	@Test
@@ -46,6 +47,14 @@ public class EMFCreation_MultipleBuilder {
 		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.TestModelBuilder","java");
 		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.AClassBuilder","java");
 		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.BClassBuilder","java");
+	}
+	
+	@Test
+	public void OptOnly_MultiBuilderTest(){
+		String genModelPath = EMFGenModelPath + "OptOnly.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, Generator.MULTIPLE_BUILDER_OPTION, OPTONLY_DEST+".multiBuilder");
+		EMFCreation.fileExists(OPTONLY_DEST+".multiBuilder.OptOnlyBuilder","java");
+		EMFCreation.fileExists(OPTONLY_DEST+".multiBuilder.RefBuilder","java");
 	}
 	
 	
