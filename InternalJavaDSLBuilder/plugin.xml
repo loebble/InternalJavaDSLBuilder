@@ -45,4 +45,12 @@
             genModel="emfmodel/TestModel.genmodel"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated OptOnly -->
+      <package
+            uri="SomeURI"
+            class="de.htwg.generated.emf.model.OptOnly.OptOnlyPackage"
+            genModel="emfmodel/OptOnly.genmodel"/>
+   </extension>
+
 </plugin>

@@ -11,7 +11,12 @@ import java.util.ArrayList;
 // builder imports
 <rest(genModel.classes.keys):{modelName|import <packageName>.<genModel.modelName>Builder.<modelName>Builder;
 }>
-
+/**
+* <genModel.modelName> Model Class.
+* To create objects use the Builder defined in 
+* {@link <packageName>.<genModel.modelName>Builder#create<genModel.modelName>}
+*
+*/
 public class <genModel.modelName>{
 	<genModel.classes.(genModel.modelName).attributes:{attribute|<createClassAttribute(attribute,"")>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
@@ -20,6 +25,13 @@ public class <genModel.modelName>{
 	<genModel.classes.(genModel.modelName).attributes:{attribute|<createModelSetter(attribute)>}>
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
 	<! CONSTRUCTOR FOR ROOT MODEL CLASS !>
+	/**
+    * Private constructor for the model class <genModel.modelName>.
+    * Expects an {@link <packageName>.<genModel.modelName>Builder} Instance with values set.
+    * @param builder The builder created by the dsl starting from entry point
+    * {@link <packageName>.<genModel.modelName>Builder#create<genModel.modelName>}
+    * @return new <genModel.modelName> instance with values from the the <genModel.modelName>Builder.
+    */
 	public <genModel.modelName>(<genModel.modelName>Builder builder){
 		<genModel.classes.(genModel.modelName).attributes:{attribute|<transferValues(attribute,"builder")>}>
 		<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
@@ -44,6 +56,10 @@ import java.util.ArrayList;
 <rest(genModel.classes.keys):{modelName|import <packageName>.<genModel.modelName>.<modelName>;}>
 
 <! ROOT_BUILDER CLASS !>
+/**
+* Builder class for {@link <packageName>.<genModel.modelName>} instances.
+*
+*/
 public class <genModel.modelName>Builder{
 <! VALUE ATTRIBUTES !>
 	<if(!genModel.classes.(genModel.modelName).attributes.empty)>//mandatory attributes
@@ -131,22 +147,49 @@ if(<builderName>.is<attribute.attributeName;format="cap">ValueSet()){
 >>
 
 createModelGetter(attribute,attach) ::= <<
-<if(attribute.list)>public List\<<attribute.type>\> get<attribute.attributeName;format="cap"><attach>(){
-<else>public <attribute.type> get<attribute.attributeName;format="cap"><attach>(){ 
+<if(attribute.list)>
+/**
+* Getter for the list of <attribute.type> attributes.
+*@see {@link #<attribute.attributeName>}
+*/
+public List\<<attribute.type>\> get<attribute.attributeName;format="cap"><attach>(){
+<else>
+/**
+* Getter for the <attribute.attributeName> attributes.
+*@see {@link #<attribute.attributeName>}
+*/
+public <attribute.type> get<attribute.attributeName;format="cap"><attach>(){ 
 <endif>
 	return <attribute.attributeName><attach>;
 }
-<if(attribute.optional)>public boolean is<attribute.attributeName;format="cap"><attach>Set(){ 
+<if(attribute.optional)>
+/**
+* Setter for the list of <attribute.type> attributes.
+*@see {@link #<attribute.attributeName>}
+@return true if <attribute.attributeName> was set
+*/
+public boolean is<attribute.attributeName;format="cap"><attach>Set(){ 
 	return <attribute.attributeName><attach>IsSet;
 }<endif>
 
 >>
 
 createModelSetter(attribute) ::= <<
-<if(attribute.list)>public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
+<if(attribute.list)>
+/**
+* Adds a <attribute.type> attribute to the <attribute.attributeName> list.
+*@param <attribute.attributeName> the attribute to add
+*@see {@link #<attribute.attributeName>}
+*/
+public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
 	this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
 }
-<endif>public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
+<endif>
+/**
+* Setter for the <attribute.attributeName> attribute.
+*@see {@link #<attribute.attributeName>}
+*/
+public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
 
@@ -242,15 +285,34 @@ for (<nestedAttributeRef.opposite.type> item : <modelClass.className;format="low
 >>
 
 createClassAttribute(classAttribute, attach) ::= <<
-
 <if(classAttribute.optional)>
+
+/**
+* Flag for {@link <classAttribute.attributeName><attach>}.
+* Is true if <classAttribute.attributeName><attach> was set.
+*/
+
 private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
 <if(classAttribute.list)>
+
+/**
+* List of {@link <classAttribute.attributeName><attach>}
+* for multiple <classAttribute.type> values.
+*/
 private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<else>
+
+/**
+* <classAttribute.attributeName> value of the model class.
+*/
 private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
 >>
 
 createScopeAttribute(classAttribute) ::= <<
+
+/**
+* Reference for the <classAttribute.attributeName;format="cap">Scope.
+* Used for object scoping inside the builder.
+*/
 private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
 
 >>
