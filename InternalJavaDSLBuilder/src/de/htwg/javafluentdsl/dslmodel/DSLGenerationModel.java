@@ -46,7 +46,7 @@ public class DSLGenerationModel {
 	 * Map of classes the model has.
 	 * Key of map is the ModelClass name and value the ModelClass object.
 	 */
-	public final Map<String,ModelClass> classes;
+	private final Map<String,ModelClass> classes;
 	
 	
 	/**
@@ -195,8 +195,11 @@ public class DSLGenerationModel {
 	 * @return the ModelClass object which is finally in the list {@link #classes}
 	 */
 	public ModelClass addModelClass(String className) {
-		if(!classes.containsKey(className))
+		if(!classes.containsKey(className)){
 			classes.put(className,new ModelClass(className,this));
+			if(classes.size() == 1)
+				classes.get(className).setRootModelClass(true);
+		}
 		return classes.get(className);
 	}
 	

@@ -7,19 +7,16 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.intern.forum.Forum;
 import de.htwg.generated.regex.intern.simpleforum.SimpleForum;
-import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimplePostBuilder;
-import de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleUserBuilder;
+import static de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleForumBuilder.*;
 import de.htwg.generated.regex.intern.user.User;
-import de.htwg.generated.regex.intern.user.User.AddressBuilder;
-import de.htwg.generated.regex.intern.user.User.CountryBuilder;
 import de.htwg.generated.regex.intern.user.User.UserBuilder;
+import static de.htwg.generated.regex.intern.user.User.UserBuilder.*;
 import de.htwg.generated.regex.intern.useropt.UserOPT;
-import de.htwg.generated.regex.intern.useropt.UserOPT.AddressOPTBuilder;
-import de.htwg.generated.regex.intern.useropt.UserOPT.CountryOPTBuilder;
-import de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder;
-import de.htwg.javafluentdsl.creator.regex.creation.Regex_CreationIntern;
+import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.*;
+import de.htwg.generated.regex.intern.forum.Forum;
+import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder;
+import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder.*;
 
 /**
  * Test For Using the Regex DSL.
@@ -58,9 +55,9 @@ public class Regex_UsingIntern {
 	public void testUserDSL() {
 		User user = UserBuilder.createUser().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
 				.address(
-					AddressBuilder.createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
+					createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
 						.country(
-								CountryBuilder.createCountry().name(countryName).uN_Member(unMemer).buildCountry()
+								createCountry().name(countryName).uN_Member(unMemer).buildCountry()
 						)
 					.buildAddress()
 				)
@@ -73,11 +70,11 @@ public class Regex_UsingIntern {
 	
 	@Test
 	public void testUserOPTOnlyDSL() throws MalformedURLException {
-		UserOPT user = UserOPTBuilder.createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		UserOPT user = createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
 				.address(
-					AddressOPTBuilder.createAddressOPT().optionalStreet(street).optionalHouseNumber(houseNumber).optionalZipCode(zipCode)
+					createAddressOPT().optionalStreet(street).optionalHouseNumber(houseNumber).optionalZipCode(zipCode)
 						.country(
-								CountryOPTBuilder.createCountryOPT().optionalName(countryName).optionalUnMember(unMemer).buildCountryOPT()
+								createCountryOPT().optionalName(countryName).optionalUnMember(unMemer).buildCountryOPT()
 						)
 					.buildAddressOPT()
 				)
@@ -94,8 +91,8 @@ public class Regex_UsingIntern {
 		SimpleForum simpleForum = SimpleForum.SimpleForumBuilder
 		.createSimpleForum().name(forumName).url(new URL(urlString))
 				.addUser(
-					SimpleUserBuilder.createSimpleUser().optionalAge(age).optionalFirstName(firstName).lastName(lastName).nickName(nickName).post(
-								SimplePostBuilder.createSimplePost().title(postTitle1).text(postText1).views(views).buildSimplePost()
+					createSimpleUser().optionalAge(age).optionalFirstName(firstName).lastName(lastName).nickName(nickName).post(
+								createSimplePost().title(postTitle1).text(postText1).views(views).buildSimplePost()
 					).buildSimpleUser()
 				)
 				.noUser()
@@ -106,13 +103,14 @@ public class Regex_UsingIntern {
 	
 	@Test
 	public void testForumDSL() throws MalformedURLException {
-		Forum.User replierWithoutPosts = Forum.UserBuilder.createUser().email(email).nickName("nick").rating(
-				Forum.RatingBuilder.createRating().optionalUpps(1).optionalDowns(0).buildRating()
+		// ForumBuilder needed because User DSLs createUser is used otherwise
+		Forum.User replierWithoutPosts = ForumBuilder.createUser().email(email).nickName("nick").rating(
+				createRating().optionalUpps(1).optionalDowns(0).buildRating()
 				).noPosts().buildUser();
-		Forum.User userWithPost = Forum.UserBuilder.createUser().email(otherEMail).nickName(nickName).rating(
-				Forum.RatingBuilder.createRating().optionalDowns(5).buildRating()
-				).addPosts(Forum.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
-						Forum.RatingBuilder.createRating().buildRating()
+		Forum.User userWithPost = ForumBuilder.createUser().email(otherEMail).nickName(nickName).rating(
+				createRating().optionalDowns(5).buildRating()
+				).addPosts(createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
+						createRating().buildRating()
 						)
 				 .buildPost()
 				).noPosts()
@@ -120,7 +118,7 @@ public class Regex_UsingIntern {
 		
 		Forum forum = Forum.ForumBuilder
 		.createForum().name(forumName).url(new URL(urlString))
-			.addSections(Forum.SectionBuilder.createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
+			.addSections(createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
 			.noSections()
 			.addUser(userWithPost)
 			.addUser(replierWithoutPosts)

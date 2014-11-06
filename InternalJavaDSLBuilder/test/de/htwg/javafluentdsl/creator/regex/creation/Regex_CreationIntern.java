@@ -40,4 +40,24 @@ public class Regex_CreationIntern {
 		RegexCreation.createDSL(RegexCreation.FORUM_DESCRIPTION, Generator.INTERN_MODEL_OPTION,FORUM_PACKAGE_DEST);
 	}
 	
+//	@Test
+//	public void testCreateUserDSL() {
+//		RegexCreation.createDSL(RegexCreation.USER_DESCRIPTION, Generator.INTERN_MODEL_NEW_OPTION,USER_PACKAGE_DEST +".NEW");
+//	}
+//	
+//	@Test
+//	public void testCreateUserOPTOnlyDSL() {
+//		RegexCreation.createDSL(RegexCreation.USER_OPT_ONLY_DESCRIPTION, Generator.INTERN_MODEL_NEW_OPTION,USER_OPT_DEST+".NEW");
+//	}
+//	
+//	@Test
+//	public void testCreateSimpleForumDSL() {
+//		RegexCreation.createDSL(RegexCreation.SIMPLE_FORUM_DESCRIPTION, Generator.INTERN_MODEL_NEW_OPTION,SIMPLE_FORUM_PACKAGE_DEST+".NEW");
+//	}
+//	
+//	@Test
+//	public void testCreateForumDSL() {
+//		RegexCreation.createDSL(RegexCreation.FORUM_DESCRIPTION, Generator.INTERN_MODEL_NEW_OPTION,FORUM_PACKAGE_DEST+".NEW");
+//	}
+	
 }

@@ -71,6 +71,11 @@ public class ModelClass {
 	 */
 	private String className;
 	/**
+	 * True if this ModelClass is the root Model Class for the Generation Model
+	 * 
+	 */
+	private boolean rootModelClass;
+	/**
 	 * Holds the mandatory, list and reference attributes of this ModelClass
 	 */
 	private List<ClassAttribute> attributes;
@@ -157,6 +162,21 @@ public class ModelClass {
 	 */
 	public void setClassName(String className) {
 		this.className = className;
+	}
+	
+	/**
+	 * Returns the value of {@link #rootModelClass}
+	 * @return true if this class is rootModelClass.
+	 */
+	public boolean isRootModelClass() {
+		return rootModelClass;
+	}
+
+	/**
+	 * Sets the value of {@link #rootModelClass}
+	 */
+	public void setRootModelClass(boolean rootModelClass) {
+		this.rootModelClass = rootModelClass;
 	}
 
 	/**

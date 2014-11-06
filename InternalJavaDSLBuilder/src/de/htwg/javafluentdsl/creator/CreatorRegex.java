@@ -101,8 +101,8 @@ public final class CreatorRegex implements ICreator{
 		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();
-		creator.retrieveImports();
 		creator.genModel.setAttributeOrder();
+		creator.retrieveImports();
 		return creator;
 	}
 	
@@ -235,6 +235,7 @@ public final class CreatorRegex implements ICreator{
 				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
 					this.genModel.setHasList(true);
+					modelClass.setHasList(true);
 				}
 				if(modelClass.getSpefificAttribute(attrName) != null)
 					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
@@ -352,8 +353,12 @@ public final class CreatorRegex implements ICreator{
 			this.importParameterMatcher = RegexUtil.IMPORT_PARAMETER_PATTERN.matcher(importsString);
 			while(this.importParameterMatcher.find()){
 				String toImport = importParameterMatcher.group();
-				if(!toImport.equals(""))
+				if(!toImport.equals("")){
 					this.genModel.addImport(toImport);
+					for (Map.Entry<String, ModelClass> entry : this.genModel.getClasses().entrySet()) {
+						entry.getValue().addImport(toImport);
+					}
+				}
 			}
 		}
 	}

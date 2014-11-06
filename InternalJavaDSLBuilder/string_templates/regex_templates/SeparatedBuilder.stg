@@ -76,7 +76,7 @@ public class <genModel.modelName>Builder{
 	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelGetter(modelAttribute,"Value")>}>
 	
 	<! Constructor for ClassBuilder !>
-	public <genModel.modelName;format="cap">Builder(){
+	private <genModel.modelName;format="cap">Builder(){
 		<genModel.classes.(genModel.modelName).attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 		this.<genModel.classes.(genModel.modelName).className;format="lower">BuildScope = new <genModel.classes.(genModel.modelName).className;format="cap">BuildScope();
 	}

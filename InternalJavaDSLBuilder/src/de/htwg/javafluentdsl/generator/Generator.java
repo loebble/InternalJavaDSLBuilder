@@ -30,6 +30,7 @@ public class Generator {
 	public static final String SINGLE_BUILDER_OPTION = "singleBuilder";
 	public static final String MULTIPLE_BUILDER_OPTION = "multiBuilder";
 	public static final String INTERN_MODEL_OPTION = "internBuilder";
+	public static final String INTERN_MODEL_NEW_OPTION = "internBuilderNew";
 	public static final String SEPARATED_MODEL_OPTION = "separatedBuilder";
 
 	/*
@@ -49,6 +50,7 @@ public class Generator {
 	private static final String MULTI_TEMPLATE_FILE = "MultipleBuilder.stg";
 	private static final String SINGLE_TEMPLATE_FILE = "SingleBuilder.stg";
 	private static final String INTERN_BUILDER_FILE = "InternBuilder.stg";
+	private static final String INTERN_BUILDER_FILE_NEW = "InternBuilder_New.stg";
 	private static final String SEPARATED_BUILDER_FILE = "SeparatedBuilder.stg";
 	private static final String WRONG_OPTION_EMF = "Not a valid templateOption given. "
 			+ "For a genmodel source only:"
@@ -90,6 +92,9 @@ public class Generator {
 			regexGenerateSeparateBuilderDSL(dslModel, targetPackage,
 					filesCreated);
 			break;
+		case INTERN_MODEL_NEW_OPTION:
+			regexGenerateModelInternDSL_NEW(dslModel, targetPackage,filesCreated);
+			break;
 		default:
 			throw new IllegalArgumentException(WRONG_OPTION_REGEX);
 		}
@@ -102,6 +107,28 @@ public class Generator {
 			System.out.println();
 		}
 
+	}
+
+	private static void regexGenerateModelInternDSL_NEW(
+			DSLGenerationModel dslModel, String targetPackage, List<String> filesCreated) {
+		for (Map.Entry<String, ModelClass> entry : dslModel.getClasses().entrySet()) {
+			String fileCreated =regexGenerateModelInternDSL_NEW_SingleFile(entry.getValue(),targetPackage);
+			if(fileCreated != null)
+				filesCreated.add(fileCreated);
+		}
+	}
+	
+	private static String regexGenerateModelInternDSL_NEW_SingleFile(ModelClass modelClass,
+			String targetPackage){
+				STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH
+						+ INTERN_BUILDER_FILE_NEW);
+				group.registerRenderer(String.class, new StringRenderer());
+				ST modelTemplate = group.getInstanceOf("ModelTemplate");
+				modelTemplate.add("packageName", targetPackage);
+				modelTemplate.add("modelClass", modelClass);
+				String modelCode = modelTemplate.render();
+				return Generator.writeToJavaFile(targetPackage,
+						modelClass.getClassName(), modelCode);
 	}
 
 	/**
@@ -155,7 +182,7 @@ public class Generator {
 			DSLGenerationModel dslModel, String targetPackage) {
 		STGroup group = getStringGroup(REGEX_TEMPLATES_DIR_PATH
 				+ INTERN_BUILDER_FILE);
-		ST simpleBT = group.getInstanceOf("BuilderTemplate");
+		ST simpleBT = group.getInstanceOf("ModelTemplate");
 		simpleBT.add("packageName", targetPackage);
 		simpleBT.add("genModel", dslModel);
 		return writeToJavaFile(targetPackage, dslModel.getModelName(),
@@ -257,7 +284,7 @@ public class Generator {
 	private static void emfGenerateMultipleBuilderDSL(
 			DSLGenerationModel dslModel, String targetPackage,
 			List<String> filesCreated) {
-		for (Map.Entry<String, ModelClass> classEntry : dslModel.classes
+		for (Map.Entry<String, ModelClass> classEntry : dslModel.getClasses()
 				.entrySet()) {
 			ModelClass modelClass = classEntry.getValue();
 			String filePath = emfGenerateMultiBuilderFile(modelClass,
