@@ -53,7 +53,7 @@ public class Regex_UsingIntern {
 
 	@Test
 	public void testUserDSL() {
-		User user = UserBuilder.createUser().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		User user = UserBuilder.createUser().firstName(firstName).optAge(age).lastName(lastName).nickName(nickName)
 				.address(
 					createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
 						.country(
@@ -70,11 +70,11 @@ public class Regex_UsingIntern {
 	
 	@Test
 	public void testUserOPTOnlyDSL() throws MalformedURLException {
-		UserOPT user = createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		UserOPT user = createUserOPT().firstName(firstName).optAge(age).lastName(lastName).nickName(nickName)
 				.address(
-					createAddressOPT().optionalStreet(street).optionalHouseNumber(houseNumber).optionalZipCode(zipCode)
+					createAddressOPT().optStreet(street).optHouseNumber(houseNumber).optZipCode(zipCode)
 						.country(
-								createCountryOPT().optionalName(countryName).optionalUnMember(unMemer).buildCountryOPT()
+								createCountryOPT().optName(countryName).optUnMember(unMemer).buildCountryOPT()
 						)
 					.buildAddressOPT()
 				)
@@ -91,7 +91,7 @@ public class Regex_UsingIntern {
 		SimpleForum simpleForum = SimpleForum.SimpleForumBuilder
 		.createSimpleForum().name(forumName).url(new URL(urlString))
 				.addUser(
-					createSimpleUser().optionalAge(age).optionalFirstName(firstName).lastName(lastName).nickName(nickName).post(
+					createSimpleUser().optAge(age).optFirstName(firstName).lastName(lastName).nickName(nickName).post(
 								createSimplePost().title(postTitle1).text(postText1).views(views).buildSimplePost()
 					).buildSimpleUser()
 				)
@@ -105,10 +105,10 @@ public class Regex_UsingIntern {
 	public void testForumDSL() throws MalformedURLException {
 		// ForumBuilder needed because User DSLs createUser is used otherwise
 		Forum.User replierWithoutPosts = ForumBuilder.createUser().email(email).nickName("nick").rating(
-				createRating().optionalUpps(1).optionalDowns(0).buildRating()
+				createRating().optUpps(1).optDowns(0).buildRating()
 				).noPosts().buildUser();
 		Forum.User userWithPost = ForumBuilder.createUser().email(otherEMail).nickName(nickName).rating(
-				createRating().optionalDowns(5).buildRating()
+				createRating().optDowns(5).buildRating()
 				).addPosts(createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
 						createRating().buildRating()
 						)

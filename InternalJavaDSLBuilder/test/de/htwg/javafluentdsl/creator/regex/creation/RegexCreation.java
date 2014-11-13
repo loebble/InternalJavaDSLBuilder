@@ -42,11 +42,36 @@ public class RegexCreation {
 			+ ".imp={java.net.URL}"
 			;
 	
+	public final static String LIST_PRIM_DESCRIPTION =
+			".class=SomeClass{.LA=booleanList:Boolean,.LA=charList:Character,.LA=byteList:Byte,"
+				+ ".LA=shortList:Short,.LA=intList:Integer,.LA=longList:Long,.LA=floatList:Float,.LA=doubleList:Double}"
+			;
+	
+	public final static String MA_SIMPLE_FORUM_DESCRIPTION =
+			".class=Forum{.A=name:String, .A=url:URL , .A=user:User}"
+			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int}"
+			+ ".imp={java.net.URL}"
+			;
+	
+	public final static String MA_BIREF_FORUM_DESCRIPTION =
+			".class=Forum{.A=name:String, .A=url:URL , .LA=user:User}"
+			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=email:String, .LA=post:Post}"
+			+ ".class=Post{.A=title:String, .A=text:String, .LA=replier:User, .OP=creator:User->post}"
+			+ ".imp={java.net.URL}"
+			;
+	
+	public final static String MA_OPT_FORUM_DESCRIPTION =
+			".class=Forum{.A=name:String, .A=url:URL , .LA=user:User}"
+			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String, .LA=post:Post}"
+			+ ".class=Post{.A=title:String, .A=text:String, .LA=replier:User, .OP=creator:User->post}"
+			+ ".imp={java.net.URL}"
+			;
+	
 	public final static String FORUM_DESCRIPTION =
 			".class=Forum{.A=name:String, .A=url:URL, .LA=sections:Section, .LA=user:User}"
 			+ ".class=Section{.A=name:String, .LA=moderators:User}"
 			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String,.A=nickName:String, .A=rating:Rating, .LA=posts:Post, .OP=moderatorOfSection:Section->moderators}"
-			+ ".class=Post{.A=title:String, .A=text:String, .OA=views:int, .LA=repliers:User, .A=rating:Rating, .OP=creator:User->posts}"
+			+ ".class=Post{.A=title:String, .A=text:String, .OA=views:int, .LA=repliers:User, .OA=rating:Rating, .OP=creator:User->posts}"
 			+ ".class=Rating{.OA=upps:int, .OA=downs:int, .OP=forUser:User->rating, .OP=forPost:Post->rating}"
 			+ ".imp={java.net.URL}"
 			;

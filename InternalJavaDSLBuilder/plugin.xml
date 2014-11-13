@@ -53,4 +53,12 @@
             genModel="emfmodel/OptOnly.genmodel"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated SimpleTypes -->
+      <package
+            uri="SimpleTypesURI"
+            class="de.htwg.generated.emf.model.SimpleTypes.SimpleTypesPackage"
+            genModel="emfmodel/SimpleTypes.genmodel"/>
+   </extension>
+
 </plugin>

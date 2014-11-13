@@ -1,5 +1,7 @@
 package de.htwg.javafluentdsl.creator.regex.creation;
 
+import static org.junit.Assert.assertTrue;
+
 import org.junit.Test;
 
 import de.htwg.javafluentdsl.creator.CreatorRegex;
@@ -46,6 +48,30 @@ public class RegexCreation_WrongDescription {
 			+ ".imp={java.net.URL}"
 			;
 	
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Boolean =
+			".class=SomeClass{.LA=list:boolean}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Byte =
+			".class=SomeClass{.LA=list:byte}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Short =
+			".class=SomeClass{.LA=list:short}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Int =
+			".class=SomeClass{.LA=list:int}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Long =
+			".class=SomeClass{.LA=list:long}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Char =
+			".class=SomeClass{.LA=list:char}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Float =
+			".class=SomeClass{.LA=list:float}"
+			;
+	public final static String LIST_PRIM_DESCRIPTION_Wrong_Double =
+			".class=SomeClass{.LA=list:double}"
+			;
 	
 	
 	@Test(expected = IllegalArgumentException.class)
@@ -104,6 +130,70 @@ public class RegexCreation_WrongDescription {
 			CreatorRegex.getInstance(FORUM_OP_WRONG_REFERENCE_TYPE);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
+			throw ex;
+		}
+	}
+	
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_bool() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Boolean);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_byte() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Byte);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_short() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Short);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_int() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Int);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_long() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Long);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_float() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Float);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
+			throw ex;
+		}
+	}
+	@Test(expected = IllegalArgumentException.class)
+	public void testOP_WrongListPrim_double() {
+		try{
+			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Double);
+		}catch(IllegalArgumentException ex){
+			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
 		}
 	}

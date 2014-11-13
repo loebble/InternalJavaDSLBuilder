@@ -53,6 +53,11 @@ public final class ClassAttribute{
 	private boolean isReference = false;
 	
 	/**
+	 * True if this attribute has a primitve type
+	 */
+	private boolean isPrimitive = false;
+	
+	/**
 	 * True if this attribute is Referenced by a opposite attribute
 	 */
 	private boolean isReferencedByAttribute = false;
@@ -97,6 +102,10 @@ public final class ClassAttribute{
 	 */
 	public ClassAttribute(String name, String type, String className){
 		this.attributeName = name;
+		for (PrimitiveType primType : PrimitiveType.values()) {
+			if(type.equals(primType.getKeyword()))
+				this.isPrimitive = true;
+		}
 		this.type = type;
 		this.className = className;
 		this.attributeFullName = className + name;
@@ -308,6 +317,14 @@ public final class ClassAttribute{
 	 */
 	public void setCreatorOfOpposite(boolean isCreatorOfOpposite) {
 		this.isCreatorOfOpposite = isCreatorOfOpposite;
+	}
+
+	public boolean isPrimitive() {
+		return isPrimitive;
+	}
+
+	public void setPrimitive(boolean isPrimitive) {
+		this.isPrimitive = isPrimitive;
 	}
 	
 }

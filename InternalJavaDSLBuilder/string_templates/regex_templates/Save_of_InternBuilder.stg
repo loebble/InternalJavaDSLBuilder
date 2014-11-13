@@ -1,6 +1,6 @@
-ModelTemplate(packageName, genModel) ::= <<
+BuilderTemplate(packageName, genModel) ::= <<
 <! Template for DSLGenerationModel DSL built with a CreatorRegex.
-Creates the whole model along with its classes and their intern Builder class for instantiation!>
+Creates the root model along with its intern Builder class for instantiation!>
 package <packageName>;
 <if(!genModel.imports.empty)>// user defined imports<endif>
 <genModel.imports:{imp| import <imp>;<\n>}>
@@ -9,102 +9,42 @@ package <packageName>;
 import java.util.List;
 import java.util.ArrayList;
 <endif>
-<!Create the root model class!>
+
+<! the root model class !>
 /**
-* <genModel.modelName> Model Class.
-* This Class is the root model.
-* To create objects use the Builder defined in 
-* {@link <genModel.modelName>Builder#create<genModel.modelName>}
+* <genModel.modelName> Model Class with internal Builder for instantiation.
+* To create objects use the static entry point method {@link <genModel.modelName>Builder#create<genModel.modelName>}
 *
 */
 public class <genModel.modelName>{
-<createModelClass(genModel.classes.(first(genModel.classes.keys)))>
-<! Create the the other model classes !>
-<rest(genModel.classes.keys):{className|<createModelClass(genModel.classes.(className))>}>
+    //mandatory, reference and list attributes
+	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createClassAttribute(modelAttribute,"")>}>
+	//simple optioanl attributes
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createClassAttribute(modelAttribute,"")>}>
+	
+	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelGetter(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelGetter(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).attributes:{modelAttribute|<createModelSetter(modelAttribute)>}>
+	<genModel.classes.(genModel.modelName).simpleOptAttr:{modelAttribute|<createModelSetter(modelAttribute)>}>
+	
+	/**
+	* Private constructor for the model class <genModel.modelName>.
+	* Expects an {@link #<genModel.modelName>Builder} Instance with values set.
+	* @param builder The builder created by the dsl starting from entry point
+	* {@link <genModel.modelName>Builder#create<genModel.modelName>}
+	* @return new <genModel.modelName> instance with values from the the <genModel.modelName>Builder.
+	*/
+	private <genModel.modelName>(final <genModel.modelName>Builder builder){
+		<genModel.classes.(genModel.modelName).attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
+		<genModel.classes.(genModel.modelName).simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
+	}
+	<! for every other class than the root class a new ModelClass has to be generated !>
+	<rest(genModel.classes.keys):{modelName|<createModelClass(modelName,genModel.classes.(modelName),genModel.modelName)>}>
+	<! one builder for every generated Class !>
+	<genModel.classes.keys:{className|<createClassBuilder(className, genModel.classes.(className), genModel.classes, genModel)>}>
+
 }
 
->>
-
-createModelClass(modelClass) ::= <<
-<! For the root model class the class definition is given !>
-<if(!modelClass.rootModelClass)>
-/**
-* <modelClass.className> Model Class which is part of the <modelClass.className> Model.
-* For instantiation use the static entry point method {@link <modelClass.className>Builder#create<modelClass.className>()}
-*
-*/
-public static class <modelClass.className>{
-<endif>
-    <modelClass.attributes:{attribute|<createClassAttribute(attribute,"")>}>
-    <modelClass.simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
-    
-    <! constructor !>
-    /**
-    * Private constructor for the model class <modelClass.className>.
-    * Expects an {@link #<modelClass.className>Builder} Instance with values set.
-    * @param builder The builder created by the dsl starting from entry point
-    * {@link <modelClass.className>Builder#create<modelClass.className>}
-    * @return new <modelClass.className> instance with values from the the <modelClass.className>Builder.
-    */
-    private <modelClass.className> (<modelClass.className>Builder builder){
-        <modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
-        <modelClass.simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
-    }
-    
-    <modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
-    <modelClass.simpleOptAttr:{attribute|<createModelGetter(attribute)>}>
-    <modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
-    <modelClass.simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
-    
-    <createClassBuilder(modelClass)>
-    
-<if(!modelClass.rootModelClass)>
-}
-<endif>
-
->>
-
-createClassBuilder(modelClass) ::= <<
-
-/**
-* Builder class for {@link <modelClass.className>} instances.
-*
-*/
-public static final class <modelClass.className>Builder{
-    <if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
-    <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
-    <if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
-    <modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
-    // scope references
-    <! simpleOptionalsOnly classes dont have build scopes !>
-    <if(!modelClass.simpleOptionalsOnly)>private final <modelClass.className>BuildScope <modelClass.className;format="lower">BuildScope; <endif>
-    <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
-    <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
-    <! Constructor for ClassBuilder !>
-    
-    /**
-    * Private constructor for builder class of <modelClass.className>.
-    * Only instantiated by entry point of this builder class.
-    * @return new <modelClass.className>Builder instance with
-    * scope attributes instantiated.
-    */
-    private <modelClass.className>Builder(){
-        <if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
-        <else>
-// building Scope
-this.<modelClass.className;format="lower">BuildScope = new <modelClass.className>BuildScope();
-        <endif>
-        <if(!modelClass.attributes.empty)>// attribute Scopes <endif>
-        <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
-    }
-    
-    <if(modelClass.rootModelClass)><generateAllEntryPointMethods(modelClass)><endif>
-    <! only create ScopeClass and attribute method if it isnt a opposite attribute !>
-    <modelClass.attributes:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute,modelClass.model)><endif>}>
-    <if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
-    <else><buildScopeClass(modelClass)>
-    <endif>
-}
 >>
 
 createModelAttribute(classAttribute) ::= <<
@@ -112,6 +52,38 @@ createModelAttribute(classAttribute) ::= <<
 private <classAttribute.attributeName>IsSet;<endif>
 <if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName>;<else>
 private <classAttribute.type> <classAttribute.attributeName>;<endif>
+>>
+
+createModelClass(className, modelClass,modelName) ::= <<
+
+/**
+* <className> Model Class which is part of the <modelName> Model.
+* For instantiation use the static entry point method {@link <className>Builder#create<className>()}
+*
+*/
+public static class <className>{
+	<modelClass.attributes:{attribute|<createClassAttribute(attribute,"")>}>
+	<modelClass.simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
+	
+	<! constructor !>
+	/**
+    * Private constructor for the model class <className>.
+    * Expects an {@link #<className>Builder} Instance with values set.
+    * @param builder The builder created by the dsl starting from entry point
+    * {@link <className>Builder#create<className>}
+    * @return new <className> instance with values from the the <className>Builder.
+    */
+	private <className>(<className;format="cap">Builder builder){
+		<modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
+		<modelClass.simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
+	}
+	
+	<modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
+	<modelClass.simpleOptAttr:{attribute|<createModelGetter(attribute)>}>
+	<modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
+	<modelClass.simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
+}
+
 >>
 
 
@@ -146,8 +118,9 @@ public <attribute.type> get<attribute.attributeName;format="cap">(){
 }
 <if(attribute.optional)>
 /**
-* Flag for {@link <attribute.attributeName>}.
-* @return true if <attribute.attributeName> was set
+* Setter for the list of <attribute.type> attributes.
+*@see {@link #<attribute.attributeName>}
+@return true if <attribute.attributeName> was set
 */
 public boolean is<attribute.attributeName;format="cap">Set(){ 
 	return <attribute.attributeName>IsSet;
@@ -162,7 +135,7 @@ createModelSetter(attribute) ::= <<
 *@param <attribute.attributeName> the attribute to add
 *@see {@link #<attribute.attributeName>}
 */
-private void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
+public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
 	this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
 }
 <endif>
@@ -170,43 +143,78 @@ private void add<attribute.attributeName;format="cap">(<attribute.type> <attribu
 * Setter for the <attribute.attributeName> attribute.
 *@see {@link #<attribute.attributeName>}
 */
-private void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
+public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
 
 >>
 
-generateAllEntryPointMethods(modelClass) ::= <<
-<modelClass.model.classes.keys:{className|<generateEntryPointMethod(modelClass.model.classes.(className))>}>
->>
-
 generateEntryPointMethod(modelClass) ::= <<
 
 /**
-* Entrypoint of the <modelClass.className;format="cap">Builder.
-<if(modelClass.rootModelClass)>* Since the <modelClass.className> is the root class, this is the entrypoint of the DSL.<endif>
+* Entrypoint of the <modelClass.className;format="cap">Builder. 
 * Use static import in your code for context free DSL using.
 *@return the first scope class of the <modelClass.className>Builder
 */
 <if(!modelClass.simpleOptionalsOnly)>
-public static <modelClass.className>.<modelClass.className>Builder.<first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
-	return new <modelClass.className>.<modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
+public static <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }
 <else>
 
 /**
-* Entrypoint of the <modelClass.className;format="cap">Builder.
-<if(modelClass.rootModelClass)>* Since the <modelClass.className> is the root class, this is the entrypoint of the DSL.<endif> 
+* Entrypoint of the <modelClass.className;format="cap">Builder. 
 * Use static import in your code for context free DSL using.
 *@return the only Scope Class of the <modelClass.className>Builder
 */
-public static <modelClass.className>.<modelClass.className>Builder.SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
-	return new <modelClass.className>.<modelClass.className>Builder().simpleOptionalsOnlyScope;
+public static SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>Builder().simpleOptionalsOnlyScope;
 }
 <endif>
 >>
 
+createClassBuilder(className,modelClass,allClasses, genModel) ::= <<
 
+/**
+* Builder class for {@link <className>} instances.
+*
+*/
+public static final class <className>Builder{
+	<if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
+	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
+	<if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
+	<modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
+	// scope references
+	<! simpleOptionalsOnly classes dont have build scopes !>
+	<if(!modelClass.simpleOptionalsOnly)>private final <className;format="cap">BuildScope <className;format="lower">BuildScope; <endif>
+	<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
+	<if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
+	<! Constructor for ClassBuilder !>
+	
+	/**
+    * Private constructor for builder class of <className;format="cap">.
+    * Only instantiated by entry point of this builder class.
+    * @return new <className;format="cap">Builder instance with
+    * scope attributes instantiated.
+    */
+	private <className;format="cap">Builder(){
+		<if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
+		<else>
+// building Scope
+this.<className;format="lower">BuildScope = new <className;format="cap">BuildScope();
+		<endif>
+		<if(!modelClass.attributes.empty)>// attribute Scopes <endif>
+		<modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
+	}
+	
+	<generateEntryPointMethod(modelClass)>
+	<! only create ScopeClass and attribute method if it isnt a opposite attribute !>
+	<modelClass.attributes:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute,genModel)><endif>}>
+	<if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
+	<else><buildScopeClass(modelClass)>
+	<endif>
+}
+>>
 
 buildScopeClass(modelClass) ::= <<
 
@@ -360,7 +368,7 @@ createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
 /**
 * Setter method for the optional attribute <optionalAttribute.attributeName>
 */
-public <scopeName;format="cap">Scope opt<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
+public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
 	return <className;format="cap">Builder.this.<scopeName>Scope;

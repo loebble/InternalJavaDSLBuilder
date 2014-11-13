@@ -28,6 +28,7 @@ public final class CreatorRegex implements ICreator{
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Defined opposite attributes other end was not found. ";
 	private static final String OPPOSITE_ATTRIBUTE_IN_SAME_CLASS = "The other end of a opposite attribute (its opposite) can "
 			+ "not be in the same class.";
+	private static final String PRIMITVES_NOT_ALLOWED_FOR_LIST = "For a List the type cannot be a primitive one.";
 	
 	//Matcher used for regular expression matching
 	/**
@@ -61,7 +62,6 @@ public final class CreatorRegex implements ICreator{
 	 * attributes(as well as their order) and imports defined by the language description.
 	 */
 	private DSLGenerationModel genModel;
-	private String modelDescr;
 	private List<String> imports;
 	private Map<String,String> definedClasses= new LinkedHashMap<>();
 	
@@ -97,7 +97,6 @@ public final class CreatorRegex implements ICreator{
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
 		CreatorRegex creator = new CreatorRegex();
-		creator.modelDescr = modelDescription;
 		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();
@@ -234,6 +233,11 @@ public final class CreatorRegex implements ICreator{
 				currentAttr.setAttributeKind(kind);
 				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
+					if(currentAttr.isPrimitive())
+						//TODO If Time Left implement Auto Boxing etc in Template
+						throw new IllegalArgumentException(PRIMITVES_NOT_ALLOWED_FOR_LIST
+								+ " Attribute name: "+currentAttr.getAttributeName()
+								+ " In class: "+currentAttr.getClassName());
 					this.genModel.setHasList(true);
 					modelClass.setHasList(true);
 				}
@@ -345,7 +349,7 @@ public final class CreatorRegex implements ICreator{
 	 * Retrieves the defined import Classes from the language description
 	 * and adds them to the import list of the DSGenerationModel {@link #genModel}
 	 */
-	public void retrieveImports(){
+	private void retrieveImports(){
 		if(this.imports == null && this.importMatcher.find()){
 			imports = new ArrayList<>();
 			String importsString = importMatcher.group().substring(RegexUtil.IMPORT_START.length());
@@ -362,14 +366,4 @@ public final class CreatorRegex implements ICreator{
 			}
 		}
 	}
-
-	/**
-	 * Returns the model description of this Creator
-	 * which was given when the creator was initialized
-	 * @return description as String
-	 */
-	public String getModelDescr() {
-		return modelDescr;
-	}
-
 }

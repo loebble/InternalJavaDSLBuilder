@@ -18,7 +18,10 @@ Export-Package: de.htwg.generated.emf.model.SimpleForum,
  de.htwg.generated.emf.model.TestModel.util,
  de.htwg.generated.emf.model.OptOnly,
  de.htwg.generated.emf.model.OptOnly.impl,
- de.htwg.generated.emf.model.OptOnly.util
+ de.htwg.generated.emf.model.OptOnly.util,
+ de.htwg.generated.emf.model.SimpleTypes,
+ de.htwg.generated.emf.model.SimpleTypes.impl,
+ de.htwg.generated.emf.model.SimpleTypes.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy
