@@ -10,7 +10,6 @@ import org.junit.Test;
 import de.htwg.generated.regex.intern.forum.NEW.*;
 import static de.htwg.generated.regex.intern.forum.NEW.User.UserBuilder.*;
 import static de.htwg.generated.regex.intern.forum.NEW.Forum.ForumBuilder.*;
-import static de.htwg.generated.regex.intern.forum.NEW.Post.PostBuilder.*;
 import static de.htwg.generated.regex.intern.forum.NEW.Rating.RatingBuilder.*;
 import static de.htwg.generated.regex.intern.forum.NEW.Section.SectionBuilder.*;
 import de.htwg.generated.regex.intern.simpleforum.NEW.SimpleForum;

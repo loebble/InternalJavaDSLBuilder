@@ -9,3 +9,10 @@ Package SimpleTypes <SimpleTypesURI>
 
   Class SimpleTypes
     Attribute simpleIntList : EInt<<0..*>>
+    Attribute someEnum : TheEnum<<1..1>>
+    Attribute normalIntAttr : EInt
+
+  Enum TheEnum
+    Literal FIRST = 0
+    Literal MIDDLE = 0
+    Literal LAST = 0

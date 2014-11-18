@@ -359,8 +359,8 @@ public final class CreatorRegex implements ICreator{
 				String toImport = importParameterMatcher.group();
 				if(!toImport.equals("")){
 					this.genModel.addImport(toImport);
-					for (Map.Entry<String, ModelClass> entry : this.genModel.getClasses().entrySet()) {
-						entry.getValue().addImport(toImport);
+					for (ModelClass modelClass : this.genModel.getClasses()) {
+						modelClass.addImport(toImport);
 					}
 				}
 			}

@@ -1,9 +1,7 @@
 package de.htwg.javafluentdsl.dslmodel;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Model for the generation of a internal Java DSL.
@@ -19,7 +17,7 @@ public class DSLGenerationModel {
 	 */
 	public DSLGenerationModel(){
 		imports = new ArrayList<String>();
-		classes = new LinkedHashMap<String,ModelClass>();
+		classes = new ArrayList<ModelClass>();
 	}
 	
 	/**
@@ -43,10 +41,9 @@ public class DSLGenerationModel {
 	private String factoryName;
 	
 	/**
-	 * Map of classes the model has.
-	 * Key of map is the ModelClass name and value the ModelClass object.
+	 * List of classes the model has described.
 	 */
-	private final Map<String,ModelClass> classes;
+	private final List<ModelClass> classes;
 	
 	
 	/**
@@ -55,8 +52,7 @@ public class DSLGenerationModel {
 	 * @see #setAttributeOrderInClass(ModelClass) setAttributeOrderInClass(ModelClass) - for order algorithm
 	 */
 	public void setAttributeOrder() {
-		for (Map.Entry<String,ModelClass> classEntry : this.getClasses().entrySet()) {
-			ModelClass modelClass = classEntry.getValue();
+		for (ModelClass modelClass : classes) {
 			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
 			handleOptionalAttributes(optionalAttrs, modelClass);
 		}
@@ -140,13 +136,14 @@ public class DSLGenerationModel {
 	
 	/**
 	 * Searches the whole DSLGenerationModel for the a ClassAttribute
-	 * @param className the name of the Class from
+	 * @param className the name of the class
+	 * @param attrName name of the attribute
 	 * @return the found ClassAttribute in the DSLGenerationModel or null if none has been found
 	 */
 	public ClassAttribute findAttribute(String className, String attrName){
-		ModelClass modelClass= this.classes.get(className);
-		if(modelClass != null){
-			ClassAttribute foundAttr = modelClass.getSpefificAttributeByFullName(className+attrName);
+		ModelClass existingModelClass = getModelClass(className);
+		if(existingModelClass != null){
+			ClassAttribute foundAttr = existingModelClass.getSpefificAttribute(attrName);
 			if(foundAttr != null){
 				return foundAttr;
 			}
@@ -192,32 +189,38 @@ public class DSLGenerationModel {
 	 * If a ModelClass with the same name already was in the list {@link #classes}
 	 * it will not be added or replaced.
 	 * @param className the ModelClass obj to be added
-	 * @return the ModelClass object which is finally in the list {@link #classes}
+	 * @return the ModelClass object which is now in the list {@link #classes}
 	 */
 	public ModelClass addModelClass(String className) {
-		if(!classes.containsKey(className)){
-			classes.put(className,new ModelClass(className,this));
-			if(classes.size() == 1)
-				classes.get(className).setRootModelClass(true);
-		}
-		return classes.get(className);
+		ModelClass existingModelClass = getModelClass(className);
+		if(existingModelClass != null)
+			return existingModelClass;
+		ModelClass newModelClass = new ModelClass(className,this);
+		//First Class is always the rootclass
+		if(classes.isEmpty())
+			newModelClass.setRootModelClass(true);
+		classes.add(newModelClass);
+		return newModelClass;
 	}
 	
 	/**
 	 * Retrieves a ModelClass object from the list {@link #classes} by the given className.
-	 * Can throw an Exception if a className which isnt in the list 
 	 * @param className the name of the ModelClass
-	 * @return
+	 * @return ModelClass the found ModelClass Object or null if none found
 	 */
 	public ModelClass getModelClass(String className){
-		return classes.get(className);
+		for (ModelClass modelClass : classes) {
+			if(modelClass.getClassName().equals(className))
+				return modelClass;
+		}
+		return null;
 	}
 	
 	/**
-	 * Returns the Map {@link #classes} which has all defined classes of this Model.
+	 * Returns the List {@link #classes} which has all defined classes of this Model.
 	 * Classes can be added {@link #addModelClass(String)}
 	 */
-	public Map<String,ModelClass> getClasses() {
+	public List<ModelClass> getClasses() {
 		return classes;
 	}
 	
@@ -267,8 +270,7 @@ public class DSLGenerationModel {
 			sb.append(importString + "; ");
 		}
 		sb.append("\n"+"CLASSES: ");
-		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
-			ModelClass modelClass = (ModelClass) entry.getValue();
+		for (ModelClass modelClass : classes) {
 			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
 			sb.append("Imports: ");
 			for (String imp : modelClass.getImports()) {
@@ -305,8 +307,7 @@ public class DSLGenerationModel {
 	 */
 	public String printOrder(){
 		StringBuffer sb = new StringBuffer();
-		for (Map.Entry<String, ModelClass> entry : this.classes.entrySet()) {
-			ModelClass modelClass = (ModelClass) entry.getValue();
+		for (ModelClass modelClass : classes) {
 			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
 			int i = 0;
 			for (ClassAttribute attr : modelClass.getAttributes()) {

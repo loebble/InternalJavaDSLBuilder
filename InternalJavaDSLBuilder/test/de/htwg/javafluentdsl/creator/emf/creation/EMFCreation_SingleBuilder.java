@@ -14,6 +14,7 @@ public class EMFCreation_SingleBuilder {
 	public final static String TESTMODEL_DEST = PACKAGE_DEST+".testmodel";
 	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
 	public final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
+	public final static String ENUM_DEST = PACKAGE_DEST+".enumtest";
 	
 	
 	@Test
@@ -42,5 +43,11 @@ public class EMFCreation_SingleBuilder {
 		String genModelPath = EMFGenModelPath + "OptOnly.genmodel";
 		new StartEMF().startDSLGenerationProcess(genModelPath, Generator.SINGLE_BUILDER_OPTION, OPTONLY_DEST+".singleBuilder");
 		EMFCreation.fileExists(OPTONLY_DEST+".singleBuilder.OptOnlyBuilder","java");
+	}
+	@Test
+	public void Enum_SingleBuilderTest(){
+		String genModelPath = EMFGenModelPath + "SimpleTypes.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, Generator.SINGLE_BUILDER_OPTION, ENUM_DEST+".singleBuilder");
+		EMFCreation.fileExists(ENUM_DEST+".singleBuilder.SimpleTypesBuilder","java");
 	}
 }

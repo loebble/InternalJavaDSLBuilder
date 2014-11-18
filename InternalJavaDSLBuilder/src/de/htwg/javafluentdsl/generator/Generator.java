@@ -6,7 +6,6 @@ import java.io.PrintWriter;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import org.stringtemplate.v4.ST;
 import org.stringtemplate.v4.STGroup;
@@ -111,8 +110,8 @@ public class Generator {
 
 	private static void regexGenerateModelInternDSL_NEW(
 			DSLGenerationModel dslModel, String targetPackage, List<String> filesCreated) {
-		for (Map.Entry<String, ModelClass> entry : dslModel.getClasses().entrySet()) {
-			String fileCreated =regexGenerateModelInternDSL_NEW_SingleFile(entry.getValue(),targetPackage);
+		for (ModelClass modelClass : dslModel.getClasses()) {
+			String fileCreated =regexGenerateModelInternDSL_NEW_SingleFile(modelClass,targetPackage);
 			if(fileCreated != null)
 				filesCreated.add(fileCreated);
 		}
@@ -284,9 +283,7 @@ public class Generator {
 	private static void emfGenerateMultipleBuilderDSL(
 			DSLGenerationModel dslModel, String targetPackage,
 			List<String> filesCreated) {
-		for (Map.Entry<String, ModelClass> classEntry : dslModel.getClasses()
-				.entrySet()) {
-			ModelClass modelClass = classEntry.getValue();
+		for (ModelClass modelClass : dslModel.getClasses()) {
 			String filePath = emfGenerateMultiBuilderFile(modelClass,
 					targetPackage);
 			if (filePath != null)

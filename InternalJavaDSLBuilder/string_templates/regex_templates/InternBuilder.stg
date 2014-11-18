@@ -18,9 +18,9 @@ import java.util.ArrayList;
 *
 */
 public class <genModel.modelName>{
-<createModelClass(genModel.classes.(first(genModel.classes.keys)))>
+<createModelClass(first(genModel.classes))>
 <! Create the the other model classes !>
-<rest(genModel.classes.keys):{className|<createModelClass(genModel.classes.(className))>}>
+<rest(genModel.classes):{modelClass|<createModelClass(modelClass)>}>
 }
 
 >>
@@ -48,9 +48,8 @@ public static class <modelClass.className>{
     */
     private <modelClass.className> (<modelClass.className>Builder builder){
         <modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
-        <modelClass.simpleOptAttr:{attribute|<transferOptValues(attribute,"builder")>}>
+        <modelClass.simpleOptAttr:{attribute|<transferValues(attribute,"builder")>}>
     }
-    
     <modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
     <modelClass.simpleOptAttr:{attribute|<createModelGetter(attribute)>}>
     <modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
@@ -114,17 +113,22 @@ private <classAttribute.attributeName>IsSet;<endif>
 private <classAttribute.type> <classAttribute.attributeName>;<endif>
 >>
 
-
-
 transferValues(attribute, builderName) ::= <<
-<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet)<endif>
-this.set<attribute.attributeName;format="cap">(<builderName>.<attribute.attributeName>Value);
+<if(attribute.optional)>if(<builderName>.<attribute.attributeName>ValueIsSet){
+	this.<attribute.attributeName>IsSet = true;
+    <doTransfer(attribute, builderName)>
+}<else><doTransfer(attribute, builderName)>
+<endif>
 >>
 
-transferOptValues(attribute, builderName) ::= <<
-if(<builderName>.<attribute.attributeName>ValueIsSet){
-	this.<attribute.attributeName>IsSet = true;
-	this.set<attribute.attributeName;format="cap">(<builderName>.<attribute.attributeName>Value);
+doTransfer(attribute, builderName) ::= <<
+<if(attribute.list)><transferListItems(attribute,builderName)><else
+>this.set<attribute.attributeName;format="cap">(<builderName>.<attribute.attributeName>Value);<endif>
+>>
+
+transferListItems(listAttribute,builderName) ::= <<
+for (<attribute.type> item : <builderName>.<attribute.attributeName>Value) {
+    this.add<attribute.attributeName;format="cap">(item);
 }
 >>
 
@@ -156,7 +160,7 @@ public boolean is<attribute.attributeName;format="cap">Set(){
 >>
 
 createModelSetter(attribute) ::= <<
-<if(attribute.list)>
+<if(attribute.list)> <! Only create add method if list !>
 /**
 * Adds a <attribute.type> attribute to the <attribute.attributeName> list.
 *@param <attribute.attributeName> the attribute to add
@@ -165,7 +169,7 @@ createModelSetter(attribute) ::= <<
 private void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
 	this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
 }
-<endif>
+<else>
 /**
 * Setter for the <attribute.attributeName> attribute.
 *@see {@link #<attribute.attributeName>}
@@ -174,10 +178,12 @@ private void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
 
+<endif>
+
 >>
 
 generateAllEntryPointMethods(modelClass) ::= <<
-<modelClass.model.classes.keys:{className|<generateEntryPointMethod(modelClass.model.classes.(className))>}>
+<modelClass.model.classes:{otherModelClass|<generateEntryPointMethod(otherModelClass)>}>
 >>
 
 generateEntryPointMethod(modelClass) ::= <<
@@ -211,11 +217,11 @@ public static <modelClass.className>.<modelClass.className>Builder.SimpleOptiona
 buildScopeClass(modelClass) ::= <<
 
 /**
-	* Building scope for <modelClass.className>.
-	*/
-	public class <modelClass.className;format="cap">BuildScope{
-		<buildObjectMethod(modelClass)>
-	}
+* Building scope for <modelClass.className>.
+*/
+public class <modelClass.className;format="cap">BuildScope{
+	<buildObjectMethod(modelClass)>
+}
 >>
 
 buildObjectMethod(modelClass) ::= <<

@@ -14,35 +14,33 @@ import java.util.ArrayList;
 *
 */
 public final class <genModel.modelName>Builder{
-	<if(!genModel.classes.(genModel.modelName).attributes.empty)>// mandatory, reference and list attributes<endif>
-	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
-	<if(!genModel.classes.(genModel.modelName).simpleOptAttr.empty)>// simple optional attributes<endif>
-	<genModel.classes.(genModel.modelName).simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
+	<if(!first(genModel.classes).attributes.empty)>// mandatory, reference and list attributes<endif>
+	<first(genModel.classes).attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
+	<if(!first(genModel.classes).simpleOptAttr.empty)>// simple optional attributes<endif>
+	<first(genModel.classes).simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
 	<! simpleOptionalsOnly classes dont have build scopes !>
-	<if(!genModel.classes.(genModel.modelName).simpleOptionalsOnly)>private final <genModel.modelName;format="cap">BuildScope <genModel.modelName;format="lower">BuildScope; <endif>
-	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
-	<if(genModel.classes.(genModel.modelName).simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
+	<if(!first(genModel.classes).simpleOptionalsOnly)>private final <genModel.modelName;format="cap">BuildScope <genModel.modelName;format="lower">BuildScope; <endif>
+	<first(genModel.classes).attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
+	<if(first(genModel.classes).simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	private <genModel.modelName;format="cap">Builder(){
-		<if(genModel.classes.(genModel.modelName).simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
+		<if(first(genModel.classes).simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
 		<else>// building Scope
-		this.<genModel.modelName;format="lower">BuildScope = new <genModel.modelName;format="cap">BuildScope();
+this.<genModel.modelName;format="lower">BuildScope = new <genModel.modelName;format="cap">BuildScope();
 		<endif>
-		<if(!genModel.classes.(genModel.modelName).attributes.empty)>// attribute Scopes <endif>
-		<genModel.classes.(genModel.modelName).attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
+		<if(!first(genModel.classes).attributes.empty)>// attribute Scopes <endif>
+		<first(genModel.classes).attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 	}
-	
-	<generateEMFCreateModelInstance(genModel.classes.(genModel.modelName))>
 	
 	<generateAllEntryPoints(genModel)>
 	<! only create ScopeClass and attribute method if it is not a opposite attribute !>
-	<genModel.classes.(genModel.modelName).attributes:{classAttribute|<createAttributeScopeClass(genModel.modelName,classAttribute)>}>
-	<if(genModel.classes.(genModel.modelName).simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(genModel.classes.(genModel.modelName))>
-	<else><emfBuildScopeClass(genModel.classes.(genModel.modelName))>
+	<first(genModel.classes).attributes:{classAttribute|<createAttributeScopeClass(genModel.modelName,classAttribute)>}>
+	<if(first(genModel.classes).simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(first(genModel.classes))>
+	<else><emfBuildScopeClass(first(genModel.classes))>
 	<endif>
 	
-	<rest(genModel.classes.keys):{className|<createBuilderClass(genModel.classes.(className))>}>
+	<rest(genModel.classes):{modelClass|<createBuilderClass(modelClass)>}>
 }
 
 >>
@@ -67,13 +65,11 @@ public static class <modelClass.className>Builder{
 	private <modelClass.className;format="cap">Builder(){
 		<if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
 		<else>// building Scope
-		this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
+this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
 		<endif>
 		<if(!modelClass.attributes.empty)>// attribute Scopes <endif>
 		<modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 	}
-	
-	<generateEMFCreateModelInstance(modelClass)>
 	
 	<! only create ScopeClass and attribute method if it isnt a opposite attribute !>
 	<modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute)>}>
@@ -117,9 +113,8 @@ generateEMFCreateModelInstance(modelClass) ::= <<
 private <modelClass.className> create<modelClass.className>Instance(final <modelClass.className>Builder builder){
 		<modelClass.model.factoryName> factory = <modelClass.model.factoryName>.eINSTANCE;
 		<modelClass.className> instance = factory.create<modelClass.className>();
-		<modelClass.attributes:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")>
-		<else><transferListValuesToEClass(attribute,"builder","instance")>
-		<endif> }>
+		<modelClass.attributes:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")><else
+		><transferListValuesToEClass(attribute,"builder","instance")><endif>}>
 		<modelClass.simpleOptAttr:{attribute|<transferOptValuesToEClass(attribute,"builder","instance")>}>
 		return instance;
 	}
@@ -144,8 +139,8 @@ if(<builderName>.<attribute.attributeName>ValueIsSet){
 >>
 
 generateAllEntryPoints(genModel) ::= <<
-<first(genModel.classes.keys):{className|<generateEntryPointMethod(genModel.classes.(className))>}>
-<rest(genModel.classes.keys):{className|<generateEntryPointMethodInRootBuilder(genModel.classes.(className))>}>
+<first(genModel.classes):{modelClass|<generateEntryPointMethodInRootBuilder(modelClass)>}>
+<rest(genModel.classes):{modelClass|<generateEntryPointMethodInRootBuilder(modelClass)>}>
 >>
 
 generateEntryPointMethodInRootBuilder(modelClass) ::= <<
@@ -186,11 +181,12 @@ public static SimpleOptionalsOnlyScope create<modelClass.className;format="cap">
 
 emfBuildScopeClass(modelClass) ::= <<
 /**
-	* Building scope class for <modelClass.className>.
-	*/
-	public class <modelClass.className;format="cap">BuildScope{
-		<buildEMFObjectMethod(modelClass)>
-	}
+* Building scope class for <modelClass.className>.
+*/
+public class <modelClass.className;format="cap">BuildScope{
+	<buildEMFObjectMethod(modelClass)>
+	<generateEMFCreateModelInstance(modelClass)>
+}
 >>
 
 buildEMFObjectMethod(modelClass) ::= <<
@@ -271,6 +267,7 @@ public class SimpleOptionalsOnlyScope{
 	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
 	<modelClass.simpleOptAttr:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
 	<buildEMFObjectMethod(modelClass)>
+	<generateEMFCreateModelInstance(modelClass)>
 }
 >>
 
@@ -307,27 +304,29 @@ public <getNextScopeClass(className,classAttribute)> <classAttribute.attributeNa
 */
 public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap"> (){
 	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}
-<endif>
-<endif>
+}<endif><endif>
 >>
 
 getNextScopeClass(className,classAttribute) ::= <<
-<! retrieves the next Scope Class for the Method header !>
-<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))><classAttribute.nextAttribute.attributeName;format="cap">MustAddScope<else>
-<if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else><classAttribute.nextAttribute.attributeName;format="cap">Scope<endif>
-<endif>
+<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))
+><classAttribute.nextAttribute.attributeName;format="cap">MustAddScope<else
+    ><if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else
+        ><classAttribute.nextAttribute.attributeName;format="cap">Scope<
+    endif
+><endif>
 >>
 
 getNextScopeAttr(className,classAttribute) ::= <<
 <! retrieves the next Scope Attribute for Method return !>
-<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))><classAttribute.nextAttribute.attributeName>MustAddScope
-<else><if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif>
-<endif>
+<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))><classAttribute.nextAttribute.attributeName>MustAddScope<else
+><if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif><endif>
 >>
 
 
 createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
+/**
+* Setter method for the optional attribute <optionalAttribute.attributeName>
+*/
 public <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
 	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;

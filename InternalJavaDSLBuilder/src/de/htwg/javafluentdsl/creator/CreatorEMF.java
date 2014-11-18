@@ -113,7 +113,7 @@ public final class CreatorEMF implements ICreator {
 		}
 		EFactory eFactory = this.ePackage.getEFactoryInstance();
 		//Without factory there can be no model instantiation
-		if(eFactory == null){
+		if(eFactory == null || eFactory.equals("")){
 			System.err.println("No EFactoryInstance found for Package: "
 					+this.ePackage.getClass().getCanonicalName());
 			return;
@@ -130,10 +130,12 @@ public final class CreatorEMF implements ICreator {
 					continue;
 				String eClassName = eClass.getName();
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
+				//Set each needed import to the corresponding ModelClass
 				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
 				modelClass.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
+				// Set all imports to the genModel in case for a single Builder
 				this.genModel.addImport(this.packageName +"."+modelClass.getClassName());
-				this.genModel.getClasses().put(eClassName, modelClass);
+				this.genModel.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
 				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
 					EStructuralFeature feature = (EStructuralFeature)ai.next();
 					if (feature instanceof EAttribute) {
@@ -227,7 +229,15 @@ public final class CreatorEMF implements ICreator {
 		boolean isRef = false;
 		AttributeKind kind;
 		if(eClassifier instanceof EAttribute){
-			type = ((EAttribute) eClassifier).getEAttributeType().getInstanceClassName();
+			EAttribute attribute = (EAttribute) eClassifier;
+			if(attribute.getEAttributeType() instanceof EEnum){
+				type = attribute.getEAttributeType().getName();
+				this.genModel.addImport(this.packageName +"."+type);
+			}
+			else
+				type = attribute.getEAttributeType().getInstanceClassName();
+			
+			System.out.println(attribute.getEType().getInstanceTypeName());
 		}
 		else if(eClassifier instanceof EReference){
 			EReference ref = (EReference) eClassifier;
@@ -253,6 +263,9 @@ public final class CreatorEMF implements ICreator {
 		attribute.setAttributeKind(kind);
 		attribute.setReference(isRef);
 		attribute.setList(isList);
+		if(attribute.isPrimitive() && attribute.isList()){
+			attribute.setType(PrimitiveType.getPrimitiveByKeyword(attribute.getType()).getWrapperClassName());
+		}
 		if(!modelClass.isHasList() && isList)
 			modelClass.setHasList(isList);
 		if(!this.genModel.isHasList() && isList)
