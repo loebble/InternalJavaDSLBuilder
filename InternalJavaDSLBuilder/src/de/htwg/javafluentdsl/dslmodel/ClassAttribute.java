@@ -3,6 +3,8 @@ package de.htwg.javafluentdsl.dslmodel;
 import java.util.ArrayList;
 import java.util.List;
 
+import de.htwg.javafluentdsl.creator.PrimitiveType;
+
 /**
  * Represents a defined attribute in a {@link ModelClass}
  * with all its properties

@@ -94,7 +94,7 @@ public final class CreatorEMF implements ICreator {
 		creator.ePackage = eP;
 		creator.packageName = fullPackageName; 
 		creator.genModel.setModelName(eP.getName());
-		creator.genModel.setEmfFactoryName(factoryName);
+		creator.genModel.setFactoryName(factoryName);
 		creator.retrieveAttributes();
 		creator.genModel.setAttributeOrder();
 		return creator;
@@ -120,7 +120,7 @@ public final class CreatorEMF implements ICreator {
 		}
 		
 		this.checkFirstEClass(ePackage);
-		//traverse throug the EPackages classifiers to receive attributes and classes
+		//traverse through the EPackages classifiers to receive attributes and classes
 		for (Iterator<EClassifier> iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
 			
 			EClassifier classifier = (EClassifier) iter.next();
@@ -131,7 +131,7 @@ public final class CreatorEMF implements ICreator {
 				String eClassName = eClass.getName();
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
 				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
-				modelClass.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
+				modelClass.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
 				this.genModel.addImport(this.packageName +"."+modelClass.getClassName());
 				this.genModel.getClasses().put(eClassName, modelClass);
 				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
@@ -234,7 +234,7 @@ public final class CreatorEMF implements ICreator {
 			type = ref.getEType().getName();
 			modelClass.addImport(this.packageName +"."+type);
 			this.genModel.addImport(this.packageName +"."+type);
-			this.genModel.addImport(this.packageName +"."+modelClass.getModel().getEmfFactoryName());
+			this.genModel.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
 			isRef = true;
 		}
 		else

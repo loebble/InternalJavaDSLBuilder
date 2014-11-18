@@ -146,7 +146,7 @@ public class ModelClass {
 	 * @param attribute
 	 *            the attribute to be added
 	 */
-	public void addOptionalAttribute(ClassAttribute attribute) {
+	public void addSimpleOptionalAttribute(ClassAttribute attribute) {
 		this.simpleOptAttr.add(attribute);
 	}
 

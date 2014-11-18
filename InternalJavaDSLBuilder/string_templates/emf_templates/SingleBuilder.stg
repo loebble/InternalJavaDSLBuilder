@@ -108,14 +108,14 @@ createModelSetter(attribute) ::= <<
 generateEMFCreateModelInstance(modelClass) ::= <<
 /**
 * Creates an instance of the corresponding EObject by using
-* the package factory {@link <modelClass.model.emfFactoryName>} 
+* the package factory {@link <modelClass.model.factoryName>} 
 * and fills it with the parameter of the <modelClass.className>Builder
 * @param builder the builder created by the {@link #build<modelClass.className>} method
 * @return a new <modelClass.className> instance
 *
 */
 private <modelClass.className> create<modelClass.className>Instance(final <modelClass.className>Builder builder){
-		<modelClass.model.emfFactoryName> factory = <modelClass.model.emfFactoryName>.eINSTANCE;
+		<modelClass.model.factoryName> factory = <modelClass.model.factoryName>.eINSTANCE;
 		<modelClass.className> instance = factory.create<modelClass.className>();
 		<modelClass.attributes:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")>
 		<else><transferListValuesToEClass(attribute,"builder","instance")>
@@ -139,7 +139,6 @@ transferListValuesToEClass(attribute, builderName, eClassName) ::= <<
 
 transferOptValuesToEClass(attribute, builderName, eClassName) ::= <<
 if(<builderName>.<attribute.attributeName>ValueIsSet){
-	<builderName>.<attribute.attributeName>ValueIsSet = true;
 	<eClassName>.set<attribute.attributeName;format="cap">(<builderName>.<attribute.attributeName>Value);
 }
 >>
@@ -197,7 +196,7 @@ emfBuildScopeClass(modelClass) ::= <<
 buildEMFObjectMethod(modelClass) ::= <<
 /**
 * Build Method for <modelClass.className> instances.
-* Calls the corresponding EMF factory {@link <modelClass.model.emfFactoryName>} to create a <modelClass.className> instance.
+* Calls the corresponding EMF factory {@link <modelClass.model.factoryName>} to create a <modelClass.className> instance.
 * @return a new <modelClass.className> instance with attributes filled from this builder class.
 */
 public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {

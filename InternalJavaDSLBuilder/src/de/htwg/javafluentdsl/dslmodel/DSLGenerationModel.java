@@ -38,9 +38,9 @@ public class DSLGenerationModel {
 	private boolean hasList = false;
 	
 	/**
-	 * the name of the factory if the model is a emf model
+	 * holds the name of the factory which has a create method for creating an object
 	 */
-	private String emfFactoryName;
+	private String factoryName;
 	
 	/**
 	 * Map of classes the model has.
@@ -51,7 +51,7 @@ public class DSLGenerationModel {
 	
 	/**
 	 * Handles the order of the ClassAttributes for the generated ModelClasses in {@link #classes}.
-	 * Call this Method after all Classes an their attributes are defined correctly and added to {@link #classes}
+	 * Call this Method after all Classes and their attributes are defined correctly and added to {@link #classes}
 	 * @see #setAttributeOrderInClass(ModelClass) setAttributeOrderInClass(ModelClass) - for order algorithm
 	 */
 	public void setAttributeOrder() {
@@ -132,7 +132,7 @@ public class DSLGenerationModel {
 	 */
 	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
 		for (ClassAttribute optAttr : optionalAttrs) {
-			modelClass.addOptionalAttribute(optAttr);
+			modelClass.addSimpleOptionalAttribute(optAttr);
 			modelClass.getAttributes().remove(optAttr);
 		}
 		
@@ -238,19 +238,19 @@ public class DSLGenerationModel {
 	}
 
 	/**
-	 * Returns the {@link #emfFactoryName} value
+	 * Returns the {@link #factoryName} value
 	 * @return the excact name of the factory
 	 */
-	public String getEmfFactoryName() {
-		return emfFactoryName;
+	public String getFactoryName() {
+		return factoryName;
 	}
 
 	/**
-	 * Sets the {@link #emfFactoryName} value.
+	 * Sets the {@link #factoryName} value.
 	 * @param the excact name of the factory
 	 */
-	public void setEmfFactoryName(String emfFactoryName) {
-		this.emfFactoryName = emfFactoryName;
+	public void setFactoryName(String factoryName) {
+		this.factoryName = factoryName;
 	}
 	
 	/**

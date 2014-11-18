@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.dslmodel;
+package de.htwg.javafluentdsl.creator;
 /**
  * Enum for all primitive types in the java Language
  *
