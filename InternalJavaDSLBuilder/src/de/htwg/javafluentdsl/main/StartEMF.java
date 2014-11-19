@@ -16,8 +16,9 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
-import de.htwg.javafluentdsl.creator.CreatorEMF;
 import de.htwg.javafluentdsl.generator.Generator;
+import de.htwg.javafluentdsl.generator.GeneratorEcore;
+import de.htwg.javafluentdsl.parser.ParserEcore;
 
 /**
  * Class for starting the Application with a EMF {@link GenModel} 
@@ -30,8 +31,8 @@ public class StartEMF implements IStart {
 	 * Exception messages
 	 */
 	private static final String GENMODEL_NO_FILE = "The given path doesnt lead to a valid file!"
-			+ "For a given GenModel  only " + Generator.SINGLE_BUILDER_OPTION 
-			+" or "+ Generator.MULTIPLE_BUILDER_OPTION +"are allowed";
+			+ "For a given GenModel  only " + GeneratorEcore.SINGLE_BUILDER_OPTION 
+			+" or "+ GeneratorEcore.MULTIPLE_BUILDER_OPTION +"are allowed";
 	private static final String GENMODEL_HAS_NO_GENERATIONMODEL = "The genmodel File has no generation model declared!"
 			+ " See EMFs documentation for correct genmodel creation";
 	private static final String NO_MULTIPLE_GENPACKAGES_SUPPORTED = 
@@ -47,6 +48,7 @@ public class StartEMF implements IStart {
 	/**
 	 * 
 	 * @param source the absolute path to the EMF Generator Model file
+	 * @throws IllegalArgumentException if the source is not a genmodel file
 	 * 
 	 */
 	@Override
@@ -76,9 +78,9 @@ public class StartEMF implements IStart {
 					+ "This is not recommended. Please check the import statements of the generated Classes.");
 		if (prefix != null && !prefix.equals(""))
 			packageName = packageName  + prefix;
-		CreatorEMF creator = CreatorEMF.getInstance(rootEPackage, packageName,
+		ParserEcore parser = ParserEcore.getInstance(rootEPackage, packageName,
 				factoryName);
-		Generator.buildDSL(creator, templateOption,
+		Generator.generateDSL(parser, templateOption,
 				targetPackage);
 
 	}

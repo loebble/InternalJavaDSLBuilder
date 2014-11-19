@@ -1,6 +1,6 @@
 package de.htwg.javafluentdsl.main;
 
-import de.htwg.javafluentdsl.creator.RegexUtil;
+import de.htwg.javafluentdsl.parser.RegexUtil;
 
 /**
  * Starting class for the application.

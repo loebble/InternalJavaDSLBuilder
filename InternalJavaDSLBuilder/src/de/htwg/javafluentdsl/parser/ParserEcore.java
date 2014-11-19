@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator;
+package de.htwg.javafluentdsl.parser;
 
 import java.util.Iterator;
 
@@ -23,9 +23,9 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
  * Class for Creating a {@link DSLGenerationModel} from EMFs Generator Model
  * or more precisely the {@link EPackage} defined inside the Generator Model.
  * 
- * @see {@link ICreator}
+ * @see {@link IParser}
  */
-public final class CreatorEMF implements ICreator {
+public final class ParserEcore implements IParser {
 	/**
 	 * Holds the {@link EPackage} of this EMFCreator.
 	 * Which is received through a {@link GenModel}
@@ -72,12 +72,12 @@ public final class CreatorEMF implements ICreator {
 	 * Private Constructor. This class should  be instantiated via 
 	 * its {@link #getInstance(EPackage, String, String)} method
 	 */
-	private CreatorEMF() {
+	private ParserEcore() {
 		this.genModel = new DSLGenerationModel();
 	}
 
 	/**
-	 * Creates an Instance of this class {@link CreatorEMF} .
+	 * Creates an Instance of this class {@link ParserEcore} .
 	 * An CreatorEMF needs any kind of EPackage to analyze its attributes etc.
 	 * All the necessary methods are called in this method so that after it the
 	 * Creators {@link #genModel} can be used.
@@ -88,8 +88,8 @@ public final class CreatorEMF implements ICreator {
 	 * instantiate the EMF Models
 	 * @return a new CreatorEMF instance with the created {@link DSLGenerationModel}
 	 */
-	public static <T extends EPackage> CreatorEMF getInstance(T ePackage, String fullPackageName,String factoryName) {
-		CreatorEMF creator = new CreatorEMF();
+	public static <T extends EPackage> ParserEcore getInstance(T ePackage, String fullPackageName,String factoryName) {
+		ParserEcore creator = new ParserEcore();
 		EPackage eP = (EPackage) ePackage;
 		creator.ePackage = eP;
 		creator.packageName = fullPackageName; 

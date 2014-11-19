@@ -14,7 +14,6 @@ public interface IStart {
 	 * @param templateOption the template which should be used for generation
 	 * @param targetPackage the relative target package. Preferred with typical package naming conventions
 	 * 	domains seperated by '.' and all in small letters.
-	 * @throws IllegalArgumentException if one of the parameter
 	 */
 	void startDSLGenerationProcess(String source, String templateOption, String targetPackage);
 

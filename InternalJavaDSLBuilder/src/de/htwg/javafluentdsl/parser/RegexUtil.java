@@ -1,9 +1,9 @@
-package de.htwg.javafluentdsl.creator;
+package de.htwg.javafluentdsl.parser;
 
 import java.util.regex.Pattern;
 
 /**
- * Util Class for the {@link CreatorRegex} Class.
+ * Util Class for the {@link ParserRegex} Class.
  * Contains Regular Expressions for the Model Description {@link #MODEL_DESCRIPTION}
  * and defines therefore the Models Meta Model through regular expression.
  * Also provides the Patterns for matching purposes.

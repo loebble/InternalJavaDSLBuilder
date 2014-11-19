@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator.regex.creation;
+package de.htwg.javafluentdsl.parser.regex.creation;
 
 import static org.junit.Assert.fail;
 

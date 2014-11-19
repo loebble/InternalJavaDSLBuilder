@@ -1,10 +1,10 @@
-package de.htwg.javafluentdsl.creator.regex.creation;
+package de.htwg.javafluentdsl.parser.regex.creation;
 
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-import de.htwg.javafluentdsl.creator.CreatorRegex;
+import de.htwg.javafluentdsl.parser.ParserRegex;
 /**
  * Test class for wrong language descriptions
  *
@@ -77,7 +77,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testSimpleDeclFails() {
 		try{
-			CreatorRegex.getInstance(FORUM_WRONG_DECL);
+			ParserRegex.getInstance(FORUM_WRONG_DECL);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -87,7 +87,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testDuplicateClasses() {
 		try{
-			CreatorRegex.getInstance(FORUM_DUPL_CLASSES);
+			ParserRegex.getInstance(FORUM_DUPL_CLASSES);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -97,7 +97,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testDuplicateAttribute() {
 		try{
-			CreatorRegex.getInstance(FORUM_DUPL_ATTRIBUTENAME);
+			ParserRegex.getInstance(FORUM_DUPL_ATTRIBUTENAME);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -107,7 +107,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_InSameClass() {
 		try{
-			CreatorRegex.getInstance(FORUM_OP_IN_SAME_CLASS);
+			ParserRegex.getInstance(FORUM_OP_IN_SAME_CLASS);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -117,7 +117,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_NoRefAttr() {
 		try{
-			CreatorRegex.getInstance(FORUM_OP_NO_REFERENCE);
+			ParserRegex.getInstance(FORUM_OP_NO_REFERENCE);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -127,7 +127,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongRefType() {
 		try{
-			CreatorRegex.getInstance(FORUM_OP_WRONG_REFERENCE_TYPE);
+			ParserRegex.getInstance(FORUM_OP_WRONG_REFERENCE_TYPE);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;
@@ -137,7 +137,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_bool() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Boolean);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Boolean);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -146,7 +146,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_byte() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Byte);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Byte);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -155,7 +155,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_short() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Short);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Short);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -164,7 +164,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_int() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Int);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Int);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -173,7 +173,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_long() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Long);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Long);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -182,7 +182,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_float() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Float);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Float);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;
@@ -191,7 +191,7 @@ public class RegexCreation_WrongDescription {
 	@Test(expected = IllegalArgumentException.class)
 	public void testOP_WrongListPrim_double() {
 		try{
-			CreatorRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Double);
+			ParserRegex.getInstance(LIST_PRIM_DESCRIPTION_Wrong_Double);
 		}catch(IllegalArgumentException ex){
 			assertTrue(ex.getMessage().startsWith("For a List the type cannot be a primitive one"));
 			throw ex;

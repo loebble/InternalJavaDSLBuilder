@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator.emf.using;
+package de.htwg.javafluentdsl.parser.emf.using;
 
 import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.createPost;
 import static de.htwg.generated.emf.dsl.simpleForum.singleBuilder.SimpleForumBuilder.createSimpleForum;
@@ -12,6 +12,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.junit.Test;
 
 
+
 import de.htwg.generated.emf.dsl.optonly.singleBuilder.OptOnlyBuilder;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
 /*
@@ -19,7 +20,7 @@ import de.htwg.generated.emf.model.OptOnly.OptOnly;
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import de.htwg.javafluentdsl.creator.emf.creation.EMFCreation_SingleBuilder;
+import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilder;
 
 /**
  * Test For Using the EMF DSL.

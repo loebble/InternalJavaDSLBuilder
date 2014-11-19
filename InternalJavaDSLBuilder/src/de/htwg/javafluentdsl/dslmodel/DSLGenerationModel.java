@@ -293,7 +293,9 @@ public class DSLGenerationModel {
 						+ " optional: " +attr.isOptional()+ "\n");
 			}
 			for (ClassAttribute referencedCl : modelClass.getCreatedByOpposite()) {
-				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." + referencedCl.getOpposite().getAttributeName() +" referenced by nestedClassAttr: "+referencedCl.getClassName() + "." + referencedCl.getAttributeName() +"\n");
+				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." 
+						+ referencedCl.getOpposite().getAttributeName() +" referenced by nestedClassAttr: "
+						+referencedCl.getClassName() + "." + referencedCl.getAttributeName() +"\n");
 			}
 		}
 		return sb.toString();

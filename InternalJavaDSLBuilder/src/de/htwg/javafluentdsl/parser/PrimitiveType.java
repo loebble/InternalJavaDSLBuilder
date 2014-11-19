@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator;
+package de.htwg.javafluentdsl.parser;
 
 /**
  * Enum for all primitive types in the java Language
@@ -27,6 +27,33 @@ public enum PrimitiveType {
 	PrimitiveType(String keyword) {
 		this.keyword = keyword;
 	}
+	/**
+	 * Retrieves the PrimitiveType which belongs to the given keyword
+	 * @param keyword the keyword of the primitive type
+	 * @return the PrimitiveType literal
+	 */
+	public static PrimitiveType getPrimitiveByKeyword(String keyword) {
+		switch (keyword) {
+		case "byte":
+			return BYTE;
+		case "short":
+			return SHORT;
+		case "int":
+			return INT;
+		case "long":
+			return LONG;
+		case "char":
+			return CHAR;
+		case "float":
+			return FLOAT;
+		case "double":
+			return DOUBLE;
+		case "boolean":
+			return BOOLEAN;
+		default:
+			return null;
+		}
+	}
 
 	/**
 	 * Retrieves the keyword.
@@ -42,6 +69,11 @@ public enum PrimitiveType {
 		return this.getKeyword();
 	}
 
+	/**
+	 * Gets the wrapper classes name for boxing
+	 * and unboxing of this literal.
+	 * @return the name of the wrapper class
+	 */
 	public String getWrapperClassName() {
 		switch (this.keyword) {
 		case "byte":
@@ -65,26 +97,4 @@ public enum PrimitiveType {
 		}
 	}
 
-	public static PrimitiveType getPrimitiveByKeyword(String keyword) {
-		switch (keyword) {
-		case "byte":
-			return BYTE;
-		case "short":
-			return SHORT;
-		case "int":
-			return INT;
-		case "long":
-			return LONG;
-		case "char":
-			return CHAR;
-		case "float":
-			return FLOAT;
-		case "double":
-			return DOUBLE;
-		case "boolean":
-			return BOOLEAN;
-		default:
-			return null;
-		}
-	}
 }

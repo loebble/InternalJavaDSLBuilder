@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator.regex.using;
+package de.htwg.javafluentdsl.parser.regex.using;
 
 import static org.junit.Assert.assertTrue;
 
@@ -7,28 +7,23 @@ import java.net.URL;
 
 import org.junit.Test;
 
-import de.htwg.generated.regex.separated.forum.Forum;
-import de.htwg.generated.regex.separated.forum.ForumBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForum;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimplePostBuilder;
-import de.htwg.generated.regex.separated.simpleforum.SimpleForumBuilder.SimpleUserBuilder;
-import de.htwg.generated.regex.separated.user.User;
-import de.htwg.generated.regex.separated.user.UserBuilder;
-import de.htwg.generated.regex.separated.user.UserBuilder.AddressBuilder;
-import de.htwg.generated.regex.separated.user.UserBuilder.CountryBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPT;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.AddressOPTBuilder;
-import de.htwg.generated.regex.separated.useropt.UserOPTBuilder.CountryOPTBuilder;
-import de.htwg.javafluentdsl.creator.regex.creation.Regex_CreationIntern;
+import de.htwg.generated.regex.intern.simpleforum.SimpleForum;
+import static de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleForumBuilder.*;
+import de.htwg.generated.regex.intern.user.User;
+import de.htwg.generated.regex.intern.user.User.UserBuilder;
+import static de.htwg.generated.regex.intern.user.User.UserBuilder.*;
+import de.htwg.generated.regex.intern.useropt.UserOPT;
+import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.*;
+import de.htwg.generated.regex.intern.forum.Forum;
+import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder;
+import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder.*;
 
 /**
  * Test For Using the Regex DSL.
  * If imports are not correct pls make sure {@link Regex_CreationIntern} was run
  *
  */
-public class Regex_UsingSeperated {
+public class Regex_UsingIntern {
 	/*
 	 * User Data
 	 */
@@ -58,11 +53,11 @@ public class Regex_UsingSeperated {
 
 	@Test
 	public void testUserDSL() {
-		User user = UserBuilder.createUser().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		User user = UserBuilder.createUser().firstName(firstName).optAge(age).lastName(lastName).nickName(nickName)
 				.address(
-					AddressBuilder.createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
+					createAddress().street(street).houseNumber(houseNumber).zipCode(zipCode)
 						.country(
-								CountryBuilder.createCountry().name(countryName).uN_Member(unMemer).buildCountry()
+								createCountry().name(countryName).uN_Member(unMemer).buildCountry()
 						)
 					.buildAddress()
 				)
@@ -75,11 +70,11 @@ public class Regex_UsingSeperated {
 	
 	@Test
 	public void testUserOPTOnlyDSL() throws MalformedURLException {
-		UserOPT user = UserOPTBuilder.createUserOPT().firstName(firstName).optionalAge(age).lastName(lastName).nickName(nickName)
+		UserOPT user = createUserOPT().firstName(firstName).optAge(age).lastName(lastName).nickName(nickName)
 				.address(
-					AddressOPTBuilder.createAddressOPT().optionalStreet(street).optionalHouseNumber(houseNumber).optionalZipCode(zipCode)
+					createAddressOPT().optStreet(street).optHouseNumber(houseNumber).optZipCode(zipCode)
 						.country(
-								CountryOPTBuilder.createCountryOPT().optionalName(countryName).optionalUnMember(unMemer).buildCountryOPT()
+								createCountryOPT().optName(countryName).optUnMember(unMemer).buildCountryOPT()
 						)
 					.buildAddressOPT()
 				)
@@ -93,11 +88,11 @@ public class Regex_UsingSeperated {
 	
 	@Test
 	public void testSimpleForumDSL() throws MalformedURLException {
-		SimpleForum simpleForum = SimpleForumBuilder
+		SimpleForum simpleForum = SimpleForum.SimpleForumBuilder
 		.createSimpleForum().name(forumName).url(new URL(urlString))
 				.addUser(
-					SimpleUserBuilder.createSimpleUser().optionalAge(age).optionalFirstName(firstName).lastName(lastName).nickName(nickName).post(
-								SimplePostBuilder.createSimplePost().title(postTitle1).text(postText1).views(views).buildSimplePost()
+					createSimpleUser().optAge(age).optFirstName(firstName).lastName(lastName).nickName(nickName).post(
+								createSimplePost().title(postTitle1).text(postText1).views(views).buildSimplePost()
 					).buildSimpleUser()
 				)
 				.noUser()
@@ -108,21 +103,22 @@ public class Regex_UsingSeperated {
 	
 	@Test
 	public void testForumDSL() throws MalformedURLException {
-		Forum.User replierWithoutPosts = ForumBuilder.UserBuilder.createUser().email(email).nickName("nick").rating(
-				ForumBuilder.RatingBuilder.createRating().optionalUpps(1).optionalDowns(0).buildRating()
+		// ForumBuilder needed because User DSLs createUser is used otherwise
+		Forum.User replierWithoutPosts = ForumBuilder.createUser().email(email).nickName("nick").rating(
+				createRating().optUpps(1).optDowns(0).buildRating()
 				).noPosts().buildUser();
-		Forum.User userWithPost = ForumBuilder.UserBuilder.createUser().email(otherEMail).nickName(nickName).rating(
-				ForumBuilder.RatingBuilder.createRating().optionalDowns(5).buildRating()
-				).addPosts(ForumBuilder.PostBuilder.createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
-						ForumBuilder.RatingBuilder.createRating().buildRating()
+		Forum.User userWithPost = ForumBuilder.createUser().email(otherEMail).nickName(nickName).rating(
+				createRating().optDowns(5).buildRating()
+				).addPosts(createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
+						createRating().buildRating()
 						)
 				 .buildPost()
 				).noPosts()
 				.buildUser();
 		
-		Forum forum = ForumBuilder
+		Forum forum = Forum.ForumBuilder
 		.createForum().name(forumName).url(new URL(urlString))
-			.addSections(ForumBuilder.SectionBuilder.createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
+			.addSections(createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
 			.noSections()
 			.addUser(userWithPost)
 			.addUser(replierWithoutPosts)

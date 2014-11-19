@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator;
+package de.htwg.javafluentdsl.parser;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -14,11 +14,11 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
 
 /**
  * Class for Creating a {@link DSLGenerationModel} from a model description 
- * defined by {@link de.htwg.javafluentdsl.creator.RegexUtil#MODEL_DESCRIPTION model description}
+ * defined by {@link de.htwg.javafluentdsl.parser.RegexUtil#MODEL_DESCRIPTION model description}
  * 
- * @see {@link ICreator}
+ * @see {@link IParser}
  */
-public final class CreatorRegex implements ICreator{
+public final class ParserRegex implements IParser{
 
 	//Error Messages
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
@@ -69,19 +69,19 @@ public final class CreatorRegex implements ICreator{
 	 * Private Constructor. This class should  be instantiated via 
 	 * its {@link #getInstance(String)} method
 	 */
-	private CreatorRegex(){
+	private ParserRegex(){
 		this.genModel = new DSLGenerationModel();
 	}
 	
 	/**
-	 * Creates a new Instance of this class {@link CreatorRegex}.
+	 * Creates a new Instance of this class {@link ParserRegex}.
 	 * An CreatorRegex need a model description. This description is defined
 	 * by the {@link RegexUtil#MODEL_DESCRIPTION}.
 	 * All the necessary methods are called in this method so that after it the Creators genModel can be used.
 	 * @param modelDescription the String with the whole model Description
 	 * @return new Instance of the CreatorRegex class
 	 */
-	public static CreatorRegex getInstance(String modelDescription){
+	public static ParserRegex getInstance(String modelDescription){
 		if(!RegexUtil.doesModelDescriptionMatch(modelDescription)){
 			//try to find class description which failed
 			Pattern p = Pattern.compile(RegexUtil.CLASS_DEFINITION);
@@ -96,7 +96,7 @@ public final class CreatorRegex implements ICreator{
 				appendedErrorMsg = "\n Error in class definition after :'" + modelDescription.substring(endOfLastCorrectClass -10, endOfLastCorrectClass) + "'...";
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
-		CreatorRegex creator = new CreatorRegex();
+		ParserRegex creator = new ParserRegex();
 		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();

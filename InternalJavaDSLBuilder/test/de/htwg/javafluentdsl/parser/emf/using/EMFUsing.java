@@ -1,4 +1,4 @@
-package de.htwg.javafluentdsl.creator.emf.using;
+package de.htwg.javafluentdsl.parser.emf.using;
 
 import java.util.Iterator;
 

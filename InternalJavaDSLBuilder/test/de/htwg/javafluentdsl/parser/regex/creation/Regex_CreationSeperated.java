@@ -1,8 +1,8 @@
-package de.htwg.javafluentdsl.creator.regex.creation;
+package de.htwg.javafluentdsl.parser.regex.creation;
 
 import org.junit.Test;
 
-import de.htwg.javafluentdsl.generator.Generator;
+import de.htwg.javafluentdsl.generator.GeneratorRegex;
 
 /**
  * Test class for creation of a DSL using Regular Expression
@@ -27,22 +27,22 @@ public class Regex_CreationSeperated {
 	 */
 	@Test
 	public void testCreateUserDSLSeperated() {
-		RegexCreation.createDSL(RegexCreation.USER_DESCRIPTION, Generator.SEPARATED_MODEL_OPTION,USER_PACKAGE_DEST);
+		RegexCreation.createDSL(RegexCreation.USER_DESCRIPTION, GeneratorRegex.SEPARATED_MODEL_OPTION,USER_PACKAGE_DEST);
 	}
 	
 	@Test
 	public void testCreateUserOPTOnlyDSLSeperated() {
-		RegexCreation.createDSL(RegexCreation.USER_OPT_ONLY_DESCRIPTION, Generator.SEPARATED_MODEL_OPTION,USER_OPT_DEST);
+		RegexCreation.createDSL(RegexCreation.USER_OPT_ONLY_DESCRIPTION, GeneratorRegex.SEPARATED_MODEL_OPTION,USER_OPT_DEST);
 	}
 	
 	@Test
 	public void testCreateSimpleForumDSLSeperated() {
-		RegexCreation.createDSL(RegexCreation.SIMPLE_FORUM_DESCRIPTION, Generator.SEPARATED_MODEL_OPTION,SIMPLE_FORUM_PACKAGE_DEST);
+		RegexCreation.createDSL(RegexCreation.SIMPLE_FORUM_DESCRIPTION, GeneratorRegex.SEPARATED_MODEL_OPTION,SIMPLE_FORUM_PACKAGE_DEST);
 	}
 	
 	@Test
 	public void testCreateForumDSLSeperated() {
-		RegexCreation.createDSL(RegexCreation.FORUM_DESCRIPTION, Generator.SEPARATED_MODEL_OPTION,FORUM_PACKAGE_DEST);
+		RegexCreation.createDSL(RegexCreation.FORUM_DESCRIPTION, GeneratorRegex.SEPARATED_MODEL_OPTION,FORUM_PACKAGE_DEST);
 	}
 	
 }
