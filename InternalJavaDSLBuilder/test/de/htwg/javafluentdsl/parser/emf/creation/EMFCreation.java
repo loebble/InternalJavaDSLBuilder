@@ -17,7 +17,7 @@ public class EMFCreation {
 			.normalize().toString();
 	
 	public static void fileExists(String path,String ending) {
-		String modelPath =  projectPath + "\\src\\" +path.replace('.', '\\')+"."+ending;
+		String modelPath =  projectPath + "\\generated\\" +path.replace('.', '\\')+"."+ending;
 		try {
 			File file = new File(modelPath);
 			assertTrue(file.exists());

@@ -25,7 +25,7 @@ import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder.*;
  */
 public class Regex_UsingIntern {
 	/*
-	 * User Data
+	 * User1 Data
 	 */
 	String firstName = "Max";
 	String lastName = "Mueller";
@@ -49,6 +49,21 @@ public class Regex_UsingIntern {
 	String postTitle2 = "MySecondPost";
 	String postText2 = "MySecondPostText";
 	String urlString = "http://MyForum.com";
+	
+	@Test
+	public void testMASimpleForumDSL() throws MalformedURLException {
+		de.htwg.generated.regex.intern.masimpleforum.oneuser.Forum forum =
+		de.htwg.generated.regex.intern.masimpleforum.oneuser.Forum.ForumBuilder
+		.createForum().name(forumName).url(new URL(urlString)).user(
+				de.htwg.generated.regex.intern.masimpleforum.oneuser.Forum.ForumBuilder
+				.createUser().firstName(firstName).lastName(lastName).buildUser())
+		.buildForum();
+
+		assertTrue(forum.getName().equals(forumName)
+				&& forum.getUser().getFirstName().equals(firstName)
+				&& forum.getUser().getAge() == 0);
+		
+	}
 	
 
 	@Test
@@ -140,7 +155,6 @@ public class Regex_UsingIntern {
 		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForUser() == null);
 		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForPost().getText()
 					.equals(forum.getUser().get(0).getPosts().get(0).getText()));
-		//TODO more to come
 	}
 	
 }

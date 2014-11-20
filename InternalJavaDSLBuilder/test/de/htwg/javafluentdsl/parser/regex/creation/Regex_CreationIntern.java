@@ -48,7 +48,7 @@ public class Regex_CreationIntern {
 	
 	@Test
 	public void testMACreateSimpleForumDSL() {
-		RegexCreation.createDSL(RegexCreation.MA_SIMPLE_FORUM_DESCRIPTION, GeneratorRegex.INTERN_MODEL_OPTION,MA_SIMPLE_FORUM_PACKAGE_DEST+"oneuser");
+		RegexCreation.createDSL(RegexCreation.MA_SIMPLE_FORUM_DESCRIPTION, GeneratorRegex.INTERN_MODEL_OPTION,MA_SIMPLE_FORUM_PACKAGE_DEST+".oneuser");
 	}
 	
 	@Test
