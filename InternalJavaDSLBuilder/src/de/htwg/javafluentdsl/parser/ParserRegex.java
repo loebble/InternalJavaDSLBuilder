@@ -26,8 +26,7 @@ public final class ParserRegex implements IParser{
 	private static final String CLASS_NOT_DEFINED = "class is not defined!";
 	private static final String OPPOSITE_DIFFERENT_TYPE = "The defined opposite attribute and its referencing attribute have different types.";
 	private static final String OPPOSITE_ATTRIBUTE_NOT_DEFINED = "Defined opposite attributes other end was not found. ";
-	private static final String OPPOSITE_ATTRIBUTE_IN_SAME_CLASS = "The other end of a opposite attribute (its opposite) can "
-			+ "not be in the same class.";
+	private static final String OPPOSITE_ATTRIBUTE_THE_SAME = "The other end of a opposite attribute can not be the same attribute!";
 	private static final String PRIMITVES_NOT_ALLOWED_FOR_LIST = "For a List the type cannot be a primitive one.";
 	
 	//Matcher used for regular expression matching
@@ -273,14 +272,14 @@ public final class ParserRegex implements IParser{
 			nameOfOpposite = Character.toLowerCase(nameOfOpposite.charAt(0)) + nameOfOpposite.substring(1);
 			if(isClassDefined(opType)){
 				ModelClass oppModelClass = genModel.getModelClass(opType);
-				if(opType.equals
-						(currentAttr.getModelClass().getClassName()))
-					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_IN_SAME_CLASS 
-							+ " Given OP Attribute: "+opDef);
 				ClassAttribute oppositeAttribute = oppModelClass.getSpefificAttribute(nameOfOpposite);
 				if(oppositeAttribute == null)
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_NOT_DEFINED 
 							+ "Given OP Attribute: "+opDef);
+				else if(oppositeAttribute.getAttributeFullName().equals
+						(currentAttr.getAttributeFullName()))
+					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_THE_SAME 
+							+ " Given OP Attribute: "+opDef);
 				else
 					currentAttr.setOpposite(oppositeAttribute);
 				checkForMatchingType(currentAttr, oppositeAttribute);

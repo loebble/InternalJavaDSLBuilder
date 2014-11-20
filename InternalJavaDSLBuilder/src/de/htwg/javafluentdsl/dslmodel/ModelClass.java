@@ -84,8 +84,7 @@ public class ModelClass {
 	 */
 	private List<ClassAttribute> simpleOptAttr;
 	/**
-	 * Holds the opposite Attributes which are created by their opposite
-	 * (creator)
+	 * Holds the opposite Attributes which are set in the DSL by this ModelClass
 	 */
 	private List<ClassAttribute> createdByOpposite;
 	/**

@@ -13,6 +13,11 @@ public class RegexCreation_WrongDescription {
 	/*
 	 * Wrong descriptions
 	 */
+	
+	public final static String USER_DESCRIPTION_OPP_SAME_ATTR=
+			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address, .OP=oppUser:User->oppUser}"
+			;
+	
 	public final static String FORUM_WRONG_DECL =
 			".class=Forum{.A=name:String, .A=url:URL, .a=asd=int}"
 			+ ".imp={java.net.URL}"
@@ -105,9 +110,9 @@ public class RegexCreation_WrongDescription {
 	}
 	
 	@Test(expected = IllegalArgumentException.class)
-	public void testOP_InSameClass() {
+	public void testOP_SameAttr() {
 		try{
-			ParserRegex.getInstance(FORUM_OP_IN_SAME_CLASS);
+			ParserRegex.getInstance(USER_DESCRIPTION_OPP_SAME_ATTR);
 		}catch(IllegalArgumentException ex){
 			System.out.println(ex.getMessage());
 			throw ex;

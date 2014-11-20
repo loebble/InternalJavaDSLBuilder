@@ -16,7 +16,7 @@ import de.htwg.javafluentdsl.main.StartRegex;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ RegexCreation_WrongDescription.class, Regex_CreationIntern.class, Regex_CreationSeperated.class })
+@SuiteClasses({ RegexCreation_WrongDescription.class, Regex_CreationIntern.class, Regex_CreationSeparated.class })
 public class RegexCreation {
 	
 	/*
@@ -27,6 +27,10 @@ public class RegexCreation {
 			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address}"
 			+ ".class=Address{.A=street:String, .A=houseNumber:int, .A=zipCode:String, .A=country:Country}"
 			+ ".class=Country{.A=name:String, .A=UN_Member:boolean}"
+			;
+	
+	public final static String USER_DESCRIPTION_OPP_IN_SAME_CLASS=
+			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .OA=otherUser:User, .OP=oppUser:User->otherUser}"
 			;
 	
 	public final static String USER_OPT_ONLY_DESCRIPTION =
@@ -78,7 +82,7 @@ public class RegexCreation {
 	
 	public static void createDSL(String modelDescription, String templateOption, String targetPackage) {
 		new StartRegex().startDSLGenerationProcess(modelDescription, templateOption, targetPackage);
-		String modelPath =  Paths.get(".").toAbsolutePath().normalize().toString() + "\\src\\" +targetPackage.replace('.', '\\');
+		String modelPath =  Paths.get(".").toAbsolutePath().normalize().toString() + "\\generated\\" +targetPackage.replace('.', '\\');
 		try {
 			File file = new File(modelPath);
 			assert(file.exists());

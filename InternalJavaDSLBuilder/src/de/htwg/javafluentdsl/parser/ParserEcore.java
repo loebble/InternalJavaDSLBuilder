@@ -101,7 +101,7 @@ public final class ParserEcore implements IParser {
 	}
 
 	/**
-	 * Analyzes this {@link #ePackage} for its defined classes and attributes
+	 * Analyzes the {@link #ePackage} for its defined classes and attributes
 	 * to be able to generate a valid {@link DSLGenerationModel}
 	 */
 	private void retrieveAttributes() {
@@ -215,7 +215,7 @@ public final class ParserEcore implements IParser {
 	}
 
 	/**
-	 * * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}
+	 * Creates ClassAttribute in this classes DSLGenerationModel {@link #genModel}
 	 * and initializes it with given parameter
 	 * @param eClassifier can be an EAttribute or an EReference
 	 * @param modelClass the class in which the attribute is defined

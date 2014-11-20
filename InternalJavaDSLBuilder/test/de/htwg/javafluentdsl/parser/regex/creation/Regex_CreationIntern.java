@@ -27,6 +27,11 @@ public class Regex_CreationIntern {
 	}
 	
 	@Test
+	public void testCreateUserDSLOPInClass() {
+		RegexCreation.createDSL(RegexCreation.USER_DESCRIPTION_OPP_IN_SAME_CLASS, GeneratorRegex.INTERN_MODEL_OPTION,USER_PACKAGE_DEST+".oppinclass");
+	}
+	
+	@Test
 	public void testCreateUserOPTOnlyDSL() {
 		RegexCreation.createDSL(RegexCreation.USER_OPT_ONLY_DESCRIPTION, GeneratorRegex.INTERN_MODEL_OPTION,USER_OPT_DEST);
 	}

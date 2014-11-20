@@ -55,7 +55,7 @@ public class GeneratorUtil {
 			String generatedCode) {
 		try {
 			String packagePath = targetPackage.replace(".", "/");
-			String pathForDSL = currentPath + "/src/" + packagePath;
+			String pathForDSL = currentPath + "/generated/" + packagePath; //TODO
 			File targetDirectory = new File(pathForDSL);
 			if (!targetDirectory.exists()) {
 				targetDirectory.mkdirs();
