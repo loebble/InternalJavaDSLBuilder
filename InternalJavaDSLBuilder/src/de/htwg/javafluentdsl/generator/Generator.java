@@ -4,7 +4,8 @@ import de.htwg.javafluentdsl.parser.ParserEcore;
 import de.htwg.javafluentdsl.parser.ParserRegex;
 
 /**
- * Abstract generator class which delegates the specific Generator to call.
+ * Abstract generator class which delegates the call of the specific Generator
+ * depending on the given Parser.
  *
  */
 public abstract class Generator {

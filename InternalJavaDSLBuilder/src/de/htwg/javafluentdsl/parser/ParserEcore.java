@@ -1,6 +1,8 @@
 package de.htwg.javafluentdsl.parser;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.emf.codegen.ecore.genmodel.GenModel;
 import org.eclipse.emf.codegen.ecore.genmodel.GenPackage;
@@ -8,13 +10,12 @@ import org.eclipse.emf.ecore.EAttribute;
 import org.eclipse.emf.ecore.EClass;
 import org.eclipse.emf.ecore.EClassifier;
 import org.eclipse.emf.ecore.EEnum;
-import org.eclipse.emf.ecore.EEnumLiteral;
 import org.eclipse.emf.ecore.EFactory;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EReference;
 import org.eclipse.emf.ecore.EStructuralFeature;
 
-import de.htwg.javafluentdsl.dslmodel.AttributeKind;
+import de.htwg.javafluentdsl.dslmodel.DependencyKind;
 import de.htwg.javafluentdsl.dslmodel.ClassAttribute;
 import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
@@ -96,7 +97,7 @@ public final class ParserEcore implements IParser {
 		creator.genModel.setModelName(eP.getName());
 		creator.genModel.setFactoryName(factoryName);
 		creator.retrieveAttributes();
-		creator.genModel.setAttributeOrder();
+		creator.createAttributeOrder();
 		return creator;
 	}
 
@@ -122,66 +123,25 @@ public final class ParserEcore implements IParser {
 		this.checkFirstEClass(ePackage);
 		//traverse through the EPackages classifiers to receive attributes and classes
 		for (Iterator<EClassifier> iter = this.ePackage.getEClassifiers().iterator(); iter.hasNext();) {
-			
 			EClassifier classifier = (EClassifier) iter.next();
 			if (classifier instanceof EClass) {
 				EClass eClass = (EClass) classifier;
-				if(eClass.isAbstract() || eClass.isInterface()) //TODO can be ignored completely?
+				if(eClass.isAbstract() || eClass.isInterface()) //TODO abstract classes...
 					continue;
 				String eClassName = eClass.getName();
 				ModelClass modelClass = this.genModel.addModelClass(eClassName);
 				//Set each needed import to the corresponding ModelClass
-				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
 				modelClass.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
+				modelClass.addImport(this.packageName +"."+modelClass.getClassName());
 				// Set all imports to the genModel in case for a single Builder
 				this.genModel.addImport(this.packageName +"."+modelClass.getClassName());
 				this.genModel.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
 				for (Iterator<EStructuralFeature> ai = eClass.getEStructuralFeatures().iterator(); ai.hasNext();) {
 					EStructuralFeature feature = (EStructuralFeature)ai.next();
-					if (feature instanceof EAttribute) {
-						EAttribute foundAttribute = (EAttribute) feature;
-						if(!foundAttribute.isChangeable()) //TODO should create a corresponding setter Method for the attribute
-							continue;
-						ClassAttribute modelAttribute = createModelAttribute(foundAttribute, modelClass);
-						modelClass.addAttribute(modelAttribute);
-					}else if(feature instanceof EReference) {
-						EReference reference = (EReference) feature;
-						ClassAttribute modelAttribute = createModelAttribute(reference, modelClass);
-						modelAttribute.setReference(true);
-						modelClass.addAttribute(modelAttribute);
-						EReference opposite = reference.getEOpposite();
-						if(opposite != null){
-							// Opposite attribute could not have been processed yet
-							ClassAttribute oppositeAttr = this.genModel.findAttribute(reference.getEReferenceType().getName(), opposite.getName());
-							if(oppositeAttr == null){
-								//Sets the start of an opposite relation
-								// -> if not processed the current attribute is the "creator" and is Referenced by the other one
-								modelAttribute.setCreatorOfOpposite(true);
-							}else{
-								//Sets the end of an opposite relation
-								modelAttribute.setOpposite(oppositeAttr);
-								oppositeAttr.setOpposite(modelAttribute);
-								ClassAttribute creator = null;
-								//Decide which opposite is called first in the chain
-								//this is equal to the creator of the opposite relation
-								if(modelAttribute.isCreatorOfOpposite()){
-									creator = modelAttribute;
-									creator.setReferencedByAttribute(true);
-									creator.setReferencedBy(creator.getOpposite());
-								}else if (oppositeAttr.isCreatorOfOpposite()) {
-									creator = oppositeAttr;
-									creator.setReferencedByAttribute(true);
-									creator.setReferencedBy(creator.getOpposite());
-								}
-							}
-						}
-					}else if (feature instanceof EEnum){ // TODO Enums
-						EEnum eEnum = (EEnum)classifier;
-						for (Iterator<EEnumLiteral> ei = eEnum.getELiterals().iterator();ei.hasNext();){
-							EEnumLiteral literal = (EEnumLiteral) ei.next();
-							System.out.println("ENUM: "+literal.getName());
-						}
-					}
+					//Not changeable means it has no setter and can therefore not be set by a dsl
+					if(!feature.isChangeable())
+						continue;
+					createModelAttribute(feature, modelClass);
 				}
 			}
 		}
@@ -190,9 +150,9 @@ public final class ParserEcore implements IParser {
 	
 	/**
 	 * Checks if the first EClass has the same Name as the {@link EPackage} ePackage
-	 * And gives a prints a warning if thats not the case
+	 * And prints a warning if thats not the case
 	 * @param ePackage the EPackage to analyze
-	 * @throws IllegalStateException if ePackage has no EClasses defined
+	 * @throws IllegalStateException if ePackage has no EClasses at all defined
 	 */
 	private void checkFirstEClass(EPackage ePackage) {
 		EClass firstClass = null;
@@ -222,55 +182,192 @@ public final class ParserEcore implements IParser {
 	 * @throws IllegalArgumentException if eClassifier is neither instance of {@link EAttribute} or {@link EReference}
 	 * @return the created classAttribute within the ModelClass
 	 */
-	private <T extends EStructuralFeature> ClassAttribute createModelAttribute(T eClassifier, ModelClass modelClass) {
-		String clName = eClassifier.getName();
+	private ClassAttribute createModelAttribute(EStructuralFeature feature, ModelClass modelClass) {
+		String featureName = feature.getName();
 		String type = "";
 		boolean isList = false;
 		boolean isRef = false;
-		AttributeKind kind;
-		if(eClassifier instanceof EAttribute){
-			EAttribute attribute = (EAttribute) eClassifier;
+		boolean isOpposite = false;
+		String oppositeClassName ="";
+		String oppositeAttributeName ="";
+		DependencyKind kind;
+		if(feature instanceof EAttribute){
+			EAttribute attribute = (EAttribute) feature;
 			if(attribute.getEAttributeType() instanceof EEnum){
 				type = attribute.getEAttributeType().getName();
 				this.genModel.addImport(this.packageName +"."+type);
 			}
 			else
 				type = attribute.getEAttributeType().getInstanceClassName();
-			
-			System.out.println(attribute.getEType().getInstanceTypeName());
 		}
-		else if(eClassifier instanceof EReference){
-			EReference ref = (EReference) eClassifier;
+		else if(feature instanceof EReference){
+			EReference ref = (EReference) feature;
 			type = ref.getEType().getName();
 			modelClass.addImport(this.packageName +"."+type);
-			this.genModel.addImport(this.packageName +"."+type);
-			this.genModel.addImport(this.packageName +"."+modelClass.getModel().getFactoryName());
 			isRef = true;
+			System.out.println("EREFERENCE: "+featureName);
+			if(ref.getEOpposite() != null){
+				System.out.println("IS OPPOSITE ");
+				isOpposite = true;
+				oppositeClassName = ref.getEReferenceType().getName();
+				oppositeAttributeName = ref.getEOpposite().getName();
+			}
 		}
 		else
 			throw new IllegalArgumentException("Parameter eClassifier " +WRONG_ARG_TYPE);
 		
-		boolean optional = !eClassifier.isRequired();
+		boolean optional = !feature.isRequired();
 		if(optional)
-			kind = AttributeKind.OPTIONAL_ATTRIBUTE;
+			kind = DependencyKind.OPTIONAL_ATTRIBUTE;
 		else
-			kind = AttributeKind.ATTRIBUTE;
-		if(eClassifier.isMany()){
-			kind = AttributeKind.LIST_OF_ATTRIBUTES;
+			kind = DependencyKind.ATTRIBUTE;
+
+		if(feature.isMany()){
+			kind = DependencyKind.LIST_OF_ATTRIBUTES;
 			isList = true;
 		}
-		ClassAttribute attribute = new ClassAttribute(clName,type,modelClass.getClassName());
-		attribute.setAttributeKind(kind);
+		
+		ClassAttribute attribute = new ClassAttribute(featureName,type,modelClass);
+		attribute.setDependencyKind(kind);
 		attribute.setReference(isRef);
 		attribute.setList(isList);
+		//convert primitive list type to corresponding wrapper class type
 		if(attribute.isPrimitive() && attribute.isList()){
-			attribute.setType(PrimitiveType.getPrimitiveByKeyword(attribute.getType()).getWrapperClassName());
+			attribute.setType(PrimitiveType
+					.getPrimitiveByKeyword(attribute.getType()).getWrapperClassName());
 		}
-		if(!modelClass.isHasList() && isList)
-			modelClass.setHasList(isList);
+		if(isOpposite)
+			handleOppositeRelation(attribute,oppositeClassName,oppositeAttributeName);
+		if(isOpposite && !attribute.isCreatorOfOpposite()){
+			attribute.setDependencyKind(DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
+		}
+		if(isList)
+			modelClass.setHasList(isList);	
 		if(!this.genModel.isHasList() && isList)
 			this.genModel.setHasList(isList);
 		return attribute;
 	}
+	
+	/**
+	 * Handles the opposite relation.
+	 * If this method is called the first time for an opposite relation
+	 * it means the other side of the relation is not defined in the DSLGenerationModel yet.
+	 * So the given opposite attribute is marked as the first one (the creator of the other).
+	 * When this method is called with the other side of the opposite relation
+	 * it then can complete the opposite relation.
+	 * @param currentAttribute the current opposite attribute
+	 * @param oppositeClassName name of the ModelClass the opposite is in
+	 * @param oppositeAttributeName attribute name of the opposite
+	 */
+	private void handleOppositeRelation(ClassAttribute currentAttribute,
+			String oppositeClassName, String oppositeAttributeName) {
+		// check if other side of opposite relation is already in generation model
+		ClassAttribute oppositeAttr = this.genModel.findAttribute(oppositeClassName, oppositeAttributeName);
+		if(oppositeAttr == null){
+			//Sets the start of an opposite relation
+			//the first attribute of an opp relation is the creator (i.e the setter) of the other one
+			currentAttribute.setCreatorOfOpposite(true);
+		}else{
+			//Sets both attributes as their opposite
+			currentAttribute.setOpposite(oppositeAttr);
+			oppositeAttr.setOpposite(currentAttribute);
+			
+			//tells corresponding class it has to set an opposite attribute
+			if(currentAttribute.isCreatorOfOpposite())
+				currentAttribute.addOppositeToSet(currentAttribute.getOpposite());
+			else if (oppositeAttr.isCreatorOfOpposite()) 
+				oppositeAttr.addOppositeToSet(oppositeAttr.getOpposite());
+		}
+	}
+	
+	/**
+	 * Handles the order of the ClassAttributes for the generated ModelClasses in this {@link #genModel}.
+	 * @see #createAttributeOrder(ModelClass) createAttributeOrder(ModelClass) - for ordering details
+	 */
+	private void createAttributeOrder() {
+		for (ModelClass modelClass : this.genModel.getClasses()) {
+			createAttributeOrder(modelClass);
+		}
+	}
+	
+	/**
+	 * Handles the order of ClassAttributes in a ModelClass.
+	 * It also separates the attributes to be set from the simple optional ones,
+	 * so the corresponding lists in the DSLGenerationModel can be filled with them.
+	 * Attributes with DepencyKind {@link DependencyKind} OPPOSITE_ATTRIBUTE_TO_SET are not
+	 * processed because they are set by their opposite.
+	 * @param modelClass The ModelClass object to order attributes in
+	 * @return a List with the simple optional attributes
+	 */
+	private void createAttributeOrder(ModelClass modelClass) {
+		// a list for the case that the first attributes are optional
+		List<ClassAttribute> firstOptAttr= new ArrayList<>();
+		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
+		List<ClassAttribute> attributesToSet = new ArrayList<>();
+		ClassAttribute previousRequiredAttr = null;
+		for (ClassAttribute currentAtt : modelClass.getAllAttributes()) {
+			if(currentAtt.getDependencyKind() == DependencyKind.ATTRIBUTE || // mandatory attribute
+			currentAtt.getDependencyKind() == DependencyKind.LIST_OF_ATTRIBUTES){ // lists are handled as mandatory attributes
+				attributesToSet.add(currentAtt);
+				if(previousRequiredAttr==null){
+					previousRequiredAttr = currentAtt;
+					// if first attributes are optional add them to the first mandatory attribute(scope)
+					currentAtt.setNextSimpleOptAttr(firstOptAttr);
+				}
+				else if(previousRequiredAttr!=null){
+					previousRequiredAttr.setNextAttribute(currentAtt);
+					previousRequiredAttr = currentAtt;
+				}
+			}else if(currentAtt.getDependencyKind() == DependencyKind.OPTIONAL_ATTRIBUTE){
+				currentAtt.setOptional(true);
+				if(previousRequiredAttr!=null){
+					//If its a reference to another modeled class it has also to be set
+					//even if its an optional attribute.
+					if(currentAtt.isReference()){
+						attributesToSet.add(currentAtt);
+						previousRequiredAttr.setNextAttribute(currentAtt);
+						previousRequiredAttr = currentAtt;
+					}else{
+						// type is not a modeled Class so it is a simple dependency
+						previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
+					}
+				}else{
+					if(currentAtt.isReference()){
+						attributesToSet.add(currentAtt);
+						previousRequiredAttr = currentAtt;
+						currentAtt.setNextSimpleOptAttr(firstOptAttr);
+					}else{
+						//add it to the list of the first optional attributes
+						firstOptAttr.add(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
+					}
+				}
+				
+			}
+		}
+		
+		//Special case if no required Attribute in Class
+		if(previousRequiredAttr == null){
+			boolean simpleOptionalsOnly = true;
+			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
+				if(attr.isReference())
+					simpleOptionalsOnly = false;
+			}
+			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
+			
+		}
+		else{
+			previousRequiredAttr.setLastAttribute(true);
+		}
+		
+		for (ClassAttribute attrToSet : attributesToSet) {
+			modelClass.addAttributeToSet(attrToSet);
+		}
+		for (ClassAttribute simpleOptAttr : simpleOptionalAttrs) {
+			modelClass.addSimpleOptionalAttribute(simpleOptAttr);
+		}
+	}
+	
 
 }

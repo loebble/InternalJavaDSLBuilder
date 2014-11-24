@@ -30,24 +30,20 @@ public class <genModel.modelName>{
 >>
 
 createModelClass(modelClass) ::= <<
-<! For the root model class the class definition is given !>
+<! For the root model class the class definition is another one !>
 <if(!modelClass.rootModelClass)>
 <javaDocModelClass(modelClass)>
 public static class <modelClass.className>{
 <endif>
-    <modelClass.attributes:{attribute|<createClassAttribute(attribute,"")>}>
-    <modelClass.simpleOptAttr:{attribute|<createClassAttribute(attribute,"")>}>
+    <modelClass.allAttributes:{attribute|<createClassAttribute(attribute,"")>}>
     
     <! constructor !>
     <javaDocModelClassConstructor(modelClass)>
     private <modelClass.className> (<modelClass.className>Builder builder){
-        <modelClass.attributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
-        <modelClass.simpleOptAttr:{attribute|<transferValues(attribute,"builder")>}>
+        <modelClass.allAttributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
     }
-    <modelClass.attributes:{attribute|<createModelGetter(attribute)>}>
-    <modelClass.simpleOptAttr:{attribute|<createModelGetter(attribute)>}>
-    <modelClass.attributes:{attribute|<createModelSetter(attribute)>}>
-    <modelClass.simpleOptAttr:{attribute|<createModelSetter(attribute)>}>
+    <modelClass.allAttributes:{attribute|<createModelGetter(attribute)>}>
+    <modelClass.allAttributes:{attribute|<createModelSetter(attribute)>}>
     
     <createClassBuilder(modelClass)>
     
@@ -64,11 +60,11 @@ createClassBuilder(modelClass) ::= <<
 *
 */
 public static final class <modelClass.className>Builder{
-    <if(!modelClass.attributes.empty)>
+    <if(!modelClass.attributesToSet.empty)>
     /*
     * mandatory, reference and list attributes
     */<endif>
-    <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
+    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
     <if(!modelClass.simpleOptAttr.empty)>
     /*
     * simple optional attributes
@@ -83,7 +79,7 @@ public static final class <modelClass.className>Builder{
     * Used for object scoping inside the builder.
     */
     private final <modelClass.className>BuildScope <modelClass.className;format="lower">BuildScope;<endif>
-    <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
+    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
     <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
     <javaDocBuilderConstructor(modelClass)>
@@ -92,23 +88,16 @@ public static final class <modelClass.className>Builder{
         <else>
 this.<modelClass.className;format="lower">BuildScope = new <modelClass.className>BuildScope();
         <endif>
-        <modelClass.attributes:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
+        <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
     }
     <! If it is the root Model class all Entrypoint Methods are generated here !>
     <if(modelClass.rootModelClass)><generateAllEntryPointMethods(modelClass)><endif>
     <! opposite attributes doesnt have scope classes and setter methods!>
-    <modelClass.attributes:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(classAttribute)><endif>}>
+    <modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(classAttribute)><endif>}>
     <if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
     <else><buildScopeClass(modelClass)>
     <endif>
 }
->>
-
-createModelAttribute(classAttribute) ::= <<
-<if(!classAttribute.optional)>
-private <classAttribute.attributeName>IsSet;<endif>
-<if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName>;<else>
-private <classAttribute.type> <classAttribute.attributeName>;<endif>
 >>
 
 transferValues(attribute, builderName) ::= <<
@@ -191,8 +180,8 @@ generateEntryPointMethod(modelClass) ::= <<
 *@return the first scope class of the <modelClass.className>Builder
 */
 <if(!modelClass.simpleOptionalsOnly)>
-public static <modelClass.className>.<modelClass.className>Builder.<first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
-	return new <modelClass.className>.<modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
+public static <modelClass.className>.<modelClass.className>Builder.<first(modelClass.attributesToSet).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
+	return new <modelClass.className>.<modelClass.className>Builder().<first(modelClass.attributesToSet).attributeName>Scope;
 }
 <else>
 
@@ -228,25 +217,25 @@ buildObjectMethod(modelClass) ::= <<
 */
 public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
 	<modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
-	<modelClass.createdByOpposite:{nestedAttributeRef|<setOpAttribute(modelClass,nestedAttributeRef)>}>
+	<modelClass.oppositesToSet:{opAttributeToSet|<setOpAttribute(modelClass,opAttributeToSet)>}>
 	return <modelClass.className;format="lower">;
 }
 >>
 
-setOpAttribute(modelClass,nestedAttributeRef) ::= <<
-<if(nestedAttributeRef.opposite.optional)>if(<modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>IsSet){
-    <doOPSetting(modelClass, nestedAttributeRef)>
+setOpAttribute(modelClass,opAttributeToSet) ::= <<
+<if(opAttributeToSet.opposite.optional)>if(<modelClass.className;format="lower">.<opAttributeToSet.opposite.attributeName>IsSet){
+    <doOPSetting(modelClass, opAttributeToSet)>
 }
-<else><doOPSetting(modelClass, nestedAttributeRef)><endif>
+<else><doOPSetting(modelClass, opAttributeToSet)><endif>
 
 >>
 
-doOPSetting(modelClass,nestedAttributeRef) ::= <<
-<if(nestedAttributeRef.opposite.list)>
-for (<nestedAttributeRef.opposite.type> item : <modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>) {
-    item.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);
+doOPSetting(modelClass,opAttributeToSet) ::= <<
+<if(opAttributeToSet.opposite.list)>
+for (<opAttributeToSet.opposite.type> item : <modelClass.className;format="lower">.<opAttributeToSet.opposite.attributeName>) {
+    item.set<opAttributeToSet.attributeName;format="cap">(<modelClass.className;format="lower">);
 }
-<else><modelClass.className;format="lower">.<nestedAttributeRef.opposite.attributeName>.set<nestedAttributeRef.attributeName;format="cap">(<modelClass.className;format="lower">);
+<else><modelClass.className;format="lower">.<opAttributeToSet.opposite.attributeName>.set<opAttributeToSet.attributeName;format="cap">(<modelClass.className;format="lower">);
 <endif>
 >>
 

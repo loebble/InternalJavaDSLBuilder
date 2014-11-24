@@ -1,8 +1,5 @@
 package de.htwg.javafluentdsl.parser.emf.using;
 
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder.createPost;
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder.createSimpleForum;
-import static de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder.createUser;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
@@ -13,6 +10,12 @@ import org.junit.Test;
 
 import de.htwg.generated.emf.dsl.optonly.multiBuilder.OptOnlyBuilder;
 import de.htwg.generated.emf.dsl.optonly.multiBuilder.RefBuilder;
+import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder;
+import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder;
+import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder;
+import de.htwg.generated.emf.dsl.testmodel.multiBuilder.AClassBuilder;
+import de.htwg.generated.emf.dsl.testmodel.multiBuilder.BClassBuilder;
+import de.htwg.generated.emf.dsl.testmodel.multiBuilder.TestModelBuilder;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
 import de.htwg.generated.emf.model.SimpleForum.Post;
 /*
@@ -20,6 +23,7 @@ import de.htwg.generated.emf.model.SimpleForum.Post;
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.User;
+import de.htwg.generated.emf.model.TestModel.TestModel;
 import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilder;
 
 /**
@@ -68,36 +72,46 @@ public class EMFUsing_MultipleBuilder {
 	
 	@Test
 	public void SimpleForumMultiBuilderTest() throws MalformedURLException {
-		
-		User user1 = createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
+		//No static import here to show that multiple Builders are used
+		User user1 = UserBuilder.createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
 					.optionalAge(age).email(email)
+						.addPosts(
+							PostBuilder.createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
+							.buildPost()
+						)
 						.noPosts()
-						.noForum()
 					.buildUser();
+		Post post1 = user1.getPosts().get(0);
+		Post post2 = PostBuilder.createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
+				 .buildPost();
+		user1.getPosts().add(post2);
 		
-		User user2 = createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
+		User user2 = UserBuilder.createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
 				.optionalAge(age2).email(email2)
 					.noPosts()
-					.noForum()
 				.buildUser();
 		
-		Post post1 = createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
-							.creator(user1)
-					 .buildPost();
+		Post post3 = PostBuilder.createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
+				.buildPost();
 		
-		
-		Post post2 = createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
-				.creator(user1)
-		 .buildPost();
-		
-		SimpleForum simpleForum = createSimpleForum().name(forumName).url(new URL(urlString))
+		SimpleForum simpleForum = SimpleForumBuilder.createSimpleForum().name(forumName).url(new URL(urlString))
 									.addUsers(user1).addUsers(user2)
 									.noUsers()
 							 .buildSimpleForum();
 		
+		assertTrue(EMFUsing.validateObject(user1));
+		assertTrue(EMFUsing.validateObject(post1));
+		assertTrue(EMFUsing.validateObject(post2));
+		assertTrue(EMFUsing.validateObject(post3));
+		assertTrue(EMFUsing.validateObject(simpleForum));
+		//user2 has no posts, but at least one post is required
+		assertTrue(!EMFUsing.validateObject(user2));
+		user2.getPosts().add(post3);
+		assertTrue(EMFUsing.validateObject(user2));
+		
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
-		assertTrue(user2.getPosts().size() == 0);
+		assertTrue(user2.getPosts().size() == 1);
 		assertTrue(simpleForum.getUsers().size() == 2);
 		// check for same opposite objects, regardless from which side they were set
 		assertTrue(EcoreUtil.equals(user1.getPosts().get(0) , post1));
@@ -122,6 +136,22 @@ public class EMFUsing_MultipleBuilder {
 		assertTrue(opt.getRef().getOtherName().equals("otherName"));
 		assertTrue(opt.getRef().isSomeNumber() ==true);
 		
+	}
+	
+	@Test
+	public void TestModelMultiBuilderTest(){
+		TestModel testModel = TestModelBuilder.createTestModel()
+			.a(
+				AClassBuilder.createAClass().bClassRef(
+						//Has only an opposite attr to the aClass which is set by buildAClass
+						BClassBuilder.createBClass()
+						.buildBClass()
+				).buildAClass()
+			).buildTestModel();
+		
+		assertTrue(EMFUsing.validateObject(testModel));
+		assertTrue(EMFUsing.validateObject(testModel.getA()));
+		assertTrue(EMFUsing.validateObject(testModel.getA().getBClassRef()));
 	}
 	
 }

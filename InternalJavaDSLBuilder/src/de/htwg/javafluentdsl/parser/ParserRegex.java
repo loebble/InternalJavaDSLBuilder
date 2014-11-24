@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.htwg.javafluentdsl.dslmodel.AttributeKind;
+import de.htwg.javafluentdsl.dslmodel.DependencyKind;
 import de.htwg.javafluentdsl.dslmodel.ClassAttribute;
 import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
@@ -81,7 +81,7 @@ public final class ParserRegex implements IParser{
 	 * @return new Instance of the CreatorRegex class
 	 */
 	public static ParserRegex getInstance(String modelDescription){
-		if(!RegexUtil.doesModelDescriptionMatch(modelDescription)){
+		if(!RegexUtil.isDescriptionMatching(modelDescription)){
 			//try to find class description which failed
 			Pattern p = Pattern.compile(RegexUtil.CLASS_DEFINITION);
 			Matcher m = p.matcher(modelDescription);
@@ -92,15 +92,16 @@ public final class ParserRegex implements IParser{
 			if(endOfLastCorrectClass == 0)
 				appendedErrorMsg = "\n First class definition has errors";
 			else
-				appendedErrorMsg = "\n Error in class definition after :'" + modelDescription.substring(endOfLastCorrectClass -10, endOfLastCorrectClass) + "'...";
+				appendedErrorMsg = "\n Error in class definition after :'" 
+						+ modelDescription.substring(endOfLastCorrectClass -10, endOfLastCorrectClass) + "'...";
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
 		ParserRegex creator = new ParserRegex();
 		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();
-		creator.genModel.setAttributeOrder();
 		creator.retrieveImports();
+		creator.createAttributeOrder();
 		return creator;
 	}
 	
@@ -206,13 +207,13 @@ public final class ParserRegex implements IParser{
 	}
 	
 	/**
-	 * Retives the attributes and their properties from the class definition and adds them to to given modelClass.
-	 * @param classDef
-	 * @param modelClass
-	 * @return
+	 * Retrieves the attributes and their properties from the class definition 
+	 * and creates a ClassAttribute representation in the given modelClass. 
+	 * All created Attributes for the ModelClass are internally added its allAttributes list.
+	 * @param classDef String with class definition
+	 * @param modelClass the corresponding ModelClass 
 	 */
-	private List<ClassAttribute> retrieveAttributes(String classDef, ModelClass modelClass) {
-		List<ClassAttribute> attributes = new ArrayList<ClassAttribute>();
+	private void retrieveAttributes(String classDef, ModelClass modelClass) {
 		Matcher attrDefMatcher = RegexUtil.CLASS_ATTRIBUTES_PATTERN.matcher(classDef);
 		while(attrDefMatcher.find()){
 			Matcher singleAttrMatcher = RegexUtil.ATTRIBUTE_ALL_PATTERN.matcher(attrDefMatcher.group());
@@ -221,16 +222,21 @@ public final class ParserRegex implements IParser{
 				String attrName = getNameOfDefinition(attrDef);
 				attrName = Character.toLowerCase(attrName.charAt(0)) + attrName.substring(1);
 				String attrType = getTypeOfDefinition(attrDef);
-				AttributeKind kind = getKind(attrDef);
+				DependencyKind kind = getKind(attrDef);
 				// if class is defined make sure capital letter is used
 				boolean isRef = false;
 				if(isClassDefined(attrType)){
 					attrType = Character.toUpperCase(attrType.charAt(0)) + attrType.substring(1);
 					isRef = true;
 				}
-				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass.getClassName());
-				currentAttr.setAttributeKind(kind);
-				if(kind.equals(AttributeKind.LIST_OF_ATTRIBUTES)){
+				//check if same name is already in ModelClass
+				if(modelClass.getSpefificAttribute(attrName) != null)
+					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
+							+ " Attribute '"+attrName +"' in class " + modelClass.getClassName());
+				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass);
+				currentAttr.setReference(isRef);
+				currentAttr.setDependencyKind(kind);
+				if(kind.equals(DependencyKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
 					if(currentAttr.isPrimitive())
 						//TODO If Time Left implement Auto Boxing etc in Template
@@ -240,19 +246,10 @@ public final class ParserRegex implements IParser{
 					this.genModel.setHasList(true);
 					modelClass.setHasList(true);
 				}
-				if(modelClass.getSpefificAttribute(attrName) != null)
-					throw new IllegalArgumentException(SAME_ATTRIBUTE_MULTIPLE_TIMES
-							+ " Attribute '"+attrName +"' in class " + modelClass.getClassName());
-				currentAttr.setAttributeName(attrName);
-				currentAttr.setAttributeFullName(modelClass.getClassName()+attrName);
-				currentAttr.setReference(isRef);
-				attributes.add(currentAttr);
-				modelClass.addAttribute(currentAttr);
-				if(currentAttr.getAttributeKind() == AttributeKind.OPPOSITE_ATTRIBUTE)
+				if(currentAttr.getDependencyKind() == DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET)
 					setOppositeAttribute(currentAttr,attrDef);
 			}
 		}
-		return attributes;
 	}
 	
 	/**
@@ -280,23 +277,25 @@ public final class ParserRegex implements IParser{
 						(currentAttr.getAttributeFullName()))
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_THE_SAME 
 							+ " Given OP Attribute: "+opDef);
-				else
-					currentAttr.setOpposite(oppositeAttribute);
+				currentAttr.setOpposite(oppositeAttribute);
+				currentAttr.getOpposite().setCreatorOfOpposite(true);
 				checkForMatchingType(currentAttr, oppositeAttribute);
-				oppModelClass.addCreatedByOpposite(currentAttr); //adds nested attribute reference to enclosing class
-				currentAttr.setReferencedByAttribute(true);
+				//adds the current attribute to the opposites attributes ModelClass
+				//so it will later be set by that ModelClass
+				oppModelClass.addOppositeToSet(currentAttr); 
 			}
 			else 
 				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  
-						+ " referenced by " + opDef);
+						+ " but referenced by " + opDef +" . An opposite attributes type has "
+								+ "to be defined before the attribute itself.");
 		}
 	}
 
 	/**
 	 * Checks if the attribute's opposite ClassAttribute has the correct type.
-	 * Throws a IllegalArgumentException if the types doesnt match.
 	 * @param attribute one side of the opposite relation
 	 * @param oppositeAttribute the other side of the relation
+	 * @throws IllegalArgumentException if the types do not match.
 	 */
 	private void checkForMatchingType(ClassAttribute attribute,
 			ClassAttribute oppositeAttribute) {
@@ -305,12 +304,6 @@ public final class ParserRegex implements IParser{
 					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" 
 							+ oppositeAttribute.getAttributeName()+":"+oppositeAttribute.getType() 
 							+ "' referencing attribute '" +attribute.getAttributeName() +":"+attribute.getType()+"'");
-//		if(!oppositeAttribute.getType().equals(attribute.getClassName()) || TODO check if vice versa also in RegexModel needed!!!
-//				   !attribute.getType().equals(oppositeAttribute.getClassName()))
-//					throw new IllegalArgumentException(OPPOSITE_DIFFERENT_TYPE + " OP attr '" 
-//							+ attribute.getAttributeName()+":"+attribute.getType() 
-//							+ "' referencing attribute '" +oppositeAttribute.getAttributeName() 
-//							+":"+oppositeAttribute.getType()+"'");
 	}
 
 	/**
@@ -327,19 +320,19 @@ public final class ParserRegex implements IParser{
 	}
 	
 	/**
-	 * Returns the matching AttributeKind depending on the Start of the attribute definition
+	 * Returns the matching DependencyKind depending on the Start of the attribute definition
 	 * @param attrDef the attribute defined in the language description
 	 * @return the matching AttributeKind or null if none is found
 	 */
-	private AttributeKind getKind(String attrDef){
+	private DependencyKind getKind(String attrDef){
 		if(attrDef.startsWith(RegexUtil.ATTR_START))
-			return AttributeKind.ATTRIBUTE;
+			return DependencyKind.ATTRIBUTE;
 		else if (attrDef.startsWith(RegexUtil.OPT_START))
-			return AttributeKind.OPTIONAL_ATTRIBUTE;
+			return DependencyKind.OPTIONAL_ATTRIBUTE;
 		else if (attrDef.startsWith(RegexUtil.LIST_START))
-			return AttributeKind.LIST_OF_ATTRIBUTES;
+			return DependencyKind.LIST_OF_ATTRIBUTES;
 		else if (attrDef.startsWith(RegexUtil.OPPOSITE_START))
-			return AttributeKind.OPPOSITE_ATTRIBUTE;
+			return DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET;
 		else return null;
 	}
 	
@@ -365,4 +358,95 @@ public final class ParserRegex implements IParser{
 			}
 		}
 	}
+	
+	
+	/**
+	 * Handles the order of the ClassAttributes for the generated ModelClasses in this {@link #genModel}.
+	 * @see #createAttributeOrder(ModelClass) createAttributeOrder(ModelClass) - for ordering details
+	 */
+	private void createAttributeOrder() {
+		for (ModelClass modelClass : this.genModel.getClasses()) {
+			createAttributeOrder(modelClass);
+		}
+	}
+	
+	/**
+	 * Handles the order of ClassAttributes in a ModelClass.
+	 * It also separates the attributes to be set from the simple optional ones,
+	 * so the corresponding lists in the DSLGenerationModel can be filled with them.
+	 * Attributes with DepencyKind {@link DependencyKind} OPPOSITE_ATTRIBUTE_TO_SET are not
+	 * processed because they are set by their opposite.
+	 * @param modelClass The ModelClass object to order attributes in
+	 * @return a List with the simple optional attributes
+	 */
+	private void createAttributeOrder(ModelClass modelClass) {
+		// a list for the case that the first attributes are optional
+		List<ClassAttribute> firstOptAttr= new ArrayList<>();
+		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
+		List<ClassAttribute> attributesToSet = new ArrayList<>();
+		ClassAttribute previousRequiredAttr = null;
+		for (ClassAttribute currentAtt : modelClass.getAllAttributes()) {
+			if(currentAtt.getDependencyKind() == DependencyKind.ATTRIBUTE || // mandatory attribute
+			currentAtt.getDependencyKind() == DependencyKind.LIST_OF_ATTRIBUTES){ // lists are handled as mandatory attributes
+				attributesToSet.add(currentAtt);
+				if(previousRequiredAttr==null){
+					previousRequiredAttr = currentAtt;
+					// if first attributes are optional add them to the first mandatory attribute(scope)
+					currentAtt.setNextSimpleOptAttr(firstOptAttr);
+				}
+				else if(previousRequiredAttr!=null){
+					previousRequiredAttr.setNextAttribute(currentAtt);
+					previousRequiredAttr = currentAtt;
+				}
+			}else if(currentAtt.getDependencyKind() == DependencyKind.OPTIONAL_ATTRIBUTE){
+				currentAtt.setOptional(true);
+				if(previousRequiredAttr!=null){
+					//If its a reference to another modeled class it has also to be set
+					//even if its an optional attribute.
+					if(currentAtt.isReference()){
+						attributesToSet.add(currentAtt);
+						previousRequiredAttr.setNextAttribute(currentAtt);
+						previousRequiredAttr = currentAtt;
+					}else{
+						// type is not a modeled Class so it is a simple dependency
+						previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
+					}
+				}else{
+					if(currentAtt.isReference()){
+						attributesToSet.add(currentAtt);
+						previousRequiredAttr = currentAtt;
+						currentAtt.setNextSimpleOptAttr(firstOptAttr);
+					}else{
+						//add it to the list of the first optional attributes
+						firstOptAttr.add(currentAtt);
+						simpleOptionalAttrs.add(currentAtt);
+					}
+				}
+				
+			}
+		}
+		
+		//Special case if no required Attribute in Class
+		if(previousRequiredAttr == null){
+			boolean simpleOptionalsOnly = true;
+			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
+				if(attr.isReference())
+					simpleOptionalsOnly = false;
+			}
+			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
+			
+		}
+		else{
+			previousRequiredAttr.setLastAttribute(true);
+		}
+		
+		for (ClassAttribute attrToSet : attributesToSet) {
+			modelClass.addAttributeToSet(attrToSet);
+		}
+		for (ClassAttribute simpleOptAttr : simpleOptionalAttrs) {
+			modelClass.addSimpleOptionalAttribute(simpleOptAttr);
+		}
+	}
+	
 }

@@ -13,15 +13,14 @@ import java.util.ArrayList;
 *
 */
 public final class <modelClass.className>Builder {
-    <if(!modelClass.attributesToSet.empty)>// mandatory, reference and list attributes<endif>
-    <modelClass.attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
+    <if(!modelClass.attributes.empty)>// mandatory, reference and list attributes<endif>
+    <modelClass.attributes:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
     <if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
     <modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
     // scope references
     <! simpleOptionalsOnly classes dont have build scopes !>
     <if(!modelClass.simpleOptionalsOnly)>private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; <endif>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)
-       ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><createScopeAttribute(classAttribute)><endif>}>
+    <modelClass.attributes:{classAttribute|<createScopeAttribute(classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
     private <modelClass.className;format="cap">Builder() {
@@ -29,14 +28,12 @@ public final class <modelClass.className>Builder {
         <else>// building Scope
     this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
         <endif>
-        <if(!modelClass.attributesToSet.empty)>// attribute Scopes <endif>
-        <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)
-        ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><instantiateScopeAttributes(classAttribute)><endif>}>
+        <if(!modelClass.attributes.empty)>// attribute Scopes <endif>
+        <modelClass.attributes:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
     }
     
     <generateEntryPointMethod(modelClass)>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createAttributeScopeClass(modelClass.className,classAttribute)
-       ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><createAttributeScopeClass(modelClass.className,classAttribute)><endif>}>
+    <modelClass.attributes:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
     <else><emfBuildScopeClass(modelClass)>
     <endif>
@@ -44,6 +41,27 @@ public final class <modelClass.className>Builder {
 
 >>
 
+createModelGetter(attribute) ::= <<
+<if(attribute.list)>public List\<<attribute.type>\> get<attribute.attributeName;format="cap">() {
+<else>public <attribute.type> get<attribute.attributeName;format="cap">() { 
+<endif>
+    return <attribute.attributeName>;
+}
+<if(attribute.optional)>public boolean is<attribute.attributeName;format="cap">Set() { 
+    return <attribute.attributeName>IsSet;
+}<endif>
+
+>>
+
+createModelSetter(attribute) ::= <<
+<if(attribute.list)>public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>) {
+    this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
+}
+<endif>public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>) {
+    this.<attribute.attributeName> = <attribute.attributeName>;
+}
+
+>>
 
 generateEMFCreateModelInstance(modelClass) ::= <<
 /**
@@ -57,7 +75,7 @@ generateEMFCreateModelInstance(modelClass) ::= <<
 private <modelClass.className> create<modelClass.className>Instance(final <modelClass.className>Builder builder) {
     <modelClass.model.factoryName> factory = <modelClass.model.factoryName>.eINSTANCE;
     <modelClass.className> instance = factory.create<modelClass.className>();
-    <modelClass.attributesToSet:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")>
+    <modelClass.attributes:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")>
     <else><transferListValuesToEClass(attribute,"builder","instance")>
     <endif>}>
     <modelClass.simpleOptAttr:{attribute|<transferOptValuesToEClass(attribute,"builder","instance")>}>
@@ -87,8 +105,8 @@ generateEntryPointMethod(modelClass) ::= <<
 * Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
 */
 <if(!modelClass.simpleOptionalsOnly)>
-public static final <first(modelClass.attributesToSet).attributeName; format="cap">Scope create<modelClass.className;format="cap">() {
-    return new <modelClass.className>Builder().<first(modelClass.attributesToSet).attributeName>Scope;
+public static final <first(modelClass.attributes).attributeName; format="cap">Scope create<modelClass.className;format="cap">() {
+    return new <modelClass.className>Builder().<first(modelClass.attributes).attributeName>Scope;
 }
 <else>
 public static final SimpleOptionalsOnlyScope create<modelClass.className;format="cap">() {
@@ -129,17 +147,23 @@ private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
 >>
 
 createScopeAttribute(classAttribute) ::= <<
-<if(!classAttribute.opposite)>private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-<elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))>private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-<endif>
+<if((classAttribute.list) &&
+(!classAttribute.optional))>private final <classAttribute.attributeName;format="cap">MustAddScope <classAttribute.attributeName>MustAddScope;<endif>
+private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
+
 >>
 
 instantiateScopeAttributes(classAttribute) ::= <<
+<if((classAttribute.list) &&
+(!classAttribute.optional))>this.<classAttribute.attributeName>MustAddScope = this.new <classAttribute.attributeName;format="cap">MustAddScope();<endif>
 this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
 
 >>
 
 createAttributeScopeClass(className,classAttribute) ::= <<
+<! Special case if List has to have at least one Element !>
+<if((classAttribute.list) && (!classAttribute.optional))>
+<createMustAddScope(className,classAttribute)><endif>
 <if(classAttribute.list)><javaDocListScopeClass(classAttribute)>
 <elseif(classAttribute.reference)><javaDocRefernceScopeClass(classAttribute)>
 <else><javaDocScopeClass(classAttribute)>
@@ -148,6 +172,23 @@ public class <classAttribute.attributeName;format="cap">Scope {
     <createAttributeMethod(className,classAttribute)>
     <! foreach simple optional attribute !>
     <classAttribute.nextSimpleOptAttr:{optAttr|<createSimpleOptAttrMethod(className, classAttribute.attributeName, optAttr)>}>
+}
+>>
+
+createMustAddScope(className,classAttribute) ::= <<
+/**
+* ScopeClass forcing the user to add at least one <classAttribute.type> value
+* to the <classAttribute.attributeName>Value list.
+*/
+public class <classAttribute.attributeName;format="cap">MustAddScope{
+    /**
+    * Adds the first required <classAttribute.type> object to the <classAttribute.attributeName> List.
+    *@param val the <classAttribute.type> object 
+    */
+    public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap"> (<classAttribute.type> val){
+        <className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val);
+        return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
+    }
 }
 >>
 
@@ -191,13 +232,18 @@ public final <getNextScopeClass(className,classAttribute)> no<classAttribute.att
 >>
 
 getNextScopeClass(className,classAttribute) ::= <<
-<! retrieves the next Scope Class for the Method header !>
-<if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else><classAttribute.nextAttribute.attributeName;format="cap">Scope<endif>
+<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))
+><classAttribute.nextAttribute.attributeName;format="cap">MustAddScope<else
+    ><if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else
+        ><classAttribute.nextAttribute.attributeName;format="cap">Scope<
+    endif
+><endif>
 >>
 
 getNextScopeAttr(className,classAttribute) ::= <<
 <! retrieves the next Scope Attribute for Method return !>
-<if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif>
+<if((classAttribute.nextAttribute.list) &&(!classAttribute.nextAttribute.optional))><classAttribute.nextAttribute.attributeName>MustAddScope<else
+><if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif><endif>
 >>
 
 

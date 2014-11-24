@@ -26,7 +26,7 @@ public class DSLGenerationModel {
 	private String modelName;
 	
 	/**
-	 * A list of imports the model has
+	 * A list of imports the model has to have
 	 */
 	private List<String> imports;
 	
@@ -44,95 +44,6 @@ public class DSLGenerationModel {
 	 * List of classes the model has described.
 	 */
 	private final List<ModelClass> classes;
-	
-	
-	/**
-	 * Handles the order of the ClassAttributes for the generated ModelClasses in {@link #classes}.
-	 * Call this Method after all Classes and their attributes are defined correctly and added to {@link #classes}
-	 * @see #setAttributeOrderInClass(ModelClass) setAttributeOrderInClass(ModelClass) - for order algorithm
-	 */
-	public void setAttributeOrder() {
-		for (ModelClass modelClass : classes) {
-			List<ClassAttribute> optionalAttrs = setAttributeOrderInClass(modelClass);
-			handleOptionalAttributes(optionalAttrs, modelClass);
-		}
-	}
-	
-	/**
-	 * Sets the order of ClassAttributes in a ModelClass
-	 * @param modelClass The ModelClass object to order attributes in
-	 * @return a List<ClassAttribute> with the simpleOptionalAttributes
-	 */
-	private List<ClassAttribute> setAttributeOrderInClass(ModelClass modelClass) { //TODO refactor with attributeKind SIMPLE:OPTIONAL_ATTRIBUTE, to reduce complexity
-		List<ClassAttribute> firstOptAttr= new ArrayList<>();
-		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
-		ClassAttribute previousRequiredAttr = null;
-		for (ClassAttribute currentAtt : modelClass.getAttributes()) {
-			if(currentAtt.getAttributeKind() == AttributeKind.ATTRIBUTE || // mandatory attribute
-			currentAtt.getAttributeKind() == AttributeKind.LIST_OF_ATTRIBUTES){ // lists are handled as mandatory attributes
-				if(previousRequiredAttr==null){
-					previousRequiredAttr = currentAtt;
-					// if first attributes are optional add them to the first mandatory attribute(scope)
-					currentAtt.setNextSimpleOptAttr(firstOptAttr);
-				}
-				else if(previousRequiredAttr!=null){
-					previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-					previousRequiredAttr = currentAtt;
-				}
-			}else if(currentAtt.getAttributeKind() == AttributeKind.OPTIONAL_ATTRIBUTE){ // optional attribute
-				currentAtt.setOptional(true);
-				if(previousRequiredAttr!=null){
-					if(currentAtt.isReference()){
-						previousRequiredAttr.setNextAttribute(currentAtt); //TODO nextAttribute needed if class is defined? = else
-						previousRequiredAttr = currentAtt;
-					}else{
-						// type is not a modeled Class e.g. a simple types
-						previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}else{
-					//reference to another ModelClass?
-					if(currentAtt.isReference()){
-						previousRequiredAttr = currentAtt;
-						currentAtt.setNextSimpleOptAttr(firstOptAttr);
-					}else{
-						firstOptAttr.add(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}
-				
-			}
-		}
-		//Special Case if no required Attribute in Class
-		if(previousRequiredAttr == null){
-			boolean simpleOptionalsOnly = true;
-			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
-				if(attr.isReference())
-					simpleOptionalsOnly = false;
-			}
-			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			return simpleOptionalAttrs;
-		}
-		else{
-			previousRequiredAttr.setLastAttribute(true);
-			return simpleOptionalAttrs;
-		}
-	}
-	
-	/**
-	 * Handles the simple optionalAttributes of a ModelClass.
-	 * It removes them from the attributes list
-	 * and adds them to the optionalAttrubutes list for separation purpose
-	 * @param optionalAttrs List of simple optional attributes 
-	 * @param modelClass the ModelClass in which the attribute is defined
-	 */
-	private void handleOptionalAttributes(List<ClassAttribute> optionalAttrs, ModelClass modelClass) {
-		for (ClassAttribute optAttr : optionalAttrs) {
-			modelClass.addSimpleOptionalAttribute(optAttr);
-			modelClass.getAttributes().remove(optAttr);
-		}
-		
-	}
 	
 	/**
 	 * Searches the whole DSLGenerationModel for the a ClassAttribute
@@ -277,25 +188,26 @@ public class DSLGenerationModel {
 				sb.append(imp + "; ");
 			}
 			sb.append("\n");
-			for (ClassAttribute attr : modelClass.getAttributes()) {
+			for (ClassAttribute attr : modelClass.getAttributesToSet()) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
-						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
+						+ " kind: " +attr.getDependencyKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
 				if(attr.getOpposite()!=null)
-					sb.append(" opposite: " +attr.getOpposite().getAttributeFullName()
-							+ " isRefBy: " +attr.isReferencedByAttribute()+
-							" isCreatorOfOpp: " +attr.isCreatorOfOpposite());
+					sb.append(" opposite: " +attr.getOpposite().getClassName()+"."+attr.getOpposite().getAttributeName()
+							+ " isCreatorOfOpp: " +attr.isCreatorOfOpposite());
 				sb.append("\n");
 			}
 			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
-						+ " kind: " +attr.getAttributeKind()+" " + " reference: " +attr.isReference()
+						+ " kind: " +attr.getDependencyKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional()+ "\n");
 			}
-			for (ClassAttribute referencedCl : modelClass.getCreatedByOpposite()) {
+			for (ClassAttribute referencedCl : modelClass.getOppositesToSet()) {
 				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." 
-						+ referencedCl.getOpposite().getAttributeName() +" referenced by nestedClassAttr: "
-						+referencedCl.getClassName() + "." + referencedCl.getAttributeName() +"\n");
+						+ referencedCl.getOpposite().getAttributeName()
+						+ " is creator opposite of "
+						+ referencedCl.getClassName() + "." + referencedCl.getAttributeName()
+						+"\n");
 			}
 		}
 		return sb.toString();
@@ -303,7 +215,7 @@ public class DSLGenerationModel {
 	
 	/**
 	 * Creates a String representation of the order the classes and attributes 
-	 * that are in this model.
+	 * that are set in this model.
 	 * 
 	 * @return the created String with the corresponding order
 	 */
@@ -312,7 +224,7 @@ public class DSLGenerationModel {
 		for (ModelClass modelClass : classes) {
 			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
 			int i = 0;
-			for (ClassAttribute attr : modelClass.getAttributes()) {
+			for (ClassAttribute attr : modelClass.getAttributesToSet()) {
 				if(i == 0)
 					sb.append(" "+attr.getAttributeName() +":" +attr.getType());
 				if(attr.getNextAttribute() != null)

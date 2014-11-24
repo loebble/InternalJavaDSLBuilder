@@ -31,7 +31,7 @@ public class GeneratorUtil {
 	 * @return STGroup 
 	 * 			  object for accessing the template file
 	 */
-	public static STGroup getStringGroup(String templatePath) {
+	public static STGroup getStringTemplateFromPath(String templatePath) {
 		STGroup group = new STGroupFile(templatePath);
 		group.registerRenderer(String.class, new StringRenderer());
 		return group;

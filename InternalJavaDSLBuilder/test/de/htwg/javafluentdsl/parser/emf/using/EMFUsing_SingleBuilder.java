@@ -13,13 +13,17 @@ import org.junit.Test;
 
 
 
+
 import de.htwg.generated.emf.dsl.optonly.singleBuilder.OptOnlyBuilder;
+import de.htwg.generated.emf.dsl.testmodel.singleBuilder.TestModelBuilder;
+import static de.htwg.generated.emf.dsl.testmodel.singleBuilder.TestModelBuilder.*;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
 /*
  * Imports for EMF Model and DSL Builders
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.User;
+import de.htwg.generated.emf.model.TestModel.TestModel;
 import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilder;
 
 /**
@@ -75,30 +79,27 @@ public class EMFUsing_SingleBuilder {
 						createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
 						.optionalAge(age).email(email)
 							.addPosts(createPost().optionalText(postText1).optionalViews(5).title(postTitle1)
-										.creatorSetByOpposite()
 										.buildPost()
 									 )
 							 .addPosts(createPost().optionalText(postText2).optionalViews(10).title(postTitle2)
-									     .creatorSetByOpposite()
 										 .buildPost())
 							 .noPosts()
-							 .forumSetByOpposite()
 						.buildUser()
 				).addUsers(
 					createUser().optionalFirstName(firstName2).optionalLastName(lastName2).nickName(nickName2)
 					.optionalAge(age2).email(email2)
 						.addPosts(
-								createPost().optionalText(postText1).optionalViews(11).title(postTitle2).creatorSetByOpposite().buildPost()
+								createPost().optionalText(postText1).optionalViews(11)
+									.title(postTitle2).buildPost()
 								)
 						.noPosts()
-						.forumSetByOpposite()
 					.buildUser()
 						)
 				.noUsers()
 		.buildSimpleForum();
 		
-		User user1 = simpleForum.getUsers().get(0); 
-		User user2 = simpleForum.getUsers().get(1); 
+		User user1 = simpleForum.getUsers().get(0);
+		User user2 = simpleForum.getUsers().get(1);
 		
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
@@ -119,6 +120,8 @@ public class EMFUsing_SingleBuilder {
 		
 	}
 	
+	
+	
 	@Test
 	public void OptOnly_SingleBuilderTest(){
 		OptOnly opt = OptOnlyBuilder.createOptOnly().optionalName("ad").optionalSomeOtherAttr(12)
@@ -131,6 +134,22 @@ public class EMFUsing_SingleBuilder {
 		assertTrue(opt.getRef().getOtherName().equals("otherName"));
 		assertTrue(opt.getRef().isSomeNumber() ==true);
 		
+	}
+	
+	@Test
+	public void TestModelSingleBuilderTest(){
+		TestModel testModel = TestModelBuilder.createTestModel()
+			.a(
+				createAClass().bClassRef(
+						//Has only an opposite attr to the aClass which is set by buildAClass
+						createBClass()
+						.buildBClass()
+				).buildAClass()
+			).buildTestModel();
+		
+		assertTrue(EMFUsing.validateObject(testModel));
+		assertTrue(EMFUsing.validateObject(testModel.getA()));
+		assertTrue(EMFUsing.validateObject(testModel.getA().getBClassRef()));
 	}
 	
 //	private void rndTest() {

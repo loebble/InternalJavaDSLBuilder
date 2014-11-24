@@ -21,15 +21,16 @@ public class ModelClass {
 	 */
 	public ModelClass(String name, DSLGenerationModel model) {
 		this.model = model;
-		className = name;
-		attributes = new ArrayList<ClassAttribute>();
-		simpleOptAttr = new ArrayList<ClassAttribute>();
-		createdByOpposite = new ArrayList<ClassAttribute>();
+		this.className = name;
+		this.allAttributes = new ArrayList<ClassAttribute>();
+		this.attributesToSet = new ArrayList<ClassAttribute>();
+		this.simpleOptAttr = new ArrayList<ClassAttribute>();
+		this.oppositesToSet = new ArrayList<ClassAttribute>();
 		this.imports = new ArrayList<String>();
 	}
 
 	/**
-	 * Searches {@link #attributes} for the given fullAttributeName. The
+	 * Searches {@link #attributesToSet} for the given fullAttributeName. The
 	 * fullAttributeName is defined by the class name + the attribute name.
 	 * 
 	 * @param fullAttributeName
@@ -39,7 +40,7 @@ public class ModelClass {
 	 */
 	public ClassAttribute getSpefificAttributeByFullName(
 			String fullAttributeName) {
-		for (ClassAttribute attr : this.attributes) {
+		for (ClassAttribute attr : this.allAttributes) {
 			if (attr.getAttributeFullName().equals(fullAttributeName))
 				return attr;
 		}
@@ -47,7 +48,7 @@ public class ModelClass {
 	}
 
 	/**
-	 * Searches {@link #attributes} for the given attribute name.
+	 * Searches {@link #attributesToSet} for the given attribute name.
 	 * 
 	 * @param attributeName
 	 *            name to search for
@@ -55,7 +56,7 @@ public class ModelClass {
 	 * @see ClassAttribute#getAttributeName()
 	 */
 	public ClassAttribute getSpefificAttribute(String attributeName) {
-		for (ClassAttribute attr : this.attributes) {
+		for (ClassAttribute attr : this.allAttributes) {
 			if (attr.getAttributeName().equals(attributeName))
 				return attr;
 		}
@@ -75,18 +76,26 @@ public class ModelClass {
 	 * 
 	 */
 	private boolean rootModelClass;
+	
+	/**
+	 * A List which holds all Attributes of the this ModelClass.
+	 * All Attributes means regardless of their dependency kind and other values.
+	 */
+	private ArrayList<ClassAttribute> allAttributes;
+	
 	/**
 	 * Holds the mandatory, list and reference attributes of this ModelClass
 	 */
-	private List<ClassAttribute> attributes;
+	private List<ClassAttribute> attributesToSet;
 	/**
 	 * Holds the simple optional attributes this ModelClass has
 	 */
 	private List<ClassAttribute> simpleOptAttr;
 	/**
-	 * Holds the opposite Attributes which are set in the DSL by this ModelClass
+	 * Holds the opposite Attributes of this ModelClass which has to set the other ends
+	 * (i.e. their opposite) reference to complete a bidirectional relation. 
 	 */
-	private List<ClassAttribute> createdByOpposite;
+	private List<ClassAttribute> oppositesToSet;
 	/**
 	 * True if this ModelClass only consists of simple optional attributes
 	 * 
@@ -112,10 +121,10 @@ public class ModelClass {
 	}
 
 	/**
-	 * Gets {@link #attributes}.
+	 * Gets {@link #attributesToSet}.
 	 */
-	public List<ClassAttribute> getAttributes() {
-		return attributes;
+	public List<ClassAttribute> getAttributesToSet() {
+		return attributesToSet;
 	}
 
 	/**
@@ -124,6 +133,22 @@ public class ModelClass {
 	public List<ClassAttribute> getSimpleOptAttr() {
 		return simpleOptAttr;
 	}
+	
+	/**
+	 * gets All attributes of this ModelClass
+	 * @see {@link #allAttributes}
+	 */
+	public ArrayList<ClassAttribute> getAllAttributes() {
+		return allAttributes;
+	}
+
+	/**
+	 * 
+	 * @param allAttributes
+	 */
+	public void addToAllAttributes(ClassAttribute attribute) {
+		this.allAttributes.add(attribute);
+	}
 
 	/**
 	 * Adds a {@link ClassAttribute} to this ModelClass
@@ -131,12 +156,8 @@ public class ModelClass {
 	 * @param attribute
 	 *            the attribute to be added
 	 */
-	public void addAttribute(ClassAttribute attribute) {
-		attribute.setModelClass(this);
-		attribute.setClassName(this.className);
-		attribute.setAttributeFullName(this.className
-				+ attribute.getAttributeName());
-		this.attributes.add(attribute);
+	public void addAttributeToSet(ClassAttribute attribute) {
+		this.attributesToSet.add(attribute);
 	}
 
 	/**
@@ -179,20 +200,20 @@ public class ModelClass {
 	}
 
 	/**
-	 * Gets {@link #createdByOpposite}.
+	 * Gets {@link #oppositesToSet}.
 	 */
-	public List<ClassAttribute> getCreatedByOpposite() {
-		return createdByOpposite;
+	public List<ClassAttribute> getOppositesToSet() {
+		return oppositesToSet;
 	}
 
 	/**
-	 * Adds ClassAttribute to {@link #createdByOpposite}.
+	 * Adds ClassAttribute to {@link #oppositesToSet}.
 	 * 
-	 * @param createdByOpposite
+	 * @param opToSet
 	 *            the ClassAttribute to be added
 	 */
-	public void addCreatedByOpposite(ClassAttribute createdByOpposite) {
-		this.createdByOpposite.add(createdByOpposite);
+	public void addOppositeToSet(ClassAttribute opToSet) {
+		this.oppositesToSet.add(opToSet);
 	}
 
 	/**

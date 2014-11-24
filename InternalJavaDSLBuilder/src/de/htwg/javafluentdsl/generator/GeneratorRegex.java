@@ -95,7 +95,7 @@ public class GeneratorRegex {
 	
 	private static String regexGenerateModelInternDSL_NEW_SingleFile(ModelClass modelClass,
 			String targetPackage){
-				STGroup group = GeneratorUtil.getStringGroup(REGEX_TEMPLATES_DIR_PATH
+				STGroup group = GeneratorUtil.getStringTemplateFromPath(REGEX_TEMPLATES_DIR_PATH
 						+ INTERN_BUILDER_FILE_NEW);
 				ST modelTemplate = group.getInstanceOf("ModelTemplate");
 				modelTemplate.add("packageName", targetPackage);
@@ -117,7 +117,7 @@ public class GeneratorRegex {
 	 */
 	private static String regexGenerateModelInternDSL(
 			DSLGenerationModel dslModel, String targetPackage) {
-		STGroup group = GeneratorUtil.getStringGroup(REGEX_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil.getStringTemplateFromPath(REGEX_TEMPLATES_DIR_PATH
 				+ INTERN_BUILDER_FILE);
 		ST simpleBT = group.getInstanceOf("ModelTemplate");
 		simpleBT.add("packageName", targetPackage);
@@ -169,7 +169,7 @@ public class GeneratorRegex {
 	 */
 	private static String regexGenerateSeperatedModel(
 			DSLGenerationModel dslModel, String targetPackage) {
-		STGroup group = GeneratorUtil.getStringGroup(REGEX_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil.getStringTemplateFromPath(REGEX_TEMPLATES_DIR_PATH
 				+ SEPARATED_BUILDER_FILE);
 		ST modelTemplate = group.getInstanceOf("Model");
 		modelTemplate.add("packageName", targetPackage);
@@ -191,7 +191,7 @@ public class GeneratorRegex {
 	 */
 	private static String regexGenerateSeperatedBuilder(
 			DSLGenerationModel dslModel, String targetPackage) {
-		STGroup group = GeneratorUtil.getStringGroup(REGEX_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil.getStringTemplateFromPath(REGEX_TEMPLATES_DIR_PATH
 				+ SEPARATED_BUILDER_FILE);
 		ST modelTemplate = group.getInstanceOf("Builder");
 		modelTemplate.add("packageName", targetPackage);

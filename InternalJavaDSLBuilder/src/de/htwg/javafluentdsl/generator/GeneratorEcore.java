@@ -115,7 +115,7 @@ public class GeneratorEcore{
 	 */
 	private static String ecoreGenerateMultiBuilderFile(ModelClass modelClass,
 			String targetPackage) {
-		STGroup group = GeneratorUtil.getStringGroup(ECORE_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
 				+ MULTI_TEMPLATE_FILE);
 		ST modelTemplate = group.getInstanceOf("ClassBuilder");
 		modelTemplate.add("packageName", targetPackage);
@@ -139,7 +139,7 @@ public class GeneratorEcore{
 	 */
 	private static String ecoreGenerateSingleBuilderDSL(
 			DSLGenerationModel dslModel, String targetPackage) {
-		STGroup group = GeneratorUtil.getStringGroup(ECORE_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
 				+ SINGLE_TEMPLATE_FILE);
 		ST simpleBT = group.getInstanceOf("SingleBuilder");
 		simpleBT.add("packageName", targetPackage);

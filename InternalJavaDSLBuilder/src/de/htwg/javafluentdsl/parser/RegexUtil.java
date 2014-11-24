@@ -9,7 +9,7 @@ import java.util.regex.Pattern;
  * Also provides the Patterns for matching purposes.
  *
  */
-public class RegexUtil {
+public final class RegexUtil {
 	
 	// Util Class therefore No Instantiation
 	public RegexUtil(){}
@@ -104,11 +104,11 @@ public class RegexUtil {
 			+ "expression for a model description: \n" +RegexUtil.MODEL_DESCRIPTION;
 	
 	/**
-	 * Method for checking if given description String is a valid one
+	 * Method for checking if given description String is a valid one.
 	 * @param modelDescription the description for the model and therefore for the DSL
 	 * @return true if it is a valid description
 	 */
-	public static boolean doesModelDescriptionMatch(String modelDescription){
+	public static boolean isDescriptionMatching(String modelDescription){
 		return modelDescription.matches(RegexUtil.MODEL_DESCRIPTION);
 	}
 	
