@@ -32,7 +32,9 @@ public final class ClassAttribute {
 	 */
 	private String type;
 	/**
-	 * True if the attribute is not mandatory in the model
+	 * True if the attribute is required in the model.
+	 * But not necessarily mean that the attribute 
+	 * kind is {@link DependencyKind#OPTIONAL_ATTRIBUTE}.
 	 */
 	private boolean optional = false;
 	/**
@@ -266,8 +268,8 @@ public final class ClassAttribute {
 	 * Adds the given ClassAttribute to this {@link ModelClass#oppositesToSet}
 	 * List.
 	 */
-	public void addOppositeToSet(ClassAttribute referencedBy) {
-		this.getModelClass().addOppositeToSet(referencedBy);
+	public void addOppositeToSet(ClassAttribute oppToSet) {
+		this.getModelClass().addOppositeToSet(oppToSet);
 	}
 
 	/**

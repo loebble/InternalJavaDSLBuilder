@@ -64,7 +64,8 @@ public static final class <modelClass.className>Builder{
     /*
     * mandatory, reference and list attributes
     */<endif>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
+    <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>!>
+    <modelClass.attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
     <if(!modelClass.simpleOptAttr.empty)>
     /*
     * simple optional attributes
@@ -79,7 +80,8 @@ public static final class <modelClass.className>Builder{
     * Used for object scoping inside the builder.
     */
     private final <modelClass.className>BuildScope <modelClass.className;format="lower">BuildScope;<endif>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
+    <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>!>
+    <modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
     <javaDocBuilderConstructor(modelClass)>
@@ -88,12 +90,14 @@ public static final class <modelClass.className>Builder{
         <else>
 this.<modelClass.className;format="lower">BuildScope = new <modelClass.className>BuildScope();
         <endif>
-        <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
+        <modelClass.attributesToSet:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
+        <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>!>
     }
     <! If it is the root Model class all Entrypoint Methods are generated here !>
     <if(modelClass.rootModelClass)><generateAllEntryPointMethods(modelClass)><endif>
     <! opposite attributes doesnt have scope classes and setter methods!>
-    <modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(classAttribute)><endif>}>
+    <!<modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(classAttribute)><endif>}>!>
+    <modelClass.attributesToSet:{classAttribute|<createAttributeScopeClass(classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
     <else><buildScopeClass(modelClass)>
     <endif>

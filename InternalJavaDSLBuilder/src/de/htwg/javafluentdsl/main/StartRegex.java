@@ -22,7 +22,6 @@ public class StartRegex implements IStart{
 		Generator.generateDSL(creator, templateOption,
 				targetPackage);
 		System.out.println(creator.getGenerationModel().printModel());
-		System.out.println(creator.getGenerationModel().printOrder());
 	}
 
 }

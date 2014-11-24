@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ExceptionCase" nsURI="myExceptionCaseURI" nsPrefix="ExceptionCasePrefix">
+  <eClassifiers xsi:type="ecore:EClass" name="ExceptionCase">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="a" eType="#//OppositeWithOPT"
+        eOpposite="#//OppositeWithOPT/aOPRef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="b" eType="#//OppositeWithMand"
+        eOpposite="#//OppositeWithMand/bOPRef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="c" eType="#//OppositeOnly"
+        eOpposite="#//OppositeOnly/cOPRef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeWithOPT">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="aOPRef" eType="#//ExceptionCase"
+        eOpposite="#//ExceptionCase/a"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeWithMand">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringValue" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bOPRef" eType="#//ExceptionCase"
+        eOpposite="#//ExceptionCase/b"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeOnly">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cOPRef" lowerBound="1"
+        eType="#//ExceptionCase" eOpposite="#//ExceptionCase/c"/>
+  </eClassifiers>
+</ecore:EPackage>

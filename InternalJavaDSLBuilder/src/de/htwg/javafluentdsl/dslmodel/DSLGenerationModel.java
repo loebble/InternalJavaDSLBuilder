@@ -175,7 +175,7 @@ public class DSLGenerationModel {
 	 */
 	public String printModel() {
 		StringBuffer sb = new StringBuffer();
-		sb.append("DSL for: "+this.modelName +"\n");
+		sb.append("DSL Model for: "+this.modelName +"\n");
 		sb.append("IMPORTS: ");
 		for (String importString : this.imports) {
 			sb.append(importString + "; ");
@@ -188,7 +188,7 @@ public class DSLGenerationModel {
 				sb.append(imp + "; ");
 			}
 			sb.append("\n");
-			for (ClassAttribute attr : modelClass.getAttributesToSet()) {
+			for (ClassAttribute attr : modelClass.getAllAttributes()) {
 				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
 						+ " kind: " +attr.getDependencyKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
@@ -196,11 +196,6 @@ public class DSLGenerationModel {
 					sb.append(" opposite: " +attr.getOpposite().getClassName()+"."+attr.getOpposite().getAttributeName()
 							+ " isCreatorOfOpp: " +attr.isCreatorOfOpposite());
 				sb.append("\n");
-			}
-			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
-				sb.append("\t" + "Name: " +attr.getAttributeName() + " type: " +attr.getType() 
-						+ " kind: " +attr.getDependencyKind()+" " + " reference: " +attr.isReference()
-						+ " optional: " +attr.isOptional()+ "\n");
 			}
 			for (ClassAttribute referencedCl : modelClass.getOppositesToSet()) {
 				sb.append("\t" + referencedCl.getOpposite().getClassName() + "." 

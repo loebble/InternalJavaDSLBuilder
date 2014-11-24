@@ -61,4 +61,28 @@
             genModel="emfmodel/SimpleTypes.genmodel"/>
    </extension>
 
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated ExceptionCase -->
+      <package
+            uri="myExceptionCaseURI"
+            class="de.htwg.generated.emf.model.ExceptionCase.ExceptionCasePackage"
+            genModel="emfmodel/ExceptionCase.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated ExceptionCaseList -->
+      <package
+            uri="myExceptionCaseListURI"
+            class="de.htwg.generated.emf.model.ExceptionCaseList.ExceptionCaseListPackage"
+            genModel="emfmodel/ExceptionCaseList.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Expression -->
+      <package
+            uri="ExpressionURI"
+            class="de.htwg.expression.Expression.ExpressionPackage"
+            genModel="emfmodel/Expression.genmodel"/>
+   </extension>
+
 </plugin>

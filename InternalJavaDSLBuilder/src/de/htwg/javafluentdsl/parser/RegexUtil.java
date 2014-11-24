@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 public final class RegexUtil {
 	
 	// Util Class therefore No Instantiation
-	public RegexUtil(){}
+	private RegexUtil(){}
 	
 	//Parts of regular expressions
 	public static final String CLASS_START = ".class";

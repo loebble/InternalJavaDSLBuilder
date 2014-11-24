@@ -82,8 +82,6 @@ public class StartEMF implements IStart {
 				factoryName);
 		Generator.generateDSL(parser, templateOption,
 				targetPackage);
-		System.out.println(parser.getGenerationModel().printModel());
-		System.out.println(parser.getGenerationModel().printOrder());
 	}
 
 	/**

@@ -1,5 +1,13 @@
 package de.htwg.javafluentdsl.parser.emf.using;
 
+import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.ExceptionCaseBuilder.createExceptionCase;
+import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.OppositeOnlyBuilder.createOppositeOnly;
+import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.OppositeWithMandBuilder.createOppositeWithMand;
+import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.OppositeWithOPTBuilder.createOppositeWithOPT;
+import static de.htwg.generated.emf.dsl.exceptionCaseList.multiBuilder.ExceptionCaseListBuilder.createExceptionCaseList;
+import static de.htwg.generated.emf.dsl.exceptionCaseList.multiBuilder.OppositeOnlyListBuilder.createOppositeOnlyList;
+import static de.htwg.generated.emf.dsl.exceptionCaseList.multiBuilder.OppositeWithMandListBuilder.createOppositeWithMandList;
+import static de.htwg.generated.emf.dsl.exceptionCaseList.multiBuilder.OppositeWithOPTListBuilder.createOppositeWithOPTList;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
@@ -13,9 +21,8 @@ import de.htwg.generated.emf.dsl.optonly.multiBuilder.RefBuilder;
 import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder;
 import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder;
 import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder;
-import de.htwg.generated.emf.dsl.testmodel.multiBuilder.AClassBuilder;
-import de.htwg.generated.emf.dsl.testmodel.multiBuilder.BClassBuilder;
-import de.htwg.generated.emf.dsl.testmodel.multiBuilder.TestModelBuilder;
+import de.htwg.generated.emf.model.ExceptionCase.ExceptionCase;
+import de.htwg.generated.emf.model.ExceptionCaseList.ExceptionCaseList;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
 import de.htwg.generated.emf.model.SimpleForum.Post;
 /*
@@ -23,7 +30,6 @@ import de.htwg.generated.emf.model.SimpleForum.Post;
  */
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import de.htwg.generated.emf.model.TestModel.TestModel;
 import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilder;
 
 /**
@@ -139,19 +145,57 @@ public class EMFUsing_MultipleBuilder {
 	}
 	
 	@Test
-	public void TestModelMultiBuilderTest(){
-		TestModel testModel = TestModelBuilder.createTestModel()
-			.a(
-				AClassBuilder.createAClass().bClassRef(
-						//Has only an opposite attr to the aClass which is set by buildAClass
-						BClassBuilder.createBClass()
-						.buildBClass()
-				).buildAClass()
-			).buildTestModel();
+	public void ExceptionCase_SingleBuilderTest() {
+		ExceptionCase exCase = createExceptionCase()
+				.a(createOppositeWithOPT().optionalStringValue("OptionalA")
+						.buildOppositeWithOPT())
+				.b(createOppositeWithMand().stringValue("MandatoryString")
+						.buildOppositeWithMand())
+				.c(createOppositeOnly().buildOppositeOnly())
+				.buildExceptionCase();
+
+		assertTrue(EMFUsing.validateObject(exCase));
+		assertTrue(EMFUsing.validateObject(exCase));
+		assertTrue(EMFUsing.validateObject(exCase.getA()));
+		assertTrue(EMFUsing.validateObject(exCase.getB()));
+		assertTrue(EMFUsing.validateObject(exCase.getC()));
+		//String values has been set
+		assertTrue("OptionalA".equals(exCase.getA().getStringValue()));
+		assertTrue("MandatoryString".equals(exCase.getB().getStringValue()));
+		//EMF Equals
+		assertTrue(EcoreUtil.equals(exCase, exCase.getA().getAOPRef()));
+		assertTrue(EcoreUtil.equals(exCase, exCase.getB().getBOPRef()));
+		assertTrue(EcoreUtil.equals(exCase, exCase.getC().getCOPRef()));
+	}
+
+	@Test
+	public void ExceptionCaseList_SingleBuilderTest() {
+		ExceptionCaseList exCaseList = createExceptionCaseList()
+				.addA(createOppositeWithOPTList().optionalStringValue(
+						"OptionalA").buildOppositeWithOPTList())
+				.noA()
+				.addB(createOppositeWithMandList().stringValue(
+						"MandatoryString").buildOppositeWithMandList())
+				.noB()
+				.addC(createOppositeOnlyList().buildOppositeOnlyList())
+				.noC()
+				.buildExceptionCaseList();
 		
-		assertTrue(EMFUsing.validateObject(testModel));
-		assertTrue(EMFUsing.validateObject(testModel.getA()));
-		assertTrue(EMFUsing.validateObject(testModel.getA().getBClassRef()));
+		assertTrue(EMFUsing.validateObject(exCaseList));
+		assertTrue(EMFUsing.validateObject(exCaseList.getA().get(0)));
+		assertTrue(EMFUsing.validateObject(exCaseList.getB().get(0)));
+		assertTrue(EMFUsing.validateObject(exCaseList.getC().get(0)));
+		//sizes of each list and opposites list
+		assertTrue(exCaseList.getA().size() == 1 && exCaseList.getA().get(0).getAOPRef().size() == 1);
+		assertTrue(exCaseList.getB().size() == 1 && exCaseList.getB().get(0).getBOPRef().size() == 1);
+		assertTrue(exCaseList.getC().size() == 1 && exCaseList.getC().get(0).getCOPRef().size() == 1);
+		//String values has been set
+		assertTrue("OptionalA".equals(exCaseList.getA().get(0).getStringValue()));
+		assertTrue("MandatoryString".equals(exCaseList.getB().get(0).getStringValue()));
+		//EMF Equals
+		assertTrue(EcoreUtil.equals(exCaseList, exCaseList.getA().get(0).getAOPRef().get(0)));
+		assertTrue(EcoreUtil.equals(exCaseList, exCaseList.getB().get(0).getBOPRef().get(0)));
+		assertTrue(EcoreUtil.equals(exCaseList, exCaseList.getC().get(0).getCOPRef().get(0)));
 	}
 	
 }

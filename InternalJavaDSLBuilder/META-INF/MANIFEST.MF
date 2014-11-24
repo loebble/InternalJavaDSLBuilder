@@ -21,7 +21,19 @@ Export-Package: de.htwg.generated.emf.model.SimpleForum,
  de.htwg.generated.emf.model.OptOnly.util,
  de.htwg.generated.emf.model.SimpleTypes,
  de.htwg.generated.emf.model.SimpleTypes.impl,
- de.htwg.generated.emf.model.SimpleTypes.util
+ de.htwg.generated.emf.model.SimpleTypes.util,
+ de.htwg.generated.emf.model.ExceptionCase,
+ de.htwg.generated.emf.model.ExceptionCase.impl,
+ de.htwg.generated.emf.model.ExceptionCase.util,
+ ExceptionCaseList,
+ ExceptionCaseList.impl,
+ ExceptionCaseList.util,
+ de.htwg.generated.emf.model.ExceptionCaseList,
+ de.htwg.generated.emf.model.ExceptionCaseList.impl,
+ de.htwg.generated.emf.model.ExceptionCaseList.util,
+ de.htwg.expression.Expression,
+ de.htwg.expression.Expression.impl,
+ de.htwg.expression.Expression.util
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.emf.ecore;visibility:=reexport
 Bundle-ActivationPolicy: lazy

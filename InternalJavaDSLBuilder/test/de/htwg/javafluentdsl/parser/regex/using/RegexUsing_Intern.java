@@ -113,7 +113,12 @@ public class RegexUsing_Intern {
 				.noUser()
 		.buildSimpleForum();
 		assertTrue(simpleForum.getUser().get(0).getNickName().equals(nickName) && simpleForum.getUser().get(0).getPost().getTitle().equals(postTitle1)
-				&& simpleForum.getUser().get(0).getPost().getCreator().getNickName().equals(nickName));
+				&& simpleForum.getUser()
+				.get(0)
+				.getPost()
+				.getCreator()
+				.getNickName()
+				.equals(nickName));
 	}
 	
 	@Test

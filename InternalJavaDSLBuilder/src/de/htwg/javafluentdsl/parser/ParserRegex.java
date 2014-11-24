@@ -91,8 +91,8 @@ public final class ParserRegex implements IParser{
 			String appendedErrorMsg = "";
 			if(endOfLastCorrectClass == 0)
 				appendedErrorMsg = "\n First class definition has errors";
-			else
-				appendedErrorMsg = "\n Error in class definition after :'" 
+			else //class definitions are always greater than 10 characters
+				appendedErrorMsg = "\n Error in class definition after :'"
 						+ modelDescription.substring(endOfLastCorrectClass -10, endOfLastCorrectClass) + "'...";
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
@@ -101,7 +101,7 @@ public final class ParserRegex implements IParser{
 		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		creator.retrieveDefinedClasses();
 		creator.retrieveImports();
-		creator.createAttributeOrder();
+		ParserUtil.createAttributeOrder(creator.getGenerationModel());
 		return creator;
 	}
 	
@@ -235,6 +235,13 @@ public final class ParserRegex implements IParser{
 							+ " Attribute '"+attrName +"' in class " + modelClass.getClassName());
 				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass);
 				currentAttr.setReference(isRef);
+//				if(isRef){
+//					//optional declared in Regex Model only means optional in the model
+//					if(kind == DependencyKind.OPTIONAL_ATTRIBUTE){
+//						kind = DependencyKind.ATTRIBUTE;
+//						currentAttr.setOptional(true);
+//					}
+//				}
 				currentAttr.setDependencyKind(kind);
 				if(kind.equals(DependencyKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
@@ -246,8 +253,9 @@ public final class ParserRegex implements IParser{
 					this.genModel.setHasList(true);
 					modelClass.setHasList(true);
 				}
-				if(currentAttr.getDependencyKind() == DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET)
+				if(currentAttr.getDependencyKind() == DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET){
 					setOppositeAttribute(currentAttr,attrDef);
+				}
 			}
 		}
 	}
@@ -278,10 +286,9 @@ public final class ParserRegex implements IParser{
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_THE_SAME 
 							+ " Given OP Attribute: "+opDef);
 				currentAttr.setOpposite(oppositeAttribute);
-				currentAttr.getOpposite().setCreatorOfOpposite(true);
+//				oppositeAttribute.setOpposite(currentAttr);
+				oppositeAttribute.setCreatorOfOpposite(true);
 				checkForMatchingType(currentAttr, oppositeAttribute);
-				//adds the current attribute to the opposites attributes ModelClass
-				//so it will later be set by that ModelClass
 				oppModelClass.addOppositeToSet(currentAttr); 
 			}
 			else 
@@ -356,96 +363,6 @@ public final class ParserRegex implements IParser{
 					}
 				}
 			}
-		}
-	}
-	
-	
-	/**
-	 * Handles the order of the ClassAttributes for the generated ModelClasses in this {@link #genModel}.
-	 * @see #createAttributeOrder(ModelClass) createAttributeOrder(ModelClass) - for ordering details
-	 */
-	private void createAttributeOrder() {
-		for (ModelClass modelClass : this.genModel.getClasses()) {
-			createAttributeOrder(modelClass);
-		}
-	}
-	
-	/**
-	 * Handles the order of ClassAttributes in a ModelClass.
-	 * It also separates the attributes to be set from the simple optional ones,
-	 * so the corresponding lists in the DSLGenerationModel can be filled with them.
-	 * Attributes with DepencyKind {@link DependencyKind} OPPOSITE_ATTRIBUTE_TO_SET are not
-	 * processed because they are set by their opposite.
-	 * @param modelClass The ModelClass object to order attributes in
-	 * @return a List with the simple optional attributes
-	 */
-	private void createAttributeOrder(ModelClass modelClass) {
-		// a list for the case that the first attributes are optional
-		List<ClassAttribute> firstOptAttr= new ArrayList<>();
-		List<ClassAttribute> simpleOptionalAttrs = new ArrayList<>();
-		List<ClassAttribute> attributesToSet = new ArrayList<>();
-		ClassAttribute previousRequiredAttr = null;
-		for (ClassAttribute currentAtt : modelClass.getAllAttributes()) {
-			if(currentAtt.getDependencyKind() == DependencyKind.ATTRIBUTE || // mandatory attribute
-			currentAtt.getDependencyKind() == DependencyKind.LIST_OF_ATTRIBUTES){ // lists are handled as mandatory attributes
-				attributesToSet.add(currentAtt);
-				if(previousRequiredAttr==null){
-					previousRequiredAttr = currentAtt;
-					// if first attributes are optional add them to the first mandatory attribute(scope)
-					currentAtt.setNextSimpleOptAttr(firstOptAttr);
-				}
-				else if(previousRequiredAttr!=null){
-					previousRequiredAttr.setNextAttribute(currentAtt);
-					previousRequiredAttr = currentAtt;
-				}
-			}else if(currentAtt.getDependencyKind() == DependencyKind.OPTIONAL_ATTRIBUTE){
-				currentAtt.setOptional(true);
-				if(previousRequiredAttr!=null){
-					//If its a reference to another modeled class it has also to be set
-					//even if its an optional attribute.
-					if(currentAtt.isReference()){
-						attributesToSet.add(currentAtt);
-						previousRequiredAttr.setNextAttribute(currentAtt);
-						previousRequiredAttr = currentAtt;
-					}else{
-						// type is not a modeled Class so it is a simple dependency
-						previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}else{
-					if(currentAtt.isReference()){
-						attributesToSet.add(currentAtt);
-						previousRequiredAttr = currentAtt;
-						currentAtt.setNextSimpleOptAttr(firstOptAttr);
-					}else{
-						//add it to the list of the first optional attributes
-						firstOptAttr.add(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
-				}
-				
-			}
-		}
-		
-		//Special case if no required Attribute in Class
-		if(previousRequiredAttr == null){
-			boolean simpleOptionalsOnly = true;
-			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
-				if(attr.isReference())
-					simpleOptionalsOnly = false;
-			}
-			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			
-		}
-		else{
-			previousRequiredAttr.setLastAttribute(true);
-		}
-		
-		for (ClassAttribute attrToSet : attributesToSet) {
-			modelClass.addAttributeToSet(attrToSet);
-		}
-		for (ClassAttribute simpleOptAttr : simpleOptionalAttrs) {
-			modelClass.addSimpleOptionalAttribute(simpleOptAttr);
 		}
 	}
 	

@@ -20,8 +20,7 @@ public final class <modelClass.className>Builder {
     // scope references
     <! simpleOptionalsOnly classes dont have build scopes !>
     <if(!modelClass.simpleOptionalsOnly)>private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; <endif>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)
-       ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><createScopeAttribute(classAttribute)><endif>}>
+    <modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
     private <modelClass.className;format="cap">Builder() {
@@ -30,13 +29,11 @@ public final class <modelClass.className>Builder {
     this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
         <endif>
         <if(!modelClass.attributesToSet.empty)>// attribute Scopes <endif>
-        <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)
-        ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><instantiateScopeAttributes(classAttribute)><endif>}>
+        <modelClass.attributesToSet:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
     }
     
     <generateEntryPointMethod(modelClass)>
-    <modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createAttributeScopeClass(modelClass.className,classAttribute)
-       ><elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))><createAttributeScopeClass(modelClass.className,classAttribute)><endif>}>
+    <modelClass.attributesToSet:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
     <else><emfBuildScopeClass(modelClass)>
     <endif>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ExceptionCaseList" nsURI="myExceptionCaseListURI" nsPrefix="ExceptionCaseListPrefix">
+  <eClassifiers xsi:type="ecore:EClass" name="ExceptionCaseList">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="a" upperBound="10" eType="#//OppositeWithOPTList"
+        eOpposite="#//OppositeWithOPTList/aOPRef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="b" upperBound="-1" eType="#//OppositeWithMandList"
+        eOpposite="#//OppositeWithMandList/bOPRef"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="c" upperBound="-1" eType="#//OppositeOnlyList"
+        eOpposite="#//OppositeOnlyList/cOPRef"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeWithOPTList">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringValue" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="aOPRef" upperBound="-1"
+        eType="#//ExceptionCaseList" eOpposite="#//ExceptionCaseList/a"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeWithMandList">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="stringValue" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bOPRef" upperBound="-1"
+        eType="#//ExceptionCaseList" eOpposite="#//ExceptionCaseList/b"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="OppositeOnlyList">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="cOPRef" upperBound="-1"
+        eType="#//ExceptionCaseList" eOpposite="#//ExceptionCaseList/c"/>
+  </eClassifiers>
+</ecore:EPackage>

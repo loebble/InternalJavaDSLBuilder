@@ -8,15 +8,16 @@ import de.htwg.javafluentdsl.generator.GeneratorEcore;
 import de.htwg.javafluentdsl.main.StartEMF;
 
 public class EMFCreation_MultipleBuilder {
-	public static final String projectPath = Paths.get(".").toAbsolutePath()
+	private static final String projectPath = Paths.get(".").toAbsolutePath()
 			.normalize().toString();
-	public static final String EMFGenModelPath = projectPath + "/emfmodel/";
+	private static final String EMFGenModelPath = projectPath + "/emfmodel/";
 	
-	public final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
-	public final static String FORUM_DEST = PACKAGE_DEST+".forum";
-	public final static String TESTMODEL_DEST = PACKAGE_DEST+".testmodel";
-	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
-	public final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
+	private final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
+	private final static String FORUM_DEST = PACKAGE_DEST+".forum";
+	private final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
+	private final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
+	private static final String EXCMODEL_DEST = PACKAGE_DEST+".exceptionCase";
+	private static final String EXC_LISTMODEL_DEST =PACKAGE_DEST+".exceptionCaseList";
 	
 	
 	@Test
@@ -41,12 +42,23 @@ public class EMFCreation_MultipleBuilder {
 	}
 	
 	@Test
-	public void testModel_MultiBuilderTest() {
-		String genModelPath = EMFGenModelPath + "TestModel.genmodel";
-		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.MULTIPLE_BUILDER_OPTION, TESTMODEL_DEST+".multiBuilder");
-		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.TestModelBuilder","java");
-		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.AClassBuilder","java");
-		EMFCreation.fileExists(TESTMODEL_DEST+".multiBuilder.BClassBuilder","java");
+	public void exceptionModel_MultiBuilderTest() {
+		String genModelPath = EMFGenModelPath + "ExceptionCase.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.MULTIPLE_BUILDER_OPTION, EXCMODEL_DEST+".multiBuilder");
+		EMFCreation.fileExists(EXCMODEL_DEST+".multiBuilder.ExceptionCaseBuilder","java");
+		EMFCreation.fileExists(EXCMODEL_DEST+".multiBuilder.OppositeOnlyBuilder","java");
+		EMFCreation.fileExists(EXCMODEL_DEST+".multiBuilder.OppositeWithMandBuilder","java");
+		EMFCreation.fileExists(EXCMODEL_DEST+".multiBuilder.OppositeWithOPTBuilder","java");
+	}
+	
+	@Test
+	public void exceptionListModel_MultiBuilderTest() {
+		String genModelPath = EMFGenModelPath + "ExceptionCaseList.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.MULTIPLE_BUILDER_OPTION, EXC_LISTMODEL_DEST+".multiBuilder");
+		EMFCreation.fileExists(EXC_LISTMODEL_DEST+".multiBuilder.ExceptionCaseListBuilder","java");
+		EMFCreation.fileExists(EXC_LISTMODEL_DEST+".multiBuilder.OppositeOnlyListBuilder","java");
+		EMFCreation.fileExists(EXC_LISTMODEL_DEST+".multiBuilder.OppositeWithMandListBuilder","java");
+		EMFCreation.fileExists(EXC_LISTMODEL_DEST+".multiBuilder.OppositeWithOPTListBuilder","java");
 	}
 	
 	@Test

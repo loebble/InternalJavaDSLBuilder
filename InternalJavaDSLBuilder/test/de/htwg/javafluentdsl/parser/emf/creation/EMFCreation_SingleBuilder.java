@@ -9,12 +9,13 @@ public class EMFCreation_SingleBuilder {
 	
 	public static final String EMFGenModelPath = EMFCreation.projectPath + "/emfmodel/";
 	
-	public final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
-	public final static String FORUM_DEST = PACKAGE_DEST+".forum";
-	public final static String TESTMODEL_DEST = PACKAGE_DEST+".testmodel";
-	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
-	public final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
-	public final static String ENUM_DEST = PACKAGE_DEST+".enumtest";
+	private final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
+	private final static String FORUM_DEST = PACKAGE_DEST+".forum";
+	private final static String EXCMODEL_DEST = PACKAGE_DEST+".exceptionCase";
+	private static final String EXC_LISTMODEL_DEST =PACKAGE_DEST+".exceptionCaseList";
+	private final static String SIMPLE_FORUM_DEST = PACKAGE_DEST+".simpleForum";
+	private final static String OPTONLY_DEST = PACKAGE_DEST+".optonly";
+	private final static String ENUM_DEST = PACKAGE_DEST+".enumtest";
 	
 	
 	@Test
@@ -32,10 +33,17 @@ public class EMFCreation_SingleBuilder {
 	}
 	
 	@Test
-	public void testModel_SINGLEBuilderTest() {
-		String genModelPath = EMFGenModelPath + "TestModel.genmodel";
-		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.SINGLE_BUILDER_OPTION, TESTMODEL_DEST+".singleBuilder");
-		EMFCreation.fileExists(TESTMODEL_DEST+".singleBuilder.TestModelBuilder","java");
+	public void exceptionModel_SingleBuilderTest() {
+		String genModelPath = EMFGenModelPath + "ExceptionCase.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.SINGLE_BUILDER_OPTION, EXCMODEL_DEST+".singleBuilder");
+		EMFCreation.fileExists(EXCMODEL_DEST+".singleBuilder.ExceptionCaseBuilder","java");
+	}
+	
+	@Test
+	public void exceptionListModel_SingleBuilderTest() {
+		String genModelPath = EMFGenModelPath + "ExceptionCaseList.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.SINGLE_BUILDER_OPTION, EXC_LISTMODEL_DEST+".singleBuilder");
+		EMFCreation.fileExists(EXC_LISTMODEL_DEST+".singleBuilder.ExceptionCaseListBuilder","java");
 	}
 	
 	@Test
@@ -50,4 +58,11 @@ public class EMFCreation_SingleBuilder {
 		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.SINGLE_BUILDER_OPTION, ENUM_DEST+".singleBuilder");
 		EMFCreation.fileExists(ENUM_DEST+".singleBuilder.SimpleTypesBuilder","java");
 	}
+//	@Test
+//	public void Expression_SingleBuilderTest(){
+//		String genModelPath = EMFGenModelPath + "Expression.genmodel";
+//		new StartEMF().startDSLGenerationProcess(genModelPath, GeneratorEcore.SINGLE_BUILDER_OPTION,"de.htwg.expression.dsl.singleBuilder");
+//		EMFCreation.fileExists("de.htwg.expression.dsl.singleBuilder.ExpressionBuilder","java");
+//	}
+	
 }

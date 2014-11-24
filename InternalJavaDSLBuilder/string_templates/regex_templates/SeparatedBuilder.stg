@@ -15,6 +15,7 @@ public class <genModel.modelName>{
 	<javaDocConstructorRootModel(first(genModel.classes),packageName)>
 	public <genModel.modelName>(<genModel.modelName>Builder builder){
 		<first(genModel.classes).allAttributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
+		<!OPPOSITE?!>
 	}
 	<! OTHER MODEL CLASSES INSIDE ROOT MODEL !>
 	<rest(genModel.classes):{modelClass|<createModelClass(modelClass)>}>
@@ -178,7 +179,8 @@ createClassBuilder(modelClass) ::= <<
 */
 public static class <modelClass.className>Builder{
 	<if(!modelClass.attributesToSet.empty)>// mandatory, reference and list attributes<endif>
-	<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>
+	<!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>!>
+	<modelClass.attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
 	<if(!modelClass.simpleOptAttr.empty)>// simple optional attributes<endif>
 	<modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
 	// scope references
@@ -191,8 +193,11 @@ public static class <modelClass.className>Builder{
 	private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; 
 	<endif>
 	<modelClass.allAttributes:{modelAttribute|<if(!modelAttribute.opposite)><createModelGetter(modelAttribute,"Value")><endif>}>
+	<!  <modelClass.attributesToSet:{modelAttribute|<createModelGetter(modelAttribute,"Value")>}>
+	<modelClass.opClassAttribute:{modelAttribute|<createModelGetter(modelAttribute,"Value")>}>  !>
 
-	<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>
+<!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>!>
+	<modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>
 	<if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	<javaDocBuilderConstructor(modelClass)>
@@ -203,13 +208,13 @@ public static class <modelClass.className>Builder{
 this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
 		<endif>
 		<if(!modelClass.attributesToSet.empty)>// attribute Scopes <endif>
-		<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>
+		<!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>!>
+		<modelClass.attributesToSet:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
 	}
 
 	<generateEntryPointMethod(modelClass)>
-
-	<! only create ScopeClass and attribute method if it isnt a opposite attribute !>
-	<modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute)><endif>}>
+<!<modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute)><endif>}>!>
+	<modelClass.attributesToSet:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute)>}>
 
 	<if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
 	<else><buildScopeClass(modelClass)>
