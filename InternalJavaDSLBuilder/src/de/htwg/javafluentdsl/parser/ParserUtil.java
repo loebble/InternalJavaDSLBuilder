@@ -33,10 +33,11 @@ public final class ParserUtil {
 	
 	/**
 	 * Handles the order of ClassAttributes in a ModelClass.
-	 * It separates the attributes to be set from the simple optional ones,
-	 * so the corresponding lists in the DSLGenerationModel can be filled with them.
-	 * Attributes with DepencyKind {@link DependencyKind} OPPOSITE_ATTRIBUTE_TO_SET are not
-	 * processed because they are set by their opposite.
+	 * It separates the attributes to be set in their own scope
+	 * from the simple optional ones which are set in the scope of a mandatory attribute.
+	 * Also tells the ModelClass which opposite Attribute it has to set when an instance is created.
+	 * For each dependency kind a list is available in the ModelClass and thus the
+	 * attributes are added to the suited list.
 	 * @param modelClass The ModelClass object to order attributes in
 	 * @return a List with the simple optional attributes
 	 */
