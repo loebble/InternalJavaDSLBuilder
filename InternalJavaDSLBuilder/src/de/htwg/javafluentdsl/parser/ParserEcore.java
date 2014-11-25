@@ -24,7 +24,7 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
  * 
  * @see {@link IParser}
  */
-public final class ParserEcore implements IParser {
+public final class ParserEcore extends AbstractIParserBasic{
 
 	/**
 	 * Holds the {@link EPackage} of this ParserEcore.
@@ -33,13 +33,7 @@ public final class ParserEcore implements IParser {
 	private EPackage ePackage;
 	
 	/**
-	 * Holds the created {@link DSLGenerationModel} 
-	 * which this ParserEcore creates
-	 */
-	private final DSLGenerationModel genModel;
-	
-	/**
-	 * The absolute packageName the created files
+	 * The absolute packageName for the created files
 	 */
 	private String packageName;
 	
@@ -80,7 +74,7 @@ public final class ParserEcore implements IParser {
 	 * its {@link #getInstance(EPackage, String, String)} method
 	 */
 	private ParserEcore() {
-		this.genModel = new DSLGenerationModel();
+		super();
 	}
 
 	/**
@@ -90,12 +84,12 @@ public final class ParserEcore implements IParser {
 	 * IParsers {@link IParser#genModel} can be used.
 	 * @param ePackage The {@link EPackage} to be analyzed
 	 * @param fullPackageName the full base package name of the corresponding
-	 * {@link GenPackage}. Has information where the generated EMF Models are located
+	 * {@link GenPackage}. This is the location where the generated EMF Models are located
 	 * @param factoryName the Factory of the {@link GenPackage} which can be used to
 	 * instantiate the EMF Models
 	 * @return a new ParserEcore instance with the created {@link DSLGenerationModel}
 	 */
-	public static <T extends EPackage> ParserEcore getInstance(T ePackage, String fullPackageName,String factoryName) {
+	public static ParserEcore getInstance (EPackage ePackage, String fullPackageName,String factoryName) {
 		ParserEcore parser = new ParserEcore();
 		EPackage eP = (EPackage) ePackage;
 		parser.ePackage = eP;
@@ -103,7 +97,7 @@ public final class ParserEcore implements IParser {
 		parser.genModel.setModelName(eP.getName());
 		parser.genModel.setFactoryName(factoryName);
 		parser.retrieveAttributes();
-		ParserUtil.createAttributeOrder(parser.getGenerationModel());
+		parser.createAttributeOrder();
 		return parser;
 	}
 
@@ -295,5 +289,5 @@ public final class ParserEcore implements IParser {
 			}
 		}
 	}
-	
+
 }

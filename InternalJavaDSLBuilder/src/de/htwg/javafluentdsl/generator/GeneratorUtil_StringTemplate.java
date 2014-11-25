@@ -13,7 +13,7 @@ import org.stringtemplate.v4.StringRenderer;
  * Util class for generating.
  * 
  */
-public class GeneratorUtil {
+public class GeneratorUtil_StringTemplate {
 
 	/**
 	 * Path to the project root. Used to write to the location of this project
@@ -21,6 +21,8 @@ public class GeneratorUtil {
 	 */
 	private static final String currentPath = Paths.get(".").toAbsolutePath()
 			.normalize().toString();
+	
+	public static final String STRING_TEMPLATES_DIR_PATH = "string_templates/";
 
 	/**
 	 * Looks for StringTemplate by the given template path. If found it creates

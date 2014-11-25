@@ -16,8 +16,9 @@ import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 
-import de.htwg.javafluentdsl.generator.Generator;
 import de.htwg.javafluentdsl.generator.GeneratorEcore;
+import de.htwg.javafluentdsl.generator.IGenerator;
+import de.htwg.javafluentdsl.parser.IParser;
 import de.htwg.javafluentdsl.parser.ParserEcore;
 
 /**
@@ -78,10 +79,10 @@ public class StartEMF implements IStart {
 					+ "This is not recommended. Please check the import statements of the generated Classes.");
 		if (prefix != null && !prefix.equals(""))
 			packageName = packageName  + prefix;
-		ParserEcore parser = ParserEcore.getInstance(rootEPackage, packageName,
+		IParser parser = ParserEcore.getInstance(rootEPackage, packageName,
 				factoryName);
-		Generator.generateDSL(parser, templateOption,
-				targetPackage);
+		IGenerator generator = new GeneratorEcore();
+		generator.generateDSL(parser, templateOption, targetPackage);
 	}
 
 	/**

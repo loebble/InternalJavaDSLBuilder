@@ -1,6 +1,7 @@
 package de.htwg.javafluentdsl.main;
 
-import de.htwg.javafluentdsl.generator.Generator;
+import de.htwg.javafluentdsl.generator.GeneratorRegex;
+import de.htwg.javafluentdsl.generator.IGenerator;
 import de.htwg.javafluentdsl.parser.ParserRegex;
 
 
@@ -18,9 +19,11 @@ public class StartRegex implements IStart{
 	@Override
 	public void startDSLGenerationProcess(String source, String templateOption,
 			String targetPackage) {
-		ParserRegex creator = ParserRegex.getInstance(source);
-		Generator.generateDSL(creator, templateOption,
-				targetPackage);
+		ParserRegex parser = ParserRegex.getInstance(source);
+		IGenerator generator = new GeneratorRegex();
+		generator.generateDSL(parser, templateOption, targetPackage);
+		System.out.println(parser.getGenerationModel().printModel());
+		System.out.println(parser.printOrder());
 	}
 
 }

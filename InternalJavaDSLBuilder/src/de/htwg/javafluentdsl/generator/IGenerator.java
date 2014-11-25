@@ -6,7 +6,7 @@ import de.htwg.javafluentdsl.parser.IParser;
  * Type Interface for defining a generator.
  *
  */
-public interface IGenerator <T extends IParser>{ //TODO Delete?
+public interface IGenerator{
 
 	/**
 	 * Generating the Files needed for the DSL.
@@ -19,7 +19,7 @@ public interface IGenerator <T extends IParser>{ //TODO Delete?
 	 * @param targetPackage
 	 *            the package where the files should be created in
 	 */
-	 void generateDSL(T parser, String templateOption,
+	 void generateDSL(IParser parser, String templateOption,
 			String targetPackage);
 
 }

@@ -50,7 +50,6 @@ public final class RegexUtil {
 	 */
 	public static final String FOLLOWING_OPPOSITE_ATTRIBUTE = "(\\s?\\,\\s? \\.OP=\\w+:\\w+"+OPPOSITE_OPERATOR+"\\w+)";
 	
-	
 	/**
 	 * Defines an attribute OR an Opposite attribute
 	 */

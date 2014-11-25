@@ -18,7 +18,7 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
  * 
  * @see {@link IParser}
  */
-public final class ParserRegex implements IParser{
+public final class ParserRegex extends AbstractIParserBasic{
 
 	//Error Messages
 	private static final String CLASS_DEFINED_MULTIPLE_TIMES = "The class was defined more than once";
@@ -57,11 +57,12 @@ public final class ParserRegex implements IParser{
 	private Matcher importParameterMatcher;
 	
 	/**
-	 * The DSLGenerationModel which holds all the classes, 
-	 * attributes(as well as their order) and imports defined by the language description.
+	 * List for temporarily saving the classes that need to be imported.
 	 */
-	private DSLGenerationModel genModel;
 	private List<String> imports;
+	/**
+	 * List for temporarily saving the classes defined in the description.
+	 */
 	private Map<String,String> definedClasses= new LinkedHashMap<>();
 	
 	/**
@@ -69,7 +70,7 @@ public final class ParserRegex implements IParser{
 	 * its {@link #getInstance(String)} method
 	 */
 	private ParserRegex(){
-		this.genModel = new DSLGenerationModel();
+		super();
 	}
 	
 	/**
@@ -101,7 +102,7 @@ public final class ParserRegex implements IParser{
 		parser.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
 		parser.retrieveDefinedClasses();
 		parser.retrieveImports();
-		ParserUtil.createAttributeOrder(parser.getGenerationModel());
+		parser.createAttributeOrder();
 		return parser;
 	}
 	

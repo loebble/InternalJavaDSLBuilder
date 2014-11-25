@@ -8,9 +8,10 @@ import org.stringtemplate.v4.STGroup;
 
 import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
+import de.htwg.javafluentdsl.parser.IParser;
 import de.htwg.javafluentdsl.parser.ParserEcore;
 
-public class GeneratorEcore{
+public class GeneratorEcore implements IGenerator{
 
 	/*
 	 * Template options
@@ -21,8 +22,7 @@ public class GeneratorEcore{
 	/*
 	 * Template paths
 	 */
-	private static final String STRING_TEMPLATES_DIR_PATH = "string_templates/";
-	private static final String ECORE_TEMPLATES_DIR_PATH = STRING_TEMPLATES_DIR_PATH
+	private static final String ECORE_TEMPLATES_DIR_PATH = GeneratorUtil_StringTemplate.STRING_TEMPLATES_DIR_PATH
 			+ "ecore_templates/";
 
 	/*
@@ -37,12 +37,6 @@ public class GeneratorEcore{
 			+ MULTIPLE_BUILDER_OPTION + " allowed.";
 
 	/**
-	 * No instantiation needed
-	 */
-	private GeneratorEcore() {
-	}
-
-	/**
 	 * Starts generation of files with given template.
 	 * 
 	 * @param parser
@@ -53,7 +47,7 @@ public class GeneratorEcore{
 	 *            the target package the files are generated at
 	 * @return list of paths where the files where created
 	 */
-	public static void generateDSL(ParserEcore parser, String templateOption,
+	public void generateDSL(IParser parser, String templateOption,
 			String targetPackage) {
 		DSLGenerationModel dslModel = parser.getGenerationModel();
 		List<String> filesCreated = new ArrayList<>();
@@ -115,13 +109,13 @@ public class GeneratorEcore{
 	 */
 	private static String ecoreGenerateMultiBuilderFile(ModelClass modelClass,
 			String targetPackage) {
-		STGroup group = GeneratorUtil.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil_StringTemplate.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
 				+ MULTI_TEMPLATE_FILE);
 		ST modelTemplate = group.getInstanceOf("ClassBuilder");
 		modelTemplate.add("packageName", targetPackage);
 		modelTemplate.add("modelClass", modelClass);
 		String modelCode = modelTemplate.render();
-		return GeneratorUtil.writeToJavaFile(targetPackage,
+		return GeneratorUtil_StringTemplate.writeToJavaFile(targetPackage,
 				modelClass.getClassName() + "Builder", modelCode);
 	}
 
@@ -139,12 +133,12 @@ public class GeneratorEcore{
 	 */
 	private static String ecoreGenerateSingleBuilderDSL(
 			DSLGenerationModel dslModel, String targetPackage) {
-		STGroup group = GeneratorUtil.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
+		STGroup group = GeneratorUtil_StringTemplate.getStringTemplateFromPath(ECORE_TEMPLATES_DIR_PATH
 				+ SINGLE_TEMPLATE_FILE);
 		ST simpleBT = group.getInstanceOf("SingleBuilder");
 		simpleBT.add("packageName", targetPackage);
 		simpleBT.add("genModel", dslModel);
-		return GeneratorUtil.writeToJavaFile(targetPackage, dslModel.getModelName()
+		return GeneratorUtil_StringTemplate.writeToJavaFile(targetPackage, dslModel.getModelName()
 				+ "Builder", simpleBT.render());
 	}
 }

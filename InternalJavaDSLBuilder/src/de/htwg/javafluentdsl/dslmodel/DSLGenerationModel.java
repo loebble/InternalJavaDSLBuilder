@@ -101,11 +101,13 @@ public class DSLGenerationModel {
 	 * it will not be added or replaced.
 	 * @param className the ModelClass obj to be added
 	 * @return the ModelClass object which is now in the list {@link #classes}
+	 * @throws IllegalArgumentException if a ModelClass with the given Name already exists
 	 */
 	public ModelClass addModelClass(String className) {
 		ModelClass existingModelClass = getModelClass(className);
 		if(existingModelClass != null)
-			return existingModelClass;
+			throw new IllegalArgumentException("ModelClass with name "+className
+					+" already exists!");
 		ModelClass newModelClass = new ModelClass(className,this);
 		//First Class is always the rootclass
 		if(classes.isEmpty())
@@ -193,7 +195,7 @@ public class DSLGenerationModel {
 						+ " kind: " +attr.getDependencyKind()+" " + " reference: " +attr.isReference()
 						+ " optional: " +attr.isOptional() +" list:" + attr.isList());
 				if(attr.getOpposite()!=null)
-					sb.append(" opposite: " +attr.getOpposite().getClassName()+"."+attr.getOpposite().getAttributeName()
+					sb.append("\n\t" +" opposite: " +attr.getOpposite().getClassName()+"."+attr.getOpposite().getAttributeName()
 							+ " isCreatorOfOpp: " +attr.isCreatorOfOpposite());
 				sb.append("\n");
 			}
@@ -207,30 +209,4 @@ public class DSLGenerationModel {
 		}
 		return sb.toString();
 	}
-	
-	/**
-	 * Creates a String representation of the order the classes and attributes 
-	 * that are set in this model.
-	 * 
-	 * @return the created String with the corresponding order
-	 */
-	public String printOrder(){
-		StringBuffer sb = new StringBuffer();
-		for (ModelClass modelClass : classes) {
-			sb.append("\n" + "ModelClass: "+modelClass.getClassName() +"\n");
-			int i = 0;
-			for (ClassAttribute attr : modelClass.getAttributesToSet()) {
-				if(i == 0)
-					sb.append(" "+attr.getAttributeName() +":" +attr.getType());
-				if(attr.getNextAttribute() != null)
-					sb.append("-> "+ attr.getNextAttribute().getAttributeName() +":" +attr.getNextAttribute().getType());
-				for (ClassAttribute nextOptional : attr.getNextSimpleOptAttr()) {
-					sb.append("(->"+nextOptional.getAttributeName()+":" +nextOptional.getType()+")");
-				}
-				i++;
-			}
-		}
-		return sb.toString();
-	}
-	
 }
