@@ -74,7 +74,7 @@ public final class ParserRegex implements IParser{
 	
 	/**
 	 * Creates a new Instance of this class {@link ParserRegex}.
-	 * An CreatorRegex need a model description. This description is defined
+	 * An ParserRegex need a model description. This description is defined
 	 * by the {@link RegexUtil#MODEL_DESCRIPTION}.
 	 * All the necessary methods are called in this method so that after it the Creators genModel can be used.
 	 * @param modelDescription the String with the whole model Description
@@ -96,13 +96,13 @@ public final class ParserRegex implements IParser{
 						+ modelDescription.substring(endOfLastCorrectClass -10, endOfLastCorrectClass) + "'...";
 			throw new IllegalArgumentException(RegexUtil.MODEL_DOESNT_MATCH + appendedErrorMsg);
 		}
-		ParserRegex creator = new ParserRegex();
-		creator.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
-		creator.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
-		creator.retrieveDefinedClasses();
-		creator.retrieveImports();
-		ParserUtil.createAttributeOrder(creator.getGenerationModel());
-		return creator;
+		ParserRegex parser = new ParserRegex();
+		parser.classDefinitionMatcher = RegexUtil.CLASS_DEFINITION_PATTERN.matcher(modelDescription);
+		parser.importMatcher = RegexUtil.IMPORT_PATTERN.matcher(modelDescription);
+		parser.retrieveDefinedClasses();
+		parser.retrieveImports();
+		ParserUtil.createAttributeOrder(parser.getGenerationModel());
+		return parser;
 	}
 	
 	@Override

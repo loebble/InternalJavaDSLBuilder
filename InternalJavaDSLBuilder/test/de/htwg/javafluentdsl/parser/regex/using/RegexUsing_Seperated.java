@@ -51,8 +51,6 @@ public class RegexUsing_Seperated {
 	String postTitle1 = "MyPost";
 	String postText1 = "MyPostText";
 	int views = 1;
-	String postTitle2 = "MySecondPost";
-	String postText2 = "MySecondPostText";
 	String urlString = "http://MyForum.com";
 	
 

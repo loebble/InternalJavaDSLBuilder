@@ -21,7 +21,6 @@ public class StartRegex implements IStart{
 		ParserRegex creator = ParserRegex.getInstance(source);
 		Generator.generateDSL(creator, templateOption,
 				targetPackage);
-		System.out.println(creator.getGenerationModel().printModel());
 	}
 
 }

@@ -27,14 +27,14 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
 public final class ParserEcore implements IParser {
 
 	/**
-	 * Holds the {@link EPackage} of this EMFCreator.
+	 * Holds the {@link EPackage} of this ParserEcore.
 	 * Which is received through a {@link GenModel}
 	 */
 	private EPackage ePackage;
 	
 	/**
 	 * Holds the created {@link DSLGenerationModel} 
-	 * which this Creator creates
+	 * which this ParserEcore creates
 	 */
 	private final DSLGenerationModel genModel;
 	
@@ -50,24 +50,24 @@ public final class ParserEcore implements IParser {
 	 * Message for Wrong EClassifier
 	 * @see #createModelAttribute(EStructuralFeature, ModelClass)
 	 */
-	private final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
+	private static final String WRONG_ARG_TYPE = "has wrong Type, only EAttribute or EReference allowed. ";
 	/**
 	 * Warning text that occurs if the EPackage 
 	 * name is different from the first modeled class
 	 */
-	private final String PACKAGENAME_NOT_EQUAL_ECLASSNAME = "The ePackage name is not equal to the first modeled "
+	private static final String PACKAGENAME_NOT_EQUAL_ECLASSNAME = "The ePackage name is not equal to the first modeled "
 			+ "EClass. This is not recomended. Only the multiBuilder option is suited for such models.";
 	/**
 	 * Message if the Epackage has not at least one EClass defined (empty EPackage)
 	 * @see #checkFirstEClass(EPackage)
 	 */
-	private final String NO_ECLASS_DEFINED = "The Package has no EClass modeled. Therefore no DSL can be created";
+	private static final String NO_ECLASS_DEFINED = "The Package has no EClass modeled. Therefore no DSL can be created";
 	
 	/**
 	 * Warning message if the EPackage has has interface or abstract classes defined
 	 * @see #checkFirstEClass(EPackage)
 	 */
-	private final String ABSTRACT_NOT_SUPPORTED_YET = "Warning: Abstract and Interface declarations "
+	private static final String ABSTRACT_NOT_SUPPORTED_YET = "Warning: Abstract and Interface declarations "
 			+ "are not totally suported yet. Code is going to be generated but probably with compile erros.";
 	
 	@Override
@@ -85,26 +85,26 @@ public final class ParserEcore implements IParser {
 
 	/**
 	 * Creates an Instance of this class {@link ParserEcore} .
-	 * An CreatorEMF needs any kind of EPackage to analyze its attributes etc.
+	 * An ParserEcore needs any kind of EPackage to analyze its attributes etc.
 	 * All the necessary methods are called in this method so that after it the
-	 * Creators {@link #genModel} can be used.
+	 * IParsers {@link IParser#genModel} can be used.
 	 * @param ePackage The {@link EPackage} to be analyzed
 	 * @param fullPackageName the full base package name of the corresponding
-	 * {@link GenPackage}. This tells the Creator where the generated EMF Models are located
+	 * {@link GenPackage}. Has information where the generated EMF Models are located
 	 * @param factoryName the Factory of the {@link GenPackage} which can be used to
 	 * instantiate the EMF Models
-	 * @return a new CreatorEMF instance with the created {@link DSLGenerationModel}
+	 * @return a new ParserEcore instance with the created {@link DSLGenerationModel}
 	 */
 	public static <T extends EPackage> ParserEcore getInstance(T ePackage, String fullPackageName,String factoryName) {
-		ParserEcore creator = new ParserEcore();
+		ParserEcore parser = new ParserEcore();
 		EPackage eP = (EPackage) ePackage;
-		creator.ePackage = eP;
-		creator.packageName = fullPackageName; 
-		creator.genModel.setModelName(eP.getName());
-		creator.genModel.setFactoryName(factoryName);
-		creator.retrieveAttributes();
-		ParserUtil.createAttributeOrder(creator.getGenerationModel());
-		return creator;
+		parser.ePackage = eP;
+		parser.packageName = fullPackageName; 
+		parser.genModel.setModelName(eP.getName());
+		parser.genModel.setFactoryName(factoryName);
+		parser.retrieveAttributes();
+		ParserUtil.createAttributeOrder(parser.getGenerationModel());
+		return parser;
 	}
 
 	/**
@@ -120,7 +120,7 @@ public final class ParserEcore implements IParser {
 		}
 		EFactory eFactory = this.ePackage.getEFactoryInstance();
 		//Without factory there can be no model instantiation
-		if(eFactory == null || eFactory.equals("")){
+		if(eFactory == null){
 			System.err.println("No EFactoryInstance found for Package: "
 					+this.ePackage.getClass().getCanonicalName());
 			return;

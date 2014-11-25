@@ -57,7 +57,7 @@ public final class ParserUtil {
 					// if first attributes are optional add them to the first mandatory attribute(scope)
 					currentAtt.setNextSimpleOptAttr(firstOptAttr);
 				}
-				else if(previousRequiredAttr!=null){
+				else{
 					previousRequiredAttr.setNextAttribute(currentAtt);
 					previousRequiredAttr = currentAtt;
 				}

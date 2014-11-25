@@ -34,6 +34,8 @@ public class EMFUsing {
 	          case Diagnostic.ERROR:
 	          case Diagnostic.WARNING:
 	            System.err.println("\t" + childDiagnostic.getMessage());
+	          default: 
+	        	  break;
 	        }
 	      }
 	      return false;

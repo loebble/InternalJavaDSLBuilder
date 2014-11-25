@@ -48,9 +48,6 @@ public class EMFUsing_MultipleBuilder {
 	String lastName = "Mueller";
 	int age = 25;
 	String nickName = "MaMue";
-	String street = "someStreet";
-	int houseNumber = 12;
-	String zipCode = "78462";
 	String email ="MaMue@smth.com";
 	
 	/*
@@ -60,9 +57,6 @@ public class EMFUsing_MultipleBuilder {
 	String lastName2 = "Bauer";
 	int age2 = 31;
 	String nickName2 = "MoBau";
-	String street2 = "someOtherStreet";
-	int houseNumber2 = 14;
-	String zipCode2 = "78467";
 	String email2 ="MoBau@smth.com";
 	
 	/*
@@ -71,13 +65,12 @@ public class EMFUsing_MultipleBuilder {
 	String forumName = "MyForum";
 	String postTitle1 = "MyPost";
 	String postText1 = "MyPostText";
-	int views = 1;
 	String postTitle2 = "MySecondPost";
 	String postText2 = "MySecondPostText";
 	String urlString = "http://MyForum.com";
 	
 	@Test
-	public void SimpleForumMultiBuilderTest() throws MalformedURLException {
+	public void simpleForumMultiBuilderTest() throws MalformedURLException {
 		//No static import here to show that multiple Builders are used
 		User user1 = UserBuilder.createUser().optionalFirstName(firstName).optionalLastName(lastName).nickName(nickName)
 					.optionalAge(age).email(email)
@@ -131,7 +124,7 @@ public class EMFUsing_MultipleBuilder {
 	}
 	
 	@Test
-	public void OptOnlyMultiBuilderTest(){
+	public void optOnlyMultiBuilderTest(){
 		OptOnly opt = OptOnlyBuilder.createOptOnly().optionalName("ad").optionalSomeOtherAttr(12)
 					.ref(RefBuilder.createRef().optionalOtherName("otherName").optionalSomeNumber(true).buildRef())
 				.buildOptOnly();
@@ -145,7 +138,7 @@ public class EMFUsing_MultipleBuilder {
 	}
 	
 	@Test
-	public void ExceptionCase_SingleBuilderTest() {
+	public void exceptionCase_SingleBuilderTest() {
 		ExceptionCase exCase = createExceptionCase()
 				.a(createOppositeWithOPT().optionalStringValue("OptionalA")
 						.buildOppositeWithOPT())
@@ -169,7 +162,7 @@ public class EMFUsing_MultipleBuilder {
 	}
 
 	@Test
-	public void ExceptionCaseList_SingleBuilderTest() {
+	public void exceptionCaseList_SingleBuilderTest() {
 		ExceptionCaseList exCaseList = createExceptionCaseList()
 				.addA(createOppositeWithOPTList().optionalStringValue(
 						"OptionalA").buildOppositeWithOPTList())

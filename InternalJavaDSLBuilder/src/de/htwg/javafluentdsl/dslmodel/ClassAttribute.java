@@ -8,7 +8,6 @@ import de.htwg.javafluentdsl.parser.PrimitiveType;
 /**
  * Represents a defined attribute in a {@link ModelClass} with all its
  * properties
- *
  */
 public final class ClassAttribute {
 	/**
@@ -32,9 +31,8 @@ public final class ClassAttribute {
 	 */
 	private String type;
 	/**
-	 * True if the attribute is required in the model.
-	 * But not necessarily mean that the attribute 
-	 * kind is {@link DependencyKind#OPTIONAL_ATTRIBUTE}.
+	 * True if the attribute is required in the model. But not necessarily mean
+	 * that the attribute kind is {@link DependencyKind#OPTIONAL_ATTRIBUTE}.
 	 */
 	private boolean optional = false;
 	/**
@@ -80,11 +78,12 @@ public final class ClassAttribute {
 	private ClassAttribute opposite;
 
 	/**
-	 * Constructor for creating a new ClassAttribute which always has to have at
-	 * least a name, a type and must be part of a {@link ModelClass}.
-	 * The Attribute is added to the given ModelClasses {@link ModelClass#allAttributes} list. 
-	 * The {@link #attributeFullName} is the combined className and attributeName because
-	 * this has to be unique in the {@link DSLGenerationModel}.
+	 * Constructor for creating a new ClassAttribute which always has to have
+	 * atleast a name, a type and must be part of a {@link ModelClass}. The
+	 * Attribute is added to the given ModelClasses
+	 * {@link ModelClass#allAttributes} list. The {@link #attributeFullName} is
+	 * the combined className and attributeName because this has to be unique in
+	 * the {@link DSLGenerationModel}.
 	 * 
 	 * @param name
 	 *            the attributes name
@@ -93,11 +92,13 @@ public final class ClassAttribute {
 	 * @param modelClass
 	 *            the ModelClass the attribute is part of
 	 */
-	public ClassAttribute(String name, String type, ModelClass modelClass) {
+	public ClassAttribute(final String name, final String type,
+			ModelClass modelClass) {
 		this.attributeName = name;
 		for (PrimitiveType primType : PrimitiveType.values()) {
-			if (type.equals(primType.getKeyword()))
+			if (type.equals(primType.getKeyword())) {
 				this.isPrimitive = true;
+			}
 		}
 		this.type = type;
 		this.modelClass = modelClass;
@@ -316,6 +317,8 @@ public final class ClassAttribute {
 
 	/**
 	 * Gets {@link #isCreatorOfOpposite} value.
+	 * 
+	 * @return true if is creator of Opposite
 	 */
 	public boolean isCreatorOfOpposite() {
 		return isCreatorOfOpposite;
@@ -323,11 +326,18 @@ public final class ClassAttribute {
 
 	/**
 	 * Sets {@link #isCreatorOfOpposite} value.
+	 * 
+	 * @param boolean value to set
 	 */
 	public void setCreatorOfOpposite(boolean isCreatorOfOpposite) {
 		this.isCreatorOfOpposite = isCreatorOfOpposite;
 	}
 
+	/**
+	 * Gets {@link #isPrimitive}
+	 * 
+	 * @return
+	 */
 	public boolean isPrimitive() {
 		return isPrimitive;
 	}

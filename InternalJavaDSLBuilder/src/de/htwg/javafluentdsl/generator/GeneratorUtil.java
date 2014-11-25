@@ -1,7 +1,7 @@
 package de.htwg.javafluentdsl.generator;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Paths;
 
@@ -48,8 +48,8 @@ public class GeneratorUtil {
 	 * @param generatedCode
 	 *            the java code
 	 * @return the generated files name or null of exception is thrown
-	 * @throws FileNotFoundException
-	 *             if the file could not be created
+	 * @throws IOException
+	 *             if the java file or the target directory could not be created
 	 */
 	public static String writeToJavaFile(String targetPackage, String fileName,
 			String generatedCode) {
@@ -58,14 +58,16 @@ public class GeneratorUtil {
 			String pathForDSL = currentPath + "/generated/" + packagePath; //TODO
 			File targetDirectory = new File(pathForDSL);
 			if (!targetDirectory.exists()) {
-				targetDirectory.mkdirs();
+				if(!targetDirectory.mkdirs())
+					throw new IOException("Targe Directory at "
+							+targetDirectory+" could not be created.");
 			}
 			String filePath = pathForDSL + "/" + fileName + ".java";
 			PrintWriter writer = new PrintWriter(filePath);
 			writer.print(generatedCode);
 			writer.close();
 			return filePath;
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
 			return null;
 		}

@@ -38,9 +38,6 @@ public class EMFUsing_SingleBuilder {
 	String lastName = "Mueller";
 	int age = 25;
 	String nickName = "MaMue";
-	String street = "someStreet";
-	int houseNumber = 12;
-	String zipCode = "78462";
 	String email = "MaMue@smth.com";
 
 	/*
@@ -50,9 +47,6 @@ public class EMFUsing_SingleBuilder {
 	String lastName2 = "Bauer";
 	int age2 = 31;
 	String nickName2 = "MoBau";
-	String street2 = "someOtherStreet";
-	int houseNumber2 = 14;
-	String zipCode2 = "78467";
 	String email2 = "MoBau@smth.com";
 
 	/*
@@ -61,14 +55,12 @@ public class EMFUsing_SingleBuilder {
 	String forumName = "MyForum";
 	String postTitle1 = "MyPost";
 	String postText1 = "MyPostText";
-	int views = 1;
 	String postTitle2 = "MySecondPost";
 	String postText2 = "MySecondPostText";
 	String urlString = "http://MyForum.com";
 
 	@Test
-	public void SimpleForumSingleBuilderTest() throws MalformedURLException {
-
+	public void simpleForumSingleBuilderTest() throws MalformedURLException {
 		SimpleForum simpleForum = createSimpleForum()
 				.name(forumName)
 				.url(new URL(urlString))
@@ -132,7 +124,7 @@ public class EMFUsing_SingleBuilder {
 	}
 
 	@Test
-	public void OptOnly_SingleBuilderTest() {
+	public void optOnly_SingleBuilderTest() {
 		OptOnly opt = OptOnlyBuilder
 				.createOptOnly()
 				.optionalName("ad")
@@ -175,7 +167,7 @@ public class EMFUsing_SingleBuilder {
 	}
 
 	@Test
-	public void ExceptionCaseList_SingleBuilderTest() {
+	public void exceptionCaseList_SingleBuilderTest() {
 		ExceptionCaseList exCaseList = createExceptionCaseList()
 				.addA(createOppositeWithOPTList().optionalStringValue(
 						"OptionalA").buildOppositeWithOPTList())
