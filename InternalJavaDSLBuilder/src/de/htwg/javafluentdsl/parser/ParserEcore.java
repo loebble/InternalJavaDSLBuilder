@@ -228,7 +228,7 @@ public final class ParserEcore implements IParser {
 			throw new IllegalArgumentException("Parameter eClassifier " +WRONG_ARG_TYPE);
 		
 		boolean optional = !feature.isRequired();
-		if(optional)
+		if(optional && !isRef)
 			kind = DependencyKind.OPTIONAL_ATTRIBUTE;
 		else
 			kind = DependencyKind.ATTRIBUTE;
@@ -287,13 +287,11 @@ public final class ParserEcore implements IParser {
 			//Sets both attributes as their opposite
 			currentAttribute.setOpposite(oppositeAttr);
 			oppositeAttr.setOpposite(currentAttribute);
-			//tells corresponding class it has to set an opposite attribute
+			//tells corresponding attribute class its opposite dependency
 			if(currentAttribute.isCreatorOfOpposite()){
 				currentAttribute.getOpposite().setDependencyKind(DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
-				currentAttribute.addOppositeToSet(currentAttribute.getOpposite());
 			}else if (oppositeAttr.isCreatorOfOpposite()){
 				oppositeAttr.getOpposite().setDependencyKind(DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
-				oppositeAttr.addOppositeToSet(oppositeAttr.getOpposite());
 			}
 		}
 	}

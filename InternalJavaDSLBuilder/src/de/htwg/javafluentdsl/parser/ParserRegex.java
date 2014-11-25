@@ -235,13 +235,13 @@ public final class ParserRegex implements IParser{
 							+ " Attribute '"+attrName +"' in class " + modelClass.getClassName());
 				ClassAttribute currentAttr = new ClassAttribute(attrName,attrType,modelClass);
 				currentAttr.setReference(isRef);
-//				if(isRef){
-//					//optional declared in Regex Model only means optional in the model
-//					if(kind == DependencyKind.OPTIONAL_ATTRIBUTE){
-//						kind = DependencyKind.ATTRIBUTE;
-//						currentAttr.setOptional(true);
-//					}
-//				}
+				if(kind == DependencyKind.OPTIONAL_ATTRIBUTE){
+					currentAttr.setOptional(true);
+					if(isRef){
+					//optional declared in Regex Model only means optional in the model
+						kind = DependencyKind.ATTRIBUTE;
+					}
+				}
 				currentAttr.setDependencyKind(kind);
 				if(kind.equals(DependencyKind.LIST_OF_ATTRIBUTES)){
 					currentAttr.setList(true);
@@ -285,11 +285,11 @@ public final class ParserRegex implements IParser{
 						(currentAttr.getAttributeFullName()))
 					throw new IllegalArgumentException(OPPOSITE_ATTRIBUTE_THE_SAME 
 							+ " Given OP Attribute: "+opDef);
+				//set bidirectional relation
 				currentAttr.setOpposite(oppositeAttribute);
-//				oppositeAttribute.setOpposite(currentAttr);
+				oppositeAttribute.setOpposite(currentAttr);
 				oppositeAttribute.setCreatorOfOpposite(true);
 				checkForMatchingType(currentAttr, oppositeAttribute);
-				oppModelClass.addOppositeToSet(currentAttr); 
 			}
 			else 
 				throw new IllegalArgumentException(opType + " " +CLASS_NOT_DEFINED  

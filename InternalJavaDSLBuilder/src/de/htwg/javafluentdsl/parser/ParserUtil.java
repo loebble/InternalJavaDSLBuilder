@@ -47,8 +47,9 @@ public final class ParserUtil {
 		List<ClassAttribute> attributesToSet = new ArrayList<>();
 		ClassAttribute previousRequiredAttr = null;
 		for (ClassAttribute currentAtt : modelClass.getAllAttributes()) {
-			if(currentAtt.getDependencyKind() == DependencyKind.ATTRIBUTE || // mandatory attribute
-			currentAtt.getDependencyKind() == DependencyKind.LIST_OF_ATTRIBUTES){ // lists are handled as mandatory attributes
+			//Lists and attributes to set in dsl
+			if(currentAtt.getDependencyKind() == DependencyKind.ATTRIBUTE || 
+			currentAtt.getDependencyKind() == DependencyKind.LIST_OF_ATTRIBUTES){
 				attributesToSet.add(currentAtt);
 				if(previousRequiredAttr==null){
 					previousRequiredAttr = currentAtt;
@@ -59,53 +60,36 @@ public final class ParserUtil {
 					previousRequiredAttr.setNextAttribute(currentAtt);
 					previousRequiredAttr = currentAtt;
 				}
-			}else if(currentAtt.getDependencyKind() == DependencyKind.OPTIONAL_ATTRIBUTE){
+			}
+			//optional_attribute dependency is a simple optional attributes in the dsl model
+			else if(currentAtt.getDependencyKind() == DependencyKind.OPTIONAL_ATTRIBUTE){
 				currentAtt.setOptional(true);
+				simpleOptionalAttrs.add(currentAtt);
 				if(previousRequiredAttr!=null){
-					//If its a reference to another modeled class it has also to be set
-					//even if its an optional attribute.
-					if(currentAtt.isReference()){
-						attributesToSet.add(currentAtt);
-						previousRequiredAttr.setNextAttribute(currentAtt);
-						previousRequiredAttr = currentAtt;
-					}else{
-						// type is not a modeled Class so it is a simple dependency
-						previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
+					previousRequiredAttr.addNextSimpleOptAttr(currentAtt);
 				}else{
-					if(currentAtt.isReference()){
-						attributesToSet.add(currentAtt);
-						previousRequiredAttr = currentAtt;
-						currentAtt.setNextSimpleOptAttr(firstOptAttr);
-					}else{
-						//add it to the list of the first optional attributes
-						firstOptAttr.add(currentAtt);
-						simpleOptionalAttrs.add(currentAtt);
-					}
+					//add it to the list of the first optional attributes
+					firstOptAttr.add(currentAtt);
 				}
 			}
-		}
-		
-		//Special case if no required Attribute in Class
-		if(previousRequiredAttr == null){
-			boolean simpleOptionalsOnly = true;
-			for (ClassAttribute attr : modelClass.getSimpleOptAttr()) {
-				if(attr.isReference())
-					simpleOptionalsOnly = false;
+			else if(currentAtt.getDependencyKind() == DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET){
+				//adds the current attribute to its creators oppositesToSetList
+				currentAtt.getOpposite().addOppositeToSet(currentAtt);
 			}
-			modelClass.setSimpleOptionalsOnly(simpleOptionalsOnly);
-			
 		}
-		else{
-			previousRequiredAttr.setLastAttribute(true);
-		}
-		
 		for (ClassAttribute attrToSet : attributesToSet) {
+			attrToSet.setDependencyKind(DependencyKind.ATTRIBUTE);
 			modelClass.addAttributeToSet(attrToSet);
 		}
 		for (ClassAttribute simpleOptAttr : simpleOptionalAttrs) {
 			modelClass.addSimpleOptionalAttribute(simpleOptAttr);
+		}
+		//Special case if no required attribute in class
+		if(previousRequiredAttr == null){
+			modelClass.setSimpleOptionalsOnly(true);
+		}
+		else{
+			previousRequiredAttr.setLastAttribute(true);
 		}
 	}
 

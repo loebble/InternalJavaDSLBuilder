@@ -144,7 +144,6 @@ public class RegexUsing_Seperated {
 		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForUser() == null);
 		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForPost().getText()
 					.equals(forum.getUser().get(0).getPosts().get(0).getText()));
-		//TODO more to come
 	}
 	
 	@Test

@@ -40,7 +40,9 @@ public static class <modelClass.className>{
     <! constructor !>
     <javaDocModelClassConstructor(modelClass)>
     private <modelClass.className> (<modelClass.className>Builder builder){
-        <modelClass.allAttributes:{attribute|<if(!attribute.opposite)><transferValues(attribute,"builder")><endif>}>
+        <!do not try to transfer opposite attributes that are not creator of opposite relation !>
+        <modelClass.allAttributes:{attribute|<if((attribute.opposite)&&(!attribute.creatorOfOpposite))
+            ><else><transferValues(attribute,"builder")><endif>}>
     }
     <modelClass.allAttributes:{attribute|<createModelGetter(attribute)>}>
     <modelClass.allAttributes:{attribute|<createModelSetter(attribute)>}>
@@ -64,7 +66,7 @@ public static final class <modelClass.className>Builder{
     /*
     * mandatory, reference and list attributes
     */<endif>
-    <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createClassAttribute(classAttribute,"Value")><endif>}>!>
+    <!<modelClass.attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>!>
     <modelClass.attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
     <if(!modelClass.simpleOptAttr.empty)>
     /*
@@ -80,7 +82,7 @@ public static final class <modelClass.className>Builder{
     * Used for object scoping inside the builder.
     */
     private final <modelClass.className>BuildScope <modelClass.className;format="lower">BuildScope;<endif>
-    <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><createScopeAttribute(classAttribute)><endif>}>!>
+    <!<modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>!>
     <modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>
     <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
@@ -91,7 +93,7 @@ public static final class <modelClass.className>Builder{
 this.<modelClass.className;format="lower">BuildScope = new <modelClass.className>BuildScope();
         <endif>
         <modelClass.attributesToSet:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>
-        <!<modelClass.attributesToSet:{classAttribute|<if(!classAttribute.opposite)><instantiateScopeAttributes(classAttribute)><endif>}>!>
+        <!<modelClass.attributesToSet:{classAttribute|<instantiateScopeAttributes(classAttribute)>}>!>
     }
     <! If it is the root Model class all Entrypoint Methods are generated here !>
     <if(modelClass.rootModelClass)><generateAllEntryPointMethods(modelClass)><endif>
@@ -304,8 +306,8 @@ public class SimpleOptionalsOnlyScope{
 
 createAttributeMethod(classAttribute) ::= <<
 <if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute)>
-<elseif (!classAttribute.opposite)><createSimpleMethod(classAttribute.className,classAttribute)>
-<endif>
+<else><createSimpleMethod(classAttribute.className,classAttribute)><
+endif>
 >>
 
 createSimpleMethod(className, classAttribute) ::= <<

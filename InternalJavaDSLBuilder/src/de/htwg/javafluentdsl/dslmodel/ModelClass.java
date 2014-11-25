@@ -157,11 +157,11 @@ public class ModelClass {
 	 *            the attribute to be added
 	 */
 	public void addAttributeToSet(ClassAttribute attribute) {
-//		if(attribute.getDependencyKind() != DependencyKind.ATTRIBUTE
-//				&& attribute.getDependencyKind() != DependencyKind.LIST_OF_ATTRIBUTES)
-//			throw new IllegalArgumentException("Not the right DependencyKind for list!"
-//					+ "Given: " +attribute.getDependencyKind() +" expected: " +DependencyKind.ATTRIBUTE 
-//					+ " OR "+DependencyKind.LIST_OF_ATTRIBUTES);
+		if(attribute.getDependencyKind() != DependencyKind.ATTRIBUTE
+				&& attribute.getDependencyKind() != DependencyKind.LIST_OF_ATTRIBUTES)
+			throw new IllegalArgumentException("Not the right DependencyKind for list!"
+					+ "Given: " +attribute.getDependencyKind() +" expected: " +DependencyKind.ATTRIBUTE 
+					+ " OR "+DependencyKind.LIST_OF_ATTRIBUTES);
 		this.attributesToSet.add(attribute);
 	}
 
@@ -172,9 +172,9 @@ public class ModelClass {
 	 *            the attribute to be added
 	 */
 	public void addSimpleOptionalAttribute(ClassAttribute attribute) {
-//		if(attribute.getDependencyKind() != DependencyKind.OPTIONAL_ATTRIBUTE)
-//			throw new IllegalArgumentException("Not the right DependencyKind for list!"
-//					+ "Given: " +attribute.getDependencyKind() +" expected: " +DependencyKind.OPTIONAL_ATTRIBUTE);
+		if(attribute.getDependencyKind() != DependencyKind.OPTIONAL_ATTRIBUTE)
+			throw new IllegalArgumentException("Not the right DependencyKind for list!"
+					+ "Given: " +attribute.getDependencyKind() +" expected: " +DependencyKind.OPTIONAL_ATTRIBUTE);
 		this.simpleOptAttr.add(attribute);
 	}
 
@@ -221,9 +221,9 @@ public class ModelClass {
 	 *            the ClassAttribute to be added
 	 */
 	public void addOppositeToSet(ClassAttribute opToSet) {
-//		if(opToSet.getDependencyKind() != DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET)
-//			throw new IllegalArgumentException("Not the right DependencyKind for list!"
-//					+ "Given: " +opToSet.getDependencyKind() +" expected: " +DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
+		if(opToSet.getDependencyKind() != DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET)
+			throw new IllegalArgumentException("Not the right DependencyKind for list!"
+					+ "Given: " +opToSet.getDependencyKind() +" expected: " +DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
 		this.oppositesToSet.add(opToSet);
 	}
 
