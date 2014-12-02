@@ -22,14 +22,14 @@ import de.htwg.generated.emf.model.ExceptionCaseList.ExceptionCaseList;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
 import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
 import de.htwg.generated.emf.model.SimpleForum.User;
-import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilder;
+import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilderTest;
 
 /**
  * Test For Using the EMF DSL. If imports are not correct pls make sure emf
- * genmodel has created EMF models and {@link EMFCreation_SingleBuilder} was run
+ * genmodel has created EMF models and {@link EMFCreation_SingleBuilderTest} was run
  *
  */
-public class EMFUsing_SingleBuilder {
+public class EMFUsing_SingleBuilderTest {
 
 	/*
 	 * User Data user 1
@@ -66,30 +66,30 @@ public class EMFUsing_SingleBuilder {
 				.url(new URL(urlString))
 				.addUsers(
 						createUser()
-								.optionalFirstName(firstName)
-								.optionalLastName(lastName)
+								.optFirstName(firstName)
+								.optLastName(lastName)
 								.nickName(nickName)
-								.optionalAge(age)
+								.optAge(age)
 								.email(email)
 								.addPosts(
-										createPost().optionalText(postText1)
-												.optionalViews(5)
+										createPost().optText(postText1)
+												.optViews(5)
 												.title(postTitle1).buildPost())
 								.addPosts(
-										createPost().optionalText(postText2)
-												.optionalViews(10)
+										createPost().optText(postText2)
+												.optViews(10)
 												.title(postTitle2).buildPost())
 								.noPosts().buildUser())
 				.addUsers(
 						createUser()
-								.optionalFirstName(firstName2)
-								.optionalLastName(lastName2)
+								.optFirstName(firstName2)
+								.optLastName(lastName2)
 								.nickName(nickName2)
-								.optionalAge(age2)
+								.optAge(age2)
 								.email(email2)
 								.addPosts(
-										createPost().optionalText(postText1)
-												.optionalViews(11)
+										createPost().optText(postText1)
+												.optViews(11)
 												.title(postTitle2).buildPost())
 								.noPosts().buildUser())
 				.noUsers()
@@ -114,12 +114,12 @@ public class EMFUsing_SingleBuilder {
 		assertTrue(EcoreUtil.equals(simpleForum, user2.getForum()));
 		assertTrue(EcoreUtil.equals(user1.getForum(), simpleForum));
 		// Calling EMFs validateObject for validating
-		assertTrue(EMFUsing.validateObject(simpleForum));
+		assertTrue(EMFUsingTest.validateObject(simpleForum));
 		simpleForum.getUsers().forEach(
-				u -> assertTrue(EMFUsing.validateObject(u)));
+				u -> assertTrue(EMFUsingTest.validateObject(u)));
 		simpleForum.getUsers().forEach(
 				u -> u.getPosts().forEach(
-						p -> assertTrue(EMFUsing.validateObject(p))));
+						p -> assertTrue(EMFUsingTest.validateObject(p))));
 
 	}
 
@@ -127,13 +127,13 @@ public class EMFUsing_SingleBuilder {
 	public void optOnly_SingleBuilderTest() {
 		OptOnly opt = OptOnlyBuilder
 				.createOptOnly()
-				.optionalName("ad")
-				.optionalSomeOtherAttr(12)
-				.ref(OptOnlyBuilder.createRef().optionalOtherName("otherName")
-						.optionalSomeNumber(true).buildRef()).buildOptOnly();
+				.optName("ad")
+				.optSomeOtherAttr(12)
+				.ref(OptOnlyBuilder.createRef().optOtherName("otherName")
+						.optSomeNumber(true).buildRef()).buildOptOnly();
 
-		assertTrue(EMFUsing.validateObject(opt));
-		assertTrue(EMFUsing.validateObject(opt.getRef()));
+		assertTrue(EMFUsingTest.validateObject(opt));
+		assertTrue(EMFUsingTest.validateObject(opt.getRef()));
 		assertTrue(opt.getName().equals("ad"));
 		assertTrue(opt.getSomeOtherAttr() == 12);
 		assertTrue(opt.getRef() != null);
@@ -145,18 +145,18 @@ public class EMFUsing_SingleBuilder {
 	@Test
 	public void ExceptionCase_SingleBuilderTest() {
 		ExceptionCase exCase = createExceptionCase()
-				.a(createOppositeWithOPT().optionalStringValue("OptionalA")
+				.a(createOppositeWithOPT().optStringValue("OptionalA")
 						.buildOppositeWithOPT())
 				.b(createOppositeWithMand().stringValue("MandatoryString")
 						.buildOppositeWithMand())
 				.c(createOppositeOnly().buildOppositeOnly())
 				.buildExceptionCase();
 
-		assertTrue(EMFUsing.validateObject(exCase));
-		assertTrue(EMFUsing.validateObject(exCase));
-		assertTrue(EMFUsing.validateObject(exCase.getA()));
-		assertTrue(EMFUsing.validateObject(exCase.getB()));
-		assertTrue(EMFUsing.validateObject(exCase.getC()));
+		assertTrue(EMFUsingTest.validateObject(exCase));
+		assertTrue(EMFUsingTest.validateObject(exCase));
+		assertTrue(EMFUsingTest.validateObject(exCase.getA()));
+		assertTrue(EMFUsingTest.validateObject(exCase.getB()));
+		assertTrue(EMFUsingTest.validateObject(exCase.getC()));
 		//String values has been set
 		assertTrue("OptionalA".equals(exCase.getA().getStringValue()));
 		assertTrue("MandatoryString".equals(exCase.getB().getStringValue()));
@@ -169,7 +169,7 @@ public class EMFUsing_SingleBuilder {
 	@Test
 	public void exceptionCaseList_SingleBuilderTest() {
 		ExceptionCaseList exCaseList = createExceptionCaseList()
-				.addA(createOppositeWithOPTList().optionalStringValue(
+				.addA(createOppositeWithOPTList().optStringValue(
 						"OptionalA").buildOppositeWithOPTList())
 				.noA()
 				.addB(createOppositeWithMandList().stringValue(
@@ -178,10 +178,10 @@ public class EMFUsing_SingleBuilder {
 				.addC(createOppositeOnlyList().buildOppositeOnlyList())
 				.noC()
 				.buildExceptionCaseList();
-		assertTrue(EMFUsing.validateObject(exCaseList));
-		assertTrue(EMFUsing.validateObject(exCaseList.getA().get(0)));
-		assertTrue(EMFUsing.validateObject(exCaseList.getB().get(0)));
-		assertTrue(EMFUsing.validateObject(exCaseList.getC().get(0)));
+		assertTrue(EMFUsingTest.validateObject(exCaseList));
+		assertTrue(EMFUsingTest.validateObject(exCaseList.getA().get(0)));
+		assertTrue(EMFUsingTest.validateObject(exCaseList.getB().get(0)));
+		assertTrue(EMFUsingTest.validateObject(exCaseList.getC().get(0)));
 		//sizes of each list and opposites list
 		assertTrue(exCaseList.getA().size() == 1 && exCaseList.getA().get(0).getAOPRef().size() == 1);
 		assertTrue(exCaseList.getB().size() == 1 && exCaseList.getB().get(0).getBOPRef().size() == 1);

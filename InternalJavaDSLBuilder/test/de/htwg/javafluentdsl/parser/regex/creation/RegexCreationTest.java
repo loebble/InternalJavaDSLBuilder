@@ -1,7 +1,5 @@
 package de.htwg.javafluentdsl.parser.regex.creation;
 
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.nio.file.Paths;
 
@@ -16,12 +14,16 @@ import de.htwg.javafluentdsl.main.StartRegex;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ RegexCreation_WrongDescription.class, Regex_CreationIntern.class, Regex_CreationSeparated.class })
-public class RegexCreation {
+@SuiteClasses({ RegexCreation_WrongDescriptionTest.class, RegexCreation_InternTest.class, RegexCreation_SeparatedTest.class })
+public class RegexCreationTest {
 	
 	/*
 	 * Correct descriptions
 	 */
+	public final static String USER_MULTI_IMPORT_DESCRIPTION =
+			".class=User{.A=firstName:String, .A=lastName:String, .A=email:URL, .A=born:Date}"
+			+ ".imp={java.net.URL, java.util.Date}"
+			;
 	
 	public final static String USER_DESCRIPTION =
 			".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=nickName:String, .A=address:Address}"
@@ -59,36 +61,36 @@ public class RegexCreation {
 	
 	public final static String MA_BIREF_FORUM_DESCRIPTION =
 			".class=Forum{.A=name:String, .A=url:URL , .LA=user:User}"
-			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=email:String, .LA=post:Post}"
+			+ ".class=User{.A=firstName:String, .A=lastName:String, .OA=age:int, .A=email:String, .LA=post:Post, .OP=forum:Forum->user}"
 			+ ".class=Post{.A=title:String, .A=text:String, .LA=replier:User, .OP=creator:User->post}"
 			+ ".imp={java.net.URL}"
 			;
 	
-	public final static String MA_OPT_FORUM_DESCRIPTION =
+	public final static String FORUM_DESCRIPTION =
 			".class=Forum{.A=name:String, .A=url:URL , .LA=user:User}"
 			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String, .LA=post:Post}"
 			+ ".class=Post{.A=title:String, .A=text:String, .LA=replier:User, .OP=creator:User->post}"
 			+ ".imp={java.net.URL}"
 			;
 	
-	public final static String FORUM_DESCRIPTION =
-			".class=Forum{.A=name:String, .A=url:URL, .LA=sections:Section, .LA=user:User}"
-			+ ".class=Section{.A=name:String, .LA=moderators:User}"
-			+ ".class=User{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String,.A=nickName:String, .A=rating:Rating, .LA=posts:Post, .OP=moderatorOfSection:Section->moderators}"
-			+ ".class=Post{.A=title:String, .A=text:String, .OA=views:int, .LA=repliers:User, .OA=rating:Rating, .OP=creator:User->posts}"
-			+ ".class=Rating{.OA=upps:int, .OA=downs:int, .OP=forUser:User->rating, .OP=forPost:Post->rating}"
+	public final static String COMPLEXFORUM_DESCRIPTION =
+			".class=ComplexForum{.A=name:String, .A=url:URL, .LA=sections:Section, .LA=user:ComplexUser}"
+			+ ".class=Section{.A=name:String, .LA=moderators:ComplexUser}"
+			+ ".class=ComplexUser{.OA=firstName:String, .OA=lastName:String, .OA=age:int, .A=email:String,.A=nickName:String, .A=rating:Rating, .LA=posts:ComplexPost, .OP=moderatorOfSection:Section->moderators}"
+			+ ".class=ComplexPost{.A=title:String, .A=text:String, .OA=views:int, .LA=repliers:ComplexUser, .OA=rating:Rating, .OP=creator:ComplexUser->posts}"
+			+ ".class=Rating{.OA=upps:int, .OA=downs:int, .OP=forUser:ComplexUser->rating, .OP=forPost:ComplexPost->rating}"
 			+ ".imp={java.net.URL}"
 			;
 	
-	public static void createDSL(String modelDescription, String templateOption, String targetPackage) {
+	public static boolean createDSL(String modelDescription, String templateOption, String targetPackage) {
 		new StartRegex().startDSLGenerationProcess(modelDescription, templateOption, targetPackage);
 		String modelPath =  Paths.get(".").toAbsolutePath().normalize().toString() + "\\generated\\" +targetPackage.replace('.', '\\');
 		try {
 			File file = new File(modelPath);
-			assert(file.exists());
+			return file.exists();
 		} catch(Exception e) {
 			System.err.println("Class at "+modelPath+" doesnt exist");
-		    fail();
+		    return false;
 		}
 	}
 

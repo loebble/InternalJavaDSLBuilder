@@ -5,6 +5,6 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ RegexUsing_Intern.class, RegexUsing_Seperated.class })
-public class RegexUsing {
+@SuiteClasses({ RegexUsing_InternTest.class, RegexUsing_SeperatedTest.class })
+public class RegexUsingTest {
 }

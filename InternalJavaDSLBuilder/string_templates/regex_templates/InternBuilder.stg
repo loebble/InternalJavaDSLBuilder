@@ -1,6 +1,6 @@
 ModelTemplate(packageName, genModel) ::= <<
 <! TEMPLATE FOR A DSL WITH BUILDER AS INNER CLASS
-USED FOR DSLGENERATIONMODEL CREATED WITH PARSERREGEX!>
+USED FOR DSLGENERATIONMODEL CREATED WITH PARSER_REGEX!>
 package <packageName>;
 <if(!genModel.imports.empty)>/*
 * user defined imports
@@ -167,7 +167,7 @@ private void add<attribute.attributeName;format="cap">(<attribute.type> <attribu
 * Setter for the <attribute.attributeName> attribute.
 *@see {@link #<attribute.attributeName>}
 */
-private void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
+private void set<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
 	this.<attribute.attributeName> = <attribute.attributeName>;
 }
 <endif>

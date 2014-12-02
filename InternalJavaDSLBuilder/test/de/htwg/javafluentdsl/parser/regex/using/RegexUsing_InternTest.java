@@ -1,5 +1,16 @@
 package de.htwg.javafluentdsl.parser.regex.using;
 
+import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder.*;
+import static de.htwg.generated.regex.intern.complexforum.ComplexForum.ComplexForumBuilder.createComplexPost;
+import static de.htwg.generated.regex.intern.complexforum.ComplexForum.ComplexForumBuilder.createRating;
+import static de.htwg.generated.regex.intern.complexforum.ComplexForum.ComplexForumBuilder.createSection;
+import static de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleForumBuilder.createSimplePost;
+import static de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleForumBuilder.createSimpleUser;
+import static de.htwg.generated.regex.intern.user.User.UserBuilder.createAddress;
+import static de.htwg.generated.regex.intern.user.User.UserBuilder.createCountry;
+import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.createAddressOPT;
+import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.createCountryOPT;
+import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.createUserOPT;
 import static org.junit.Assert.assertTrue;
 
 import java.net.MalformedURLException;
@@ -7,23 +18,21 @@ import java.net.URL;
 
 import org.junit.Test;
 
+import de.htwg.generated.regex.intern.complexforum.ComplexForum;
+import de.htwg.generated.regex.intern.complexforum.ComplexForum.ComplexForumBuilder;
+import de.htwg.generated.regex.intern.forum.Forum;
 import de.htwg.generated.regex.intern.simpleforum.SimpleForum;
-import static de.htwg.generated.regex.intern.simpleforum.SimpleForum.SimpleForumBuilder.*;
 import de.htwg.generated.regex.intern.user.User;
 import de.htwg.generated.regex.intern.user.User.UserBuilder;
-import static de.htwg.generated.regex.intern.user.User.UserBuilder.*;
 import de.htwg.generated.regex.intern.useropt.UserOPT;
-import static de.htwg.generated.regex.intern.useropt.UserOPT.UserOPTBuilder.*;
-import de.htwg.generated.regex.intern.forum.Forum;
-import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder;
-import static de.htwg.generated.regex.intern.forum.Forum.ForumBuilder.*;
+import de.htwg.javafluentdsl.parser.regex.creation.RegexCreation_InternTest;
 
 /**
  * Test For Using the Regex DSL.
- * If imports are not correct pls make sure {@link Regex_CreationIntern} was run
+ * If imports are not correct pls make sure {@link RegexCreation_InternTest} was run
  *
  */
-public class RegexUsing_Intern {
+public class RegexUsing_InternTest {
 	/*
 	 * User1 Data
 	 */
@@ -45,6 +54,8 @@ public class RegexUsing_Intern {
 	String forumName = "MyForum";
 	String postTitle1 = "MyPost";
 	String postText1 = "MyPostText";
+	String postTitle2 = "MyPost2";
+	String postText2 = "MyPostText2";
 	int views = 1;
 	String urlString = "http://MyForum.com";
 	
@@ -61,6 +72,41 @@ public class RegexUsing_Intern {
 				&& forum.getUser().getFirstName().equals(firstName)
 				&& forum.getUser().getAge() == 0);
 		
+	}
+	
+	@Test
+	public void testForumDSL() throws MalformedURLException {
+		Forum forum =
+		Forum.ForumBuilder
+		.createForum().name(forumName).url(new URL(urlString)).addUser(
+				Forum.ForumBuilder
+				.createUser().optFirstName(firstName).optLastName(lastName).email(email)
+					.addPost(
+							createPost().title(postTitle1)
+								.text(postText1).addReplier(
+										createUser().email(otherEMail).noPost().buildUser()
+							).noReplier().buildPost())
+					.addPost(createPost().title(postTitle2)
+								.text(postText2).noReplier().buildPost())
+					.noPost()
+				.buildUser())
+				.noUser()
+		.buildForum();
+		//list sizes
+		assertTrue(forum.getUser().size() == 1);
+		assertTrue(forum.getUser().get(0).getPost().size() == 2);
+		assertTrue(forum.getUser().get(0).getPost().get(0).getReplier().size() == 1);
+		assertTrue(forum.getUser().get(0).getPost().get(1).getReplier().size() == 0);
+		//values
+		assertTrue(forum.getUser().get(0).getFirstName().equals(firstName));
+		assertTrue(forum.getUser().get(0).getLastName().equals(lastName));
+		assertTrue(forum.getUser().get(0).getPost().get(0).getText().equals(postText1));
+		assertTrue(forum.getUser().get(0).getPost().get(0).getTitle().equals(postTitle1));
+		assertTrue(forum.getUser().get(0).getPost().get(1).getTitle().equals(postTitle2));
+		assertTrue(forum.getUser().get(0).getPost().get(1).getText().equals(postText2));
+		assertTrue(forum.getUser().get(0).getPost().get(0).getReplier().get(0).getEmail().equals(otherEMail));
+		//opposite attribute
+		assertTrue(forum.getUser().get(0).getPost().get(0).getCreator().getFirstName().equals(firstName));
 	}
 	
 
@@ -120,28 +166,28 @@ public class RegexUsing_Intern {
 	}
 	
 	@Test
-	public void testForumDSL() throws MalformedURLException {
+	public void testComplexForumDSL() throws MalformedURLException {
 		// ForumBuilder needed because User DSLs createUser is used otherwise
-		Forum.User replierWithoutPosts = ForumBuilder.createUser().email(email).nickName("nick").rating(
+		ComplexForum.ComplexUser replierWithoutPosts = ComplexForumBuilder.createComplexUser().email(email).nickName("nick").rating(
 				createRating().optUpps(1).optDowns(0).buildRating()
-				).noPosts().buildUser();
-		Forum.User userWithPost = ForumBuilder.createUser().email(otherEMail).nickName(nickName).rating(
+				).noPosts().buildComplexUser();
+		ComplexForum.ComplexUser userWithPost = ComplexForumBuilder.createComplexUser().email(otherEMail).nickName(nickName).rating(
 				createRating().optDowns(5).buildRating()
-				).addPosts(createPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
+				).addPosts(createComplexPost().title("Introduction").text("Hello my Nickname is "+nickName).addRepliers(replierWithoutPosts).noRepliers().rating(
 						createRating().buildRating()
 						)
-				 .buildPost()
+				 .buildComplexPost()
 				).noPosts()
-				.buildUser();
+				.buildComplexUser();
 		
-		Forum forum = Forum.ForumBuilder
-		.createForum().name(forumName).url(new URL(urlString))
+		ComplexForum forum = ComplexForum.ComplexForumBuilder
+		.createComplexForum().name(forumName).url(new URL(urlString))
 			.addSections(createSection().name("mainSection").addModerators(userWithPost).noModerators().buildSection())
 			.noSections()
 			.addUser(userWithPost)
 			.addUser(replierWithoutPosts)
 				.noUser()
-			.buildForum();
+			.buildComplexForum();
 			
 		assertTrue(forum.getUser().get(0).getNickName().equals(nickName));
 		assertTrue(forum.getUser().get(0).getPosts().get(0).getText().equals("Hello my Nickname is "+nickName));

@@ -1,12 +1,42 @@
-package de.htwg.javafluentdsl.parser;
+package de.htwg.javafluentdsl.dslmodel;
 
 /**
- * Enum for all primitive types in the java Language
+ * Enum for all primitive types in the java Language.
  *
  */
 public enum PrimitiveType {
-	BYTE("byte"), SHORT("short"), INT("int"), LONG("long"), CHAR("char"), FLOAT(
-			"float"), DOUBLE("double"), BOOLEAN("boolean");
+    /**
+     * Represents the primitive data type byte.
+     */
+	BYTE("byte"),
+	/**
+     * Represents the primitive data type short.
+     */
+	SHORT("short"),
+	/**
+     * Represents the primitive data type int.
+     */
+	INT("int"),
+	/**
+     * Represents the primitive data type long.
+     */
+	LONG("long"),
+	/**
+     * Represents the primitive data type char.
+     */
+	CHAR("char"),
+	/**
+     * Represents the primitive data type float.
+     */
+	FLOAT("float"),
+	/**
+     * Represents the primitive data type double.
+     */
+	DOUBLE("double"),
+	/**
+     * Represents the primitive data type boolean.
+     */
+	BOOLEAN("boolean");
 
 	/**
 	 * holds the case sensitive String representation of the keyword.
@@ -20,19 +50,18 @@ public enum PrimitiveType {
 	}
 
 	/**
-	 * Constructor to initialize Primitive type with its keyword
-	 * 
-	 * @param keyword
+	 * Constructor to initialize Primitive type with its keyword.
+	 * @param keywordInJava the keyword as used in the java language.
 	 */
-	PrimitiveType(String keyword) {
-		this.keyword = keyword;
+	PrimitiveType(final String keywordInJava) {
+		this.keyword = keywordInJava;
 	}
 	/**
-	 * Retrieves the PrimitiveType which belongs to the given keyword
+	 * Retrieves the PrimitiveType which belongs to the given keyword.
 	 * @param keyword the keyword of the primitive type
 	 * @return the PrimitiveType literal
 	 */
-	public static PrimitiveType getPrimitiveByKeyword(String keyword) {
+	public static PrimitiveType getPrimitiveByKeyword(final String keyword) {
 		switch (keyword) {
 		case "byte":
 			return BYTE;
@@ -61,7 +90,7 @@ public enum PrimitiveType {
 	 * @return {@link #keyword}
 	 */
 	public String getKeyword() {
-		return keyword;
+		return this.keyword;
 	}
 
 	@Override

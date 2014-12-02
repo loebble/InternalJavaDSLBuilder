@@ -19,9 +19,11 @@ public final class <modelClass.className>Builder {
     <modelClass.simpleOptAttr:{opClassAttribute|<createClassAttribute(opClassAttribute,"Value")>}>
     // scope references
     <! simpleOptionalsOnly classes dont have build scopes !>
-    <if(!modelClass.simpleOptionalsOnly)>private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; <endif>
+    <if(!modelClass.simpleOptionalsOnly)
+        >private final <modelClass.className;format="cap">BuildScope <modelClass.className;format="lower">BuildScope; <endif>
     <modelClass.attributesToSet:{classAttribute|<createScopeAttribute(classAttribute)>}>
-    <if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
+    <if(modelClass.simpleOptionalsOnly)
+        >private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
     <! Constructor for ClassBuilder !>
     private <modelClass.className;format="cap">Builder() {
         <if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
@@ -126,9 +128,7 @@ private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
 >>
 
 createScopeAttribute(classAttribute) ::= <<
-<if(!classAttribute.opposite)>private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-<elseif((classAttribute.opposite)&&(classAttribute.creatorOfOpposite))>private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-<endif>
+private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
 >>
 
 instantiateScopeAttributes(classAttribute) ::= <<
@@ -144,7 +144,7 @@ createAttributeScopeClass(className,classAttribute) ::= <<
 public class <classAttribute.attributeName;format="cap">Scope {
     <createAttributeMethod(className,classAttribute)>
     <! foreach simple optional attribute !>
-    <classAttribute.nextSimpleOptAttr:{optAttr|<createSimpleOptAttrMethod(className, classAttribute.attributeName, optAttr)>}>
+    <classAttribute.nextSimpleOptAttr:{optAttr|<createSimpleOptAttrMethod(classAttribute.attributeName, optAttr)>}>
 }
 >>
 
@@ -153,7 +153,7 @@ simpleOptionalsOnlyScopeClass(modelClass) ::= <<
 public class SimpleOptionalsOnlyScope {
     <! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
     The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
-    <modelClass.simpleOptAttr:{optAttr|<createSimpleOptAttrMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
+    <modelClass.simpleOptAttr:{optAttr|<createSimpleOptAttrMethod("simpleOptionalsOnly", optAttr)>}>
     <buildEMFObjectMethod(modelClass)>
     <generateEMFCreateModelInstance(modelClass)>
 }
@@ -198,14 +198,14 @@ getNextScopeAttr(className,classAttribute) ::= <<
 >>
 
 
-createSimpleOptAttrMethod(className, scopeName, optionalAttribute) ::= <<
+createSimpleOptAttrMethod(scopeName, optionalAttribute) ::= <<
 /**
 * Setter method for the optional attribute <optionalAttribute.attributeName>
 */
-public final <scopeName;format="cap">Scope optional<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val) {
-    <className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
-    <className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
-    return <className;format="cap">Builder.this.<scopeName>Scope;
+public final <scopeName;format="cap">Scope opt<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val) {
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
+    return <optionalAttribute.className;format="cap">Builder.this.<scopeName>Scope;
 }
 
 >>
