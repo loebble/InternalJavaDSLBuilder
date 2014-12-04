@@ -14,5 +14,6 @@ import de.htwg.javafluentdsl.parser.regex.creation.RegexCreationTest;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ MainTest.class, EMFCreationTest.class, RegexCreationTest.class })
-public class CreationTest {}
+@SuiteClasses({ MainTest.class, EMFCreationTest.class, 
+    RegexCreationTest.class } )
+public class CreationTest { }

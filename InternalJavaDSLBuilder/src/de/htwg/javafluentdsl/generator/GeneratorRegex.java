@@ -12,7 +12,10 @@ import de.htwg.javafluentdsl.parser.IParser;
 
 /**
  *Implementation of the {@link ITemplateGenerator} for generating
- *inner DSLs for Regex model instantiation. 
+ *inner DSLs for Regex model instantiation.
+ *All templateOption for Regex models should be declared
+ *in static final fields which then can be used in the
+ *{@link #generateDSL(IParser, String, String)} method.
  *
  */
 public class GeneratorRegex implements ITemplateGenerator {
@@ -65,6 +68,9 @@ public class GeneratorRegex implements ITemplateGenerator {
 
     /**
      * Starts generation of files with given template.
+     * If new templateOption is created for RegexModel
+     * insert it into the switch statement and call the
+     * implemented method for the option.
      * 
      * @param parser
      *            the {@link ParserRegex} which holds the DSLGenerationModel

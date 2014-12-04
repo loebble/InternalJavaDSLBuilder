@@ -4,8 +4,8 @@ import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 
 /**
  * Interface to make sure a {@link DSLGenerationModel} can be received in a
- * Parser implementing this interface by calling the specified
- * {@code getGenerationModel()} method.
+ * Parser. The DSLGenerationModel should be fully created before the
+ * get {@code getGenerationModel()} can be called.
  *
  */
 public interface IParser {

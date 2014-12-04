@@ -14,26 +14,7 @@ import de.htwg.javafluentdsl.main.StartEMF;
 public class EMFCreation_MultipleBuilderTest {
 
 	/**
-	 * Method for testing a simple Forum as described by the SimpleForum.ecore
-	 * and SimpleForum.genmodel files.
-	 */
-	@Test
-	public void simpleForum_MultiBuilderTest() {
-		String genModelPath = EMFCreationTest.EMFGenModelPath
-				+ "SimpleForum.genmodel";
-		new StartEMF().startDSLGenerationProcess(genModelPath,
-				GeneratorEcore.MULTIPLE_BUILDER_OPTION,
-				EMFCreationTest.SIMPLE_FORUM_DEST + ".multiBuilder");
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.SIMPLE_FORUM_DEST
-				+ ".multiBuilder.SimpleForumBuilder", "java"));
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.SIMPLE_FORUM_DEST
-				+ ".multiBuilder.UserBuilder", "java"));
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.SIMPLE_FORUM_DEST
-				+ ".multiBuilder.PostBuilder", "java"));
-	}
-
-	/**
-	 * Method for testing a complex Forum Model as described by the Forum.ecore
+	 * Method for testing a Forum as described by the Forum.ecore
 	 * and Forum.genmodel files.
 	 */
 	@Test
@@ -46,12 +27,31 @@ public class EMFCreation_MultipleBuilderTest {
 		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
 				+ ".multiBuilder.ForumBuilder", "java"));
 		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
-				+ ".multiBuilder.SectionBuilder", "java"));
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
 				+ ".multiBuilder.UserBuilder", "java"));
 		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
 				+ ".multiBuilder.PostBuilder", "java"));
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
+	}
+
+	/**
+	 * Method for testing a complex Forum Model as described by the Forum.ecore
+	 * and ComplexForum.genmodel files.
+	 */
+	@Test
+	public void complexForum_MultiBuilderTest() {
+		String genModelPath = EMFCreationTest.EMFGenModelPath
+				+ "ComplexForum.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath,
+				GeneratorEcore.MULTIPLE_BUILDER_OPTION,
+				EMFCreationTest.COMPLEX_FORUM_DEST + ".multiBuilder");
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
+				+ ".multiBuilder.ComplexForumBuilder", "java"));
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
+				+ ".multiBuilder.SectionBuilder", "java"));
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
+				+ ".multiBuilder.ComplexUserBuilder", "java"));
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
+				+ ".multiBuilder.ComplexPostBuilder", "java"));
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
 				+ ".multiBuilder.RatingBuilder", "java"));
 
 	}

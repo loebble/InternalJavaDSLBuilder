@@ -11,40 +11,24 @@
     <genClasses ecoreClass="Forum.ecore#//Forum">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Forum/name"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Forum/url"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Forum/sections"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Forum/users"/>
-    </genClasses>
-    <genClasses ecoreClass="Forum.ecore#//Section">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Section/name"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Section/moderators"/>
     </genClasses>
     <genClasses ecoreClass="Forum.ecore#//User">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/firstName"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/lastName"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/age"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/email"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/nickName"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//User/rating"/>
+      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//User/age"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//User/posts"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//User/moderatorOfSection"/>
+      <genOperations ecoreOperation="Forum.ecore#//User/hasPosts">
+        <genParameters ecoreParameter="Forum.ecore#//User/hasPosts/chain"/>
+        <genParameters ecoreParameter="Forum.ecore#//User/hasPosts/map"/>
+      </genOperations>
     </genClasses>
     <genClasses ecoreClass="Forum.ecore#//Post">
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Post/title"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Post/text"/>
       <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Post/views"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Post/repliers"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Post/rating"/>
       <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Post/creator"/>
-      <genOperations ecoreOperation="Forum.ecore#//Post/creatorIsPostCreator">
-        <genParameters ecoreParameter="Forum.ecore#//Post/creatorIsPostCreator/chain"/>
-        <genParameters ecoreParameter="Forum.ecore#//Post/creatorIsPostCreator/map"/>
-      </genOperations>
-    </genClasses>
-    <genClasses ecoreClass="Forum.ecore#//Rating">
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Rating/upps"/>
-      <genFeatures createChild="false" ecoreFeature="ecore:EAttribute Forum.ecore#//Rating/downs"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Rating/forUser"/>
-      <genFeatures notify="false" createChild="false" propertySortChoices="true" ecoreFeature="ecore:EReference Forum.ecore#//Rating/forPost"/>
     </genClasses>
   </genPackages>
 </genmodel:GenModel>

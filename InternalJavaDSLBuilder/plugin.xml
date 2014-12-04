@@ -30,14 +30,6 @@
    </extension>
 
    <extension point="org.eclipse.emf.ecore.generated_package">
-      <!-- @generated Forum -->
-      <package
-            uri="http://de.htwg.generated.emf.Forum"
-            class="de.htwg.generated.emf.model.Forum.ForumPackage"
-            genModel="emfmodel/Forum.genmodel"/>
-   </extension>
-
-   <extension point="org.eclipse.emf.ecore.generated_package">
       <!-- @generated TestModel -->
       <package
             uri="myTestModelURI"
@@ -83,6 +75,22 @@
             uri="ExpressionURI"
             class="de.htwg.expression.Expression.ExpressionPackage"
             genModel="emfmodel/Expression.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated Forum -->
+      <package
+            uri="http://de.htwg.generated.emf.SimpleForum"
+            class="de.htwg.generated.emf.model.Forum.ForumPackage"
+            genModel="emfmodel/Forum.genmodel"/>
+   </extension>
+
+   <extension point="org.eclipse.emf.ecore.generated_package">
+      <!-- @generated ComplexForum -->
+      <package
+            uri="http://de.htwg.generated.emf.Forum"
+            class="de.htwg.generated.emf.model.ComplexForum.ComplexForumPackage"
+            genModel="emfmodel/ComplexForum.genmodel"/>
    </extension>
 
 </plugin>

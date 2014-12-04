@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="ComplexForum" nsURI="http://de.htwg.generated.emf.Forum" nsPrefix="RandomPrefix">
+  <eClassifiers xsi:type="ecore:EDataType" name="URL" instanceClassName="java.net.URL"/>
+  <eClassifiers xsi:type="ecore:EClass" name="ComplexForum">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="url" lowerBound="1" eType="#//URL"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sections" upperBound="-1"
+        eType="#//Section"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="users" lowerBound="1" upperBound="-1"
+        eType="#//ComplexUser"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Section">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="name" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moderators" upperBound="-1"
+        eType="#//ComplexUser" eOpposite="#//ComplexUser/moderatorOfSection"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComplexUser">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="firstName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lastName" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true" defaultValueLiteral="null"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="age" ordered="false" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"
+        transient="true" defaultValueLiteral="0"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="email" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"
+        transient="true" defaultValueLiteral="null"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="nickName" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" transient="true"
+        defaultValueLiteral="null"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rating" lowerBound="1"
+        eType="#//Rating" eOpposite="#//Rating/forUser"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="posts" upperBound="-1"
+        eType="#//ComplexPost" eOpposite="#//ComplexPost/creator"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="moderatorOfSection" eType="#//Section"
+        eOpposite="#//Section/moderators"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ComplexPost">
+    <eOperations name="creatorIsPostCreator" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean">
+      <eParameters name="chain" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EDiagnosticChain"/>
+      <eParameters name="map">
+        <eGenericType eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EMap">
+          <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+          <eTypeArguments eClassifier="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EJavaObject"/>
+        </eGenericType>
+      </eParameters>
+    </eOperations>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="title" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="text" lowerBound="1" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="views" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="repliers" upperBound="-1"
+        eType="#//ComplexUser"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="rating" lowerBound="1"
+        eType="#//Rating" eOpposite="#//Rating/forPost"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="creator" lowerBound="1"
+        eType="#//ComplexUser" eOpposite="#//ComplexUser/posts"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Rating">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="upps" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="downs" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EInt"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="forUser" eType="#//ComplexUser"
+        eOpposite="#//ComplexUser/rating"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="forPost" eType="#//ComplexPost"
+        eOpposite="#//ComplexPost/rating"/>
+  </eClassifiers>
+</ecore:EPackage>

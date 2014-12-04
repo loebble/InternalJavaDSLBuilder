@@ -17,21 +17,6 @@ public class EMFCreation_SingleBuilderTest {
 	 * and SimpleForum.genmodel files.
 	 */
 	@Test
-	public void simpleForum_SingleBuilderTest() {
-		String genModelPath = EMFCreationTest.EMFGenModelPath
-				+ "SimpleForum.genmodel";
-		new StartEMF().startDSLGenerationProcess(genModelPath,
-				GeneratorEcore.SINGLE_BUILDER_OPTION,
-				EMFCreationTest.SIMPLE_FORUM_DEST+ ".singleBuilder");
-		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.SIMPLE_FORUM_DEST
-				+ ".singleBuilder.SimpleForumBuilder", "java"));
-	}
-
-	/**
-	 * Method for testing a complex Forum Model as described by the Forum.ecore
-	 * and Forum.genmodel files.
-	 */
-	@Test
 	public void forum_SingleBuilderTest() {
 		String genModelPath = EMFCreationTest.EMFGenModelPath
 				+ "Forum.genmodel";
@@ -40,6 +25,21 @@ public class EMFCreation_SingleBuilderTest {
 				EMFCreationTest.FORUM_DEST+ ".singleBuilder");
 		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.FORUM_DEST
 				+ ".singleBuilder.ForumBuilder", "java"));
+	}
+
+	/**
+	 * Method for testing a complex Forum Model as described by the Forum.ecore
+	 * and Forum.genmodel files.
+	 */
+	@Test
+	public void complexForum_SingleBuilderTest() {
+		String genModelPath = EMFCreationTest.EMFGenModelPath
+				+ "ComplexForum.genmodel";
+		new StartEMF().startDSLGenerationProcess(genModelPath,
+				GeneratorEcore.SINGLE_BUILDER_OPTION,
+				EMFCreationTest.COMPLEX_FORUM_DEST+ ".singleBuilder");
+		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.COMPLEX_FORUM_DEST
+				+ ".singleBuilder.ComplexForumBuilder", "java"));
 	}
 
 	/**

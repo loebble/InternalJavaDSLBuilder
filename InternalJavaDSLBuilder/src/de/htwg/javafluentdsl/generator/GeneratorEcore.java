@@ -12,7 +12,10 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
 import de.htwg.javafluentdsl.parser.IParser;
 /**
  *Implementation of the {@link ITemplateGenerator} for generating
- *inner DSLs for ECore model instantiation. 
+ *inner DSLs for ECore model instantiation.
+ *All templateOption for Regex models should be declared in 
+ *static final fields which then can be used in the 
+ *{@link #generateDSL(IParser, String, String)} method.
  *
  */
 public class GeneratorEcore implements ITemplateGenerator {

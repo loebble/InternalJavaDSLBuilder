@@ -31,8 +31,6 @@ public class StartRegex implements IStart {
     public final void startDSLGenerationProcess(final String source,
             final String templateOption, final String targetPackage) {
         ParserRegex parser = ParserRegex.getInstance(source);
-        parser.getGenerationModel().printModel();
-        parser.printOrder();
         new GeneratorRegex().generateDSL(parser, templateOption, targetPackage);
     }
 

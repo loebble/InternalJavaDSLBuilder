@@ -36,6 +36,10 @@ public class EMFCreationTest {
 	 */
 	public final static String FORUM_DEST = PACKAGE_DEST + ".forum";
 	/**
+     * Package for complex Forum DSL
+     */
+	public final static String COMPLEX_FORUM_DEST = PACKAGE_DEST + ".complexforum";
+	/**
 	 * Package for exception DSL
 	 */
 	public final static String EXCMODEL_DEST = PACKAGE_DEST + ".exceptionCase";
@@ -44,11 +48,6 @@ public class EMFCreationTest {
 	 */
 	public static final String EXC_LISTMODEL_DEST = PACKAGE_DEST
 			+ ".exceptionCaseList";
-	/**
-	 * Package for simple forum DSL
-	 */
-	public final static String SIMPLE_FORUM_DEST = PACKAGE_DEST
-			+ ".simpleForum";
 	/**
 	 * Package for OptOnly DSL
 	 */

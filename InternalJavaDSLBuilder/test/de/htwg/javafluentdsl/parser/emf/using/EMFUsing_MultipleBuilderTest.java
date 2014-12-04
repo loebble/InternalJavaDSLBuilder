@@ -18,18 +18,18 @@ import org.junit.Test;
 
 import de.htwg.generated.emf.dsl.optonly.multiBuilder.OptOnlyBuilder;
 import de.htwg.generated.emf.dsl.optonly.multiBuilder.RefBuilder;
-import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.PostBuilder;
-import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.SimpleForumBuilder;
-import de.htwg.generated.emf.dsl.simpleForum.multiBuilder.UserBuilder;
+import de.htwg.generated.emf.dsl.forum.multiBuilder.PostBuilder;
+import de.htwg.generated.emf.dsl.forum.multiBuilder.ForumBuilder;
+import de.htwg.generated.emf.dsl.forum.multiBuilder.UserBuilder;
 import de.htwg.generated.emf.model.ExceptionCase.ExceptionCase;
 import de.htwg.generated.emf.model.ExceptionCaseList.ExceptionCaseList;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
-import de.htwg.generated.emf.model.SimpleForum.Post;
+import de.htwg.generated.emf.model.Forum.Post;
 /*
  * Imports for EMF Model and DSL Builders
  */
-import de.htwg.generated.emf.model.SimpleForum.SimpleForum;
-import de.htwg.generated.emf.model.SimpleForum.User;
+import de.htwg.generated.emf.model.Forum.Forum;
+import de.htwg.generated.emf.model.Forum.User;
 import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilderTest;
 
 /**
@@ -69,13 +69,12 @@ public class EMFUsing_MultipleBuilderTest {
 	String urlString = "http://MyForum.com";
 
 	@Test
-	public void simpleForumMultiBuilderTest() throws MalformedURLException {
+	public void forumMultiBuilderTest() throws MalformedURLException {
 		// No static import here to show that multiple Builders are used
 		User user1 = UserBuilder
 				.createUser()
 				.optFirstName(firstName)
 				.optLastName(lastName)
-				.nickName(nickName)
 				.optAge(age)
 				.email(email)
 				.addPosts(
@@ -88,15 +87,15 @@ public class EMFUsing_MultipleBuilderTest {
 		user1.getPosts().add(post2);
 
 		User user2 = UserBuilder.createUser().optFirstName(firstName2)
-				.optLastName(lastName2).nickName(nickName2)
-				.optAge(age2).email(email2).noPosts().buildUser();
+				.optLastName(lastName2).optAge(age2)
+				.email(email2).noPosts().buildUser();
 
 		Post post3 = PostBuilder.createPost().optText(postText2)
 				.optViews(10).title(postTitle2).buildPost();
 
-		SimpleForum simpleForum = SimpleForumBuilder.createSimpleForum()
+		Forum simpleForum = ForumBuilder.createForum()
 				.name(forumName).url(new URL(urlString)).addUsers(user1)
-				.addUsers(user2).noUsers().buildSimpleForum();
+				.addUsers(user2).noUsers().buildForum();
 
 		assertTrue(EMFUsingTest.validateObject(user1));
 		assertTrue(EMFUsingTest.validateObject(post1));
@@ -119,9 +118,11 @@ public class EMFUsing_MultipleBuilderTest {
 		assertTrue(EcoreUtil.equals(post2.getCreator(), post1.getCreator()));
 		assertTrue(EcoreUtil.equals(simpleForum.getUsers().get(0), user1));
 		assertTrue(EcoreUtil.equals(simpleForum.getUsers().get(1), user2));
-		assertTrue(EcoreUtil.equals(simpleForum, user2.getForum()));
-		assertTrue(EcoreUtil.equals(simpleForum, user2.getForum()));
-		assertTrue(EcoreUtil.equals(user1.getForum(), simpleForum));
+	}
+	
+	@Test
+    public void complexForumMultiBuilderTest() throws MalformedURLException {
+	    //TODO
 	}
 
 	@Test
