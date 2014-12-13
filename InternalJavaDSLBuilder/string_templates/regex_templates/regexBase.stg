@@ -1,0 +1,251 @@
+/**
+* This is the base template for creating DSLs for Regex models.
+* This Template contains sub-templates that other regex templates can use.
+* Another template can import this template using: import "regexBase.stg" .
+* 
+*/
+
+
+
+/**
+* creates all the imports statement for a DSLGenerationmodels import list.
+*/
+genModelImports(genModel) ::= <<
+<if(genModel.hasList)>//uses ArrayList
+import java.util.List;
+import java.util.ArrayList;
+<endif>
+<if(!genModel.imports.empty)>//user defined imports<endif>
+<genModel.imports:{imp| import <imp>;<\n>}>
+>>
+
+buildObjectMethod(modelClass) ::= <<
+/**
+* Build Method for <modelClass.className> instances.
+* @return a new <modelClass.className> instance with attributes filled from this builder class.
+*/
+public final <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
+    <modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
+    <modelClass.oppositesToSet:{opAttributeToSet|<setOpAttribute(modelClass,opAttributeToSet)>}>
+    return <modelClass.className;format="lower">;
+}
+>>
+
+
+/**
+* creates an attribute for a class in a model or in a builder class.
+*/
+createClassAttribute(classAttribute, attach) ::= <<
+<if(classAttribute.optional)>
+/**
+* Flag for {@link <classAttribute.attributeName><attach>}.
+* True if <classAttribute.attributeName><attach> was set.
+*/
+private boolean <classAttribute.attributeName><attach>IsSet = false;
+<endif>
+<if(classAttribute.list)>
+/**
+* List of {@link <classAttribute.attributeName><attach>}
+* for multiple <classAttribute.type> values.
+*/
+private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<
+else>
+/**
+* <classAttribute.attributeName> value of the model class.
+*/
+private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
+>>
+
+
+/*
+* creates the scope attribute in a builder for returning (object scoping).
+*/
+createScopeAttribute(classAttribute) ::= <<
+
+/**
+* Reference for the <classAttribute.attributeName;format="cap">Scope.
+* Used for object scoping inside the builder.
+*/
+private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
+
+>>
+
+
+/*
+* instantiates the scope attribute in a builder.
+*/
+instantiateScopeAttributes(classAttribute) ::= <<
+this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
+
+>>
+
+/*
+* creates scope classes for  a ClassAttribute.
+*/
+createAttributeScopeClass(classAttribute) ::= <<
+<if(classAttribute.list)><javaDocListScopeClass(classAttribute)>
+<elseif(classAttribute.reference)><javaDocRefernceScopeClass(classAttribute)>
+<else><javaDocScopeClass(classAttribute)>
+<endif>
+public final class <classAttribute.attributeName;format="cap">Scope{
+    <createAttributeMethod(classAttribute)>
+    <! foreach simple optional attribute !>
+    <classAttribute.nextSimpleOptAttr:{optAttr|<createOptionalAttributeMethod(classAttribute.attributeName, optAttr)>}>
+}
+>>
+
+/**
+* Decides which method to create for ClassAttribute.
+*/
+createAttributeMethod(classAttribute) ::= <<
+<if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute)>
+<else><createSimpleMethod(classAttribute.className,classAttribute)><
+endif>
+
+
+>>
+
+/**
+* creates a simple optional only scope class.
+*/
+simpleOptionalsOnlyScopeClass(modelClass) ::= <<
+<javaDocOptOnlyScopeClass(modelClass)>
+public final class SimpleOptionalsOnlyScope{
+    <! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
+    The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
+    <modelClass.simpleOptAttr:{optAttr|<createOptionalAttributeMethod("simpleOptionalsOnly", optAttr)>}>
+    <buildObjectMethod(modelClass)>
+}
+>>
+
+/**
+* creates a usual set method for a ClassAttribute.
+*/
+createSimpleMethod(className, classAttribute) ::= <<
+/**
+* Method for setting the <classAttribute.attributeName>Value in this builder.
+* @return the next scope object
+*/
+public <getNextScopeClass(className,classAttribute)> <classAttribute.attributeName>(final <classAttribute.type> val) {
+    <className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+    <if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}
+<if(classAttribute.optional)>
+/**
+* Method for skipping the optional <classAttribute.attributeName> Attribute
+* @return the next scope object 
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}
+<endif>
+>>
+
+/**
+* creates an add method for a ClassAttribute that is a list.
+*/
+createListMethod(className, classAttribute) ::= <<
+/**
+* Adds the given <classAttribute.type> object to the <classAttribute.attributeName> List.
+* Stays in the same Scope after adding an object so that more objects can be added.
+*@param val the <classAttribute.type> object 
+*/
+public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap">(final <classAttribute.type> val) {
+    <className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val);
+    return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
+}
+
+/**
+* Ends the adding of <classAttribute.type> objects to the <classAttribute.attributeName> List.
+* By calling this method before adding any objects
+* it leaves the <classAttribute.attributeName> List empty.
+<if(classAttribute.lastAttribute)>
+*@return {@link #<className;format="cap">BuildScope}
+*@see #add<classAttribute.attributeName;format="cap">
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}
+<else>*@return {@link #<className;format="cap">Scope}
+*@see #add<classAttribute.attributeName;format="cap">
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}<endif>
+
+>>
+
+
+/**
+* creates the building scope class.
+*/
+buildScopeClass(modelClass) ::= <<
+/**
+* Scope class for building a <modelClass.className> object.
+*/
+public class <modelClass.className;format="cap">BuildScope{
+    <buildObjectMethod(modelClass)>
+}
+>>
+
+/**
+* creates the optional setting method which can be embedded in scope class of a mandatory attribute.
+*/
+createOptionalAttributeMethod(scopeName, optionalAttribute) ::= <<
+/**
+* Setter method for the optional attribute <optionalAttribute.attributeName>
+*/
+public <scopeName;format="cap">Scope opt<optionalAttribute.attributeName;format="cap">(final <optionalAttribute.type> val) {
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
+    return <optionalAttribute.className;format="cap">Builder.this.<scopeName>Scope;
+}
+>>
+
+/**
+* Retrieves the next Scope Class for a method headers return value.
+*/
+getNextScopeClass(className,classAttribute) ::= <<
+<if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else><classAttribute.nextAttribute.attributeName;format="cap">Scope<endif>
+>>
+
+/**
+* Retrieves the next Scope Class referernce method bodys return value.
+*/
+getNextScopeAttr(className,classAttribute) ::= <<
+<if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif>
+>>
+
+
+//
+// JavaDocs
+//
+
+javaDocListScopeClass(classAttribute)::= <<
+
+/**
+* Scope Class for the <classAttribute.type> List attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
+<if(classAttribute.reference)>*The type of the list of attributes is defined by the model {@link <classAttribute.type>}<endif>
+*/
+>>
+javaDocRefernceScopeClass(classAttribute)::= <<
+
+/**
+* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}.
+* The type of the attribute is defined by the model class <classAttribute.type>
+*/
+>>
+javaDocScopeClass(classAttribute)::= <<
+
+/**
+* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
+*/
+>>
+
+javaDocOptOnlyScopeClass(modelClass)::= <<
+
+/**
+* Scope Class for setting optional attributes of <modelClass.className>
+*/
+>>

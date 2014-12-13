@@ -1,3 +1,5 @@
+import "regexBase.stg"
+
 ModelTemplate(packageName, modelClass) ::= <<
 <! Template for DSLGenerationModel DSL built with a CreatorRegex.
 Creates the model class along with its intern Builder class for instantiation!>

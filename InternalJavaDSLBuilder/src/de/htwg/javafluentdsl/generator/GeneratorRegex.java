@@ -61,9 +61,9 @@ public class GeneratorRegex implements IGenerator {
      */
     private static final String WRONG_OPTION_REGEX = 
             "Not a valid templateOption given. "
-            + "For a string model description only:"
-            + INTERN_BUILDER_OPTION
-            + " OR " + SEPARATED_BUILDER_OPTION + " allowed.";
+            + "For a string model description only: "
+            + "\"" + INTERN_BUILDER_OPTION+"\""
+            + " OR \"" + SEPARATED_BUILDER_OPTION + "\" allowed.";
 
     /**
      * Starts generation of files with given template.

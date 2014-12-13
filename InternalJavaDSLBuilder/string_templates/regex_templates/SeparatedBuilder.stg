@@ -1,3 +1,16 @@
+import "regexBase.stg"
+
+/**
+* This template creates the model code and the builder code for a dsl.
+* From the DSLGeneration Model one file will be created where the
+* model is implemented and the builder is too, as a inner class.
+*/
+
+
+
+/**
+* Creates the ModelCode from the DSLGenerationModel.
+*/
 Model(packageName, genModel) ::= <<
 <! TEMPLATE FOR SEPARETED MODELCLASS!>
 package <packageName>;
@@ -7,13 +20,13 @@ package <packageName>;
 <rest(genModel.classes):{modelClass|import <packageName>.<genModel.modelName>Builder.<modelClass.className>Builder;
 }>
 <javaDocRootModelClass(first(genModel.classes),packageName)>
-public class <genModel.modelName>{
+public final class <genModel.modelName>{
 	<first(genModel.classes).allAttributes:{attribute|<createClassAttribute(attribute,"")>}>
 	<first(genModel.classes).allAttributes:{attribute|<createModelGetter(attribute,"")>}>
 	<first(genModel.classes).allAttributes:{attribute|<createModelSetter(attribute)>}>
 	<! CONSTRUCTOR FOR ROOT MODEL CLASS !>
 	<javaDocConstructorRootModel(first(genModel.classes),packageName)>
-	<genModel.modelName>(<genModel.modelName>Builder builder){
+	<genModel.modelName>(<genModel.modelName>Builder builder) {
 	    <!do not try to transfer opposite attributes that are not creator of opposite relation !>
 		<first(genModel.classes).allAttributes:{attribute|<if((attribute.opposite)&&(!attribute.creatorOfOpposite))
 		  ><else><transferValues(attribute,"builder")><endif>}>
@@ -24,6 +37,10 @@ public class <genModel.modelName>{
 
 >>
 
+
+/**
+* Creates the Builder code from the DSLGenerationModel.
+*/
 Builder(packageName, genModel) ::= <<
 <! TEMPLATE FOR SEPARETED BUILDER !>
 package <packageName>;
@@ -37,7 +54,7 @@ package <packageName>;
 * Builder class for {@link <packageName>.<genModel.modelName>} instances.
 *
 */
-public class <genModel.modelName>Builder{
+public final class <genModel.modelName>Builder{
     <if(!first(genModel.classes).attributesToSet.empty)>//mandatory attributes
 <first(genModel.classes).attributesToSet:{classAttribute|<createClassAttribute(classAttribute,"Value")>}>
     <endif>
@@ -52,7 +69,7 @@ public class <genModel.modelName>Builder{
     
     <! Constructor for ClassBuilder !>
     <javaDocBuilderConstructor(first(genModel.classes))>
-    private <genModel.modelName;format="cap">Builder(){
+    private <genModel.modelName;format="cap">Builder() {
     <if(first(genModel.classes).simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
         <else
         >   this.<first(genModel.classes).className;format="lower">BuildScope = new <first(genModel.classes).className>BuildScope();
@@ -61,7 +78,7 @@ public class <genModel.modelName>Builder{
     }
     <! Entrypoint method for builder!>
     <generateEntryPointMethod(first(genModel.classes))>
-    <first(genModel.classes).attributesToSet:{classAttribute|<createAttributeScopeClass(first(genModel.classes).className,classAttribute)>}>
+    <first(genModel.classes).attributesToSet:{classAttribute|<createAttributeScopeClass(classAttribute)>}>
     <! BUILD SCOPE WITH BUILD METHOD FOR INSTANCE CREATION !>
     <if(first(genModel.classes).simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(first(genModel.classes))>
     <else><buildScopeClass(first(genModel.classes))>
@@ -72,22 +89,9 @@ public class <genModel.modelName>Builder{
 
 >>
 
-genModelImports(genModel) ::= <<
-<if(genModel.hasList)>//uses ArrayList
-import java.util.List;
-import java.util.ArrayList;
-<endif>
-<if(!genModel.imports.empty)>//user defined imports<endif>
-<genModel.imports:{imp| import <imp>;<\n>}>
->>
-
-createModelAttribute(classAttribute) ::= <<
-<if(!classAttribute.optional)>
-private <classAttribute.attributeName>IsSet;<endif>
-<if(classAttribute.list)>private List\<<classAttribute.type>\> <classAttribute.attributeName>;<else>
-private <classAttribute.type> <classAttribute.attributeName>;<endif>
->>
-
+/**
+* Creates a ModelClass inside the root model class.
+*/
 createModelClass(modelClass) ::= <<
 /**
 * <modelClass.className> Model Class which is part of the <modelClass.model.modelName> Model.
@@ -98,7 +102,7 @@ public static class <modelClass.className>{
     <modelClass.allAttributes:{attribute|<createClassAttribute(attribute,"")>}>
     <! constructor !>
     <javaDocConstructorModel(modelClass,packageName)>
-    <modelClass.className>(<modelClass.className;format="cap">Builder builder){
+    <modelClass.className>(<modelClass.className;format="cap">Builder builder) {
         <!do not try to transfer opposite attributes that are not creator of opposite relation !>
         <modelClass.allAttributes:{attribute|<if((attribute.opposite)&&(!attribute.creatorOfOpposite))
             ><else><transferValues(attribute,"builder")><endif>}>
@@ -109,75 +113,96 @@ public static class <modelClass.className>{
 
 >>
 
+/**
+* transfer values from builder to model.
+*/
 transferValues(attribute, builderName) ::= <<
-<if(attribute.optional)>if(<builderName>.is<attribute.attributeName;format="cap">ValueSet()){
+<if(attribute.optional)>if(<builderName>.is<attribute.attributeName;format="cap">ValueSet()) {
     this.<attribute.attributeName>IsSet = true;
     <doTransfer(attribute, builderName)>
 }<else><doTransfer(attribute, builderName)>
 <endif>
 >>
-
+/**
+* transfer values from builder to model for single valued attributes.
+*/
 doTransfer(attribute, builderName) ::= <<
 <if(attribute.list)><transferListItems(attribute,builderName)><else
 >this.set<attribute.attributeName;format="cap">(<builderName>.get<attribute.attributeName;format="cap">Value());<endif>
 >>
 
+/**
+* transfer values from builder to model for list attributes.
+*/
 transferListItems(listAttribute,builderName) ::= <<
-for (<attribute.type> item : <builderName>.get<attribute.attributeName;format="cap">Value()) {
+for(<attribute.type> item : <builderName>.get<attribute.attributeName;format="cap">Value()) {
     this.add<attribute.attributeName;format="cap">(item);
 }
 >>
 
-
+/**
+* creates the a get method for a ClassAttribute in a model class.
+* Is also used to create the get methods in the
+* builder class, which is needed because of the
+* separation of model and builder.
+*/
 createModelGetter(attribute,attach) ::= <<
 <if(attribute.list)>
 /**
-* Getter for the list of <attribute.type> attributes.
-*@see {@link #<attribute.attributeName>}
+* Gets the the list of <attribute.type> attributes.
+* @return the <attribute.attributeName>
+* @see #<attribute.attributeName>
 */
-public List\<<attribute.type>\> get<attribute.attributeName;format="cap"><attach>(){
+public List\<<attribute.type>\> get<attribute.attributeName;format="cap"><attach>() {
 <else>
 /**
-* Getter for the <attribute.attributeName> attributes.
-*@see {@link #<attribute.attributeName>}
+* Gets the <attribute.attributeName> attributes.
+* @return the <attribute.attributeName>
+* @see #<attribute.attributeName>
 */
-public <attribute.type> get<attribute.attributeName;format="cap"><attach>(){ 
+public <attribute.type> get<attribute.attributeName;format="cap"><attach>() { 
 <endif>
     return <attribute.attributeName><attach>;
 }
 <if(attribute.optional)>
 /**
-* Setter for the list of <attribute.type> attributes.
-*@see {@link #<attribute.attributeName>}
-@return true if <attribute.attributeName> was set
+* Gets the value of <attribute.attributeName>.
+* @return true if <attribute.attributeName> was set
 */
-public boolean is<attribute.attributeName;format="cap"><attach>Set(){ 
+public boolean is<attribute.attributeName;format="cap"><attach>Set() { 
     return <attribute.attributeName><attach>IsSet;
 }<endif>
 
 >>
 
+/**
+* Creates a setter method for a ClassAttribute in the model classes.
+*/
 createModelSetter(attribute) ::= <<
 <if(attribute.list)>
 /**
 * Adds a <attribute.type> attribute to the <attribute.attributeName> list.
-*@param <attribute.attributeName> the attribute to add
-*@see {@link #<attribute.attributeName>}
+* @param <attribute.attributeName> the attribute to add
+* @see #<attribute.attributeName>
 */
-public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>){
+public void add<attribute.attributeName;format="cap">(<attribute.type> <attribute.attributeName>) {
     this.get<attribute.attributeName;format="cap">().add(<attribute.attributeName>);
 }
 <endif>
 /**
-* Setter for the <attribute.attributeName> attribute.
-*@see {@link #<attribute.attributeName>}
+* Sets the <attribute.attributeName> attribute.
+* @param <attribute.attributeName> the attribute to add
+* @see #<attribute.attributeName>
 */
-public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>){
+public void set<attribute.attributeName;format="cap">(<if(attribute.list)>List\<<attribute.type>\><else><attribute.type><endif> <attribute.attributeName>) {
     this.<attribute.attributeName> = <attribute.attributeName>;
 }
 
 >>
 
+/**
+* Creats a whole inner static builder class for a ModelClass.
+*/
 createClassBuilder(modelClass) ::= <<
 /**
 * Builder class for <modelClass.className> instances.
@@ -208,7 +233,7 @@ private final <modelClass.className;format="cap">BuildScope <modelClass.classNam
 	<if(modelClass.simpleOptionalsOnly)>private final SimpleOptionalsOnlyScope simpleOptionalsOnlyScope;<endif>
 	<! Constructor for ClassBuilder !>
 	<javaDocBuilderConstructor(modelClass)>
-	private <modelClass.className;format="cap">Builder(){
+	private <modelClass.className;format="cap">Builder() {
 		<if(modelClass.simpleOptionalsOnly)>this.simpleOptionalsOnlyScope = new SimpleOptionalsOnlyScope();
 		<else
 		 >    this.<modelClass.className;format="lower">BuildScope = new <modelClass.className;format="cap">BuildScope();
@@ -219,8 +244,8 @@ private final <modelClass.className;format="cap">BuildScope <modelClass.classNam
 	}
 
 	<generateEntryPointMethod(modelClass)>
-<!<modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(modelClass.className,classAttribute)><endif>}>!>
-	<modelClass.attributesToSet:{classAttribute|<createAttributeScopeClass(modelClass.className,classAttribute)>}>
+<!<modelClass.attributesToSet:{classAttribute|<if((!classAttribute.opposite))><createAttributeScopeClass(classAttribute)><endif>}>!>
+	<modelClass.attributesToSet:{classAttribute|<createAttributeScopeClass(classAttribute)>}>
 
 	<if(modelClass.simpleOptionalsOnly)><simpleOptionalsOnlyScopeClass(modelClass)>
 	<else><buildScopeClass(modelClass)>
@@ -228,22 +253,27 @@ private final <modelClass.className;format="cap">BuildScope <modelClass.classNam
 }
 >>
 
+/**
+* Creates the entrypoint method for a ModelClass object in a builder.
+*/
 generateEntryPointMethod(modelClass) ::= <<
 /**
 * Entrypoint of the <modelClass.className;format="cap">Builder. Use static import in your code for context free DSL using. 
 */
 <if(!modelClass.simpleOptionalsOnly)>
-public static <first(modelClass.attributesToSet).attributeName; format="cap">Scope create<modelClass.className;format="cap">(){
+public static <first(modelClass.attributesToSet).attributeName; format="cap">Scope create<modelClass.className;format="cap">() {
     return new <modelClass.className>Builder().<first(modelClass.attributesToSet).attributeName>Scope;
 }
 <else>
-public static SimpleOptionalsOnlyScope create<modelClass.className;format="cap">(){
+public static SimpleOptionalsOnlyScope create<modelClass.className;format="cap">() {
     return new <modelClass.className>Builder().simpleOptionalsOnlyScope;
 }
 <endif>
 >>
 
-
+/**
+* Scope Class for the build method of a builder class.
+*/
 buildScopeClass(modelClass) ::= <<
 /**
 * Building scope for <modelClass.className>.
@@ -253,192 +283,40 @@ public class <modelClass.className;format="cap">BuildScope{
 }
 >>
 
-buildObjectMethod(modelClass) ::= <<
 /**
-* Build Method for <modelClass.className> instances.
-* @return a new <modelClass.className> instance with attributes filled from this builder class.
+* Starts the setting for an opposite attribute.
+* The ModelClass needs to set the opposite when the instance of the class ist created.
 */
-public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
-	<modelClass.className;format="cap"> <modelClass.className;format="lower"> = new <modelClass.className;format="cap">(<modelClass.className;format="cap">Builder.this);
-	<modelClass.oppositesToSet:{opAttributeToSet|<setOpAttribute(modelClass,opAttributeToSet)>}>
-	return <modelClass.className;format="lower">;
-}
->>
-
 setOpAttribute(modelClass,opAttributeToSet) ::= <<
-<if(opAttributeToSet.opposite.optional)>if(<modelClass.className;format="lower">.is<opAttributeToSet.opposite.attributeName;format="cap">Set()){
+<if(opAttributeToSet.opposite.optional)>if(<modelClass.className;format="lower">.is<opAttributeToSet.opposite.attributeName;format="cap">Set()) {
     <doOPSetting(modelClass, opAttributeToSet)>
 }
 <else><doOPSetting(modelClass, opAttributeToSet)><endif>
 
 >>
 
+/**
+* Does the actual opposite setting.
+*/ 
 doOPSetting(modelClass,opAttributeToSet) ::= <<
 <if(opAttributeToSet.opposite.list)>
-for (<opAttributeToSet.opposite.type> item : <modelClass.className;format="lower">.get<opAttributeToSet.opposite.attributeName;format="cap">()) {
+for(<opAttributeToSet.opposite.type> item : <modelClass.className;format="lower">.get<opAttributeToSet.opposite.attributeName;format="cap">()) {
         item.set<opAttributeToSet.attributeName;format="cap">(<modelClass.className;format="lower">);
 }
 <else><modelClass.className;format="lower">.get<opAttributeToSet.opposite.attributeName;format="cap">().set<opAttributeToSet.attributeName;format="cap">(<modelClass.className;format="lower">);
 <endif>
 >>
 
-createClassAttribute(classAttribute, attach) ::= <<
-<if(classAttribute.optional)>
-/**
-* Flag for {@link <classAttribute.attributeName><attach>}.
-* Is true if <classAttribute.attributeName><attach> was set.
-*/
-private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
-<if(classAttribute.list)>
-/**
-* List of {@link <classAttribute.attributeName><attach>}
-* for multiple <classAttribute.type> values.
-*/
-private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<else>
-/**
-* <classAttribute.attributeName> value of the model class.
-*/
-private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
->>
-
-createScopeAttribute(classAttribute) ::= <<
-
-/**
-* Reference for the <classAttribute.attributeName;format="cap">Scope.
-* Used for object scoping inside the builder.
-*/
-private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
-
->>
-
-instantiateScopeAttributes(classAttribute) ::= <<
-this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
-
->>
-
-createAttributeScopeClass(className,classAttribute) ::= <<
-<if(classAttribute.list)><javaDocListScopeClass(classAttribute)>
-<elseif(classAttribute.reference)><javaDocRefernceScopeClass(classAttribute)>
-<else><javaDocScopeClass(classAttribute)>
-<endif>
-public class <classAttribute.attributeName;format="cap">Scope{
-	<createAttributeMethod(className,classAttribute)>
-	<! foreach simple optional attribute !>
-	<classAttribute.nextSimpleOptAttr:{optAttr|<createOptionalAttributeMethod(className, classAttribute.attributeName, optAttr)>}>
-}
->>
-
-simpleOptionalsOnlyScopeClass(modelClass) ::= <<
-<javaDocOptOnlyScopeClass(modelClass)>
-public class SimpleOptionalsOnlyScope{
-	<! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
-	The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
-	<modelClass.simpleOptAttr:{optAttr|<createOptionalAttributeMethod(modelClass.className, "simpleOptionalsOnly", optAttr)>}>
-	<buildObjectMethod(modelClass)>
-}
->>
-
-createAttributeMethod(className,classAttribute) ::= <<
-<if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute)>
-<else><createSimpleMethod(classAttribute.className,classAttribute)><endif>
-
->>
-
-createSimpleMethod(className, classAttribute) ::= <<
-<! for normal attribute setting methods!>
-/**
-* Method for setting the <classAttribute.attributeName>Value in this builder 
-* so that it can later be transfered to the <className> Model object.
-* @return the next scope object
-*/
-public <getNextScopeClass(className,classAttribute)> <classAttribute.attributeName> (<classAttribute.type> val){
-	<className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
-	<if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
-
-	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}
-<if(classAttribute.optional)>
-/**
-* Method for skipping the optional <classAttribute.attributeName> Attribute
-* @return the next scope object 
-*/
-public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap"> (){
-	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}
-<endif>
-
->>
-
-createOPPMethod(className,classAttribute,modelName) ::= <<
-<! for opposite methods !>
-/**
-* Method for the Opposite Attribute <classAttribute.attributeName>. 
-* It will be set by its opposite if it has one.
-* @return the next scope object
-*/
-public <getNextScopeClass(className,classAttribute)> <classAttribute.attributeName> (){
-	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}
->>
 
 
-getNextScopeClass(className,classAttribute) ::= <<
-<! retrieves the next Scope Class for the Method header !>
-<if(classAttribute.lastAttribute)><className;format="cap">BuildScope<else><classAttribute.nextAttribute.attributeName;format="cap">Scope<endif>
->>
-
-getNextScopeAttr(className,classAttribute) ::= <<
-<! retrieves the next Scope Attribute for Method return !>
-<if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif>
->>
-
-
-createOptionalAttributeMethod(className, scopeName, optionalAttribute) ::= <<
-/**
-* Setter method for the optional attribute <optionalAttribute.attributeName>
-*/
-public <scopeName;format="cap">Scope opt<optionalAttribute.attributeName;format="cap">(<optionalAttribute.type> val){
-	<className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
-	<className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
-	return <className;format="cap">Builder.this.<scopeName>Scope;
-}
->>
-
-createListMethod(className, classAttribute) ::= <<
-<! for list adding methods !>
-/**
-* Adds the given <classAttribute.type> object to the <classAttribute.attributeName> List.
-* Stays in the same Scope after adding an object so that more objects can be added.
-*@param val the <classAttribute.type> object 
-*/
-public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap"> (<classAttribute.type> val){
-	<className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val);
-	return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
-}
-/**
-* Ends the adding of <classAttribute.type> objects to the <classAttribute.attributeName> List.
-* By calling this method before adding any objects it leaves the <classAttribute.attributeName> List empty.
-<if(classAttribute.lastAttribute)>
-*@return {@link #<className;format="cap">BuildScope}
-*@see {@link #add<classAttribute.attributeName;format="cap">}
-*/
-public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap"> (){
-	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}
-<else>*@return {@link #<className;format="cap">Scope}
-*@see {@link #add<classAttribute.attributeName;format="cap">}
-*/
-public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap"> (){
-	return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
-}<endif>
-
->>
-
+//
+// JavaDoc
+//
 
 javaDocConstructorModel(modelClass, packageName) ::= <<
 /**
 * Private constructor for the model class <modelClass.className>.
-* Expects an {@link <modelClass.className>Builder} Instance with values set.
+* Expects {@link <modelClass.className>Builder} Instance with values set.
 * @param builder The builder created by the dsl starting from entry point
 * {@link <modelClass.model.modelName>Builder#create<modelClass.className>}
 * @return new <modelClass.className> instance with values from the the <modelClass.className>Builder.
@@ -448,7 +326,7 @@ javaDocConstructorModel(modelClass, packageName) ::= <<
 javaDocConstructorRootModel(rootModelClass, packageName) ::= <<
 /**
 * Private constructor for the model class <rootModelClass.className>.
-* Expects an {@link <rootModelClass.className>Builder} Instance with values set.
+* Expects {@link <rootModelClass.className>Builder} Instance with values set.
 * @param builder The builder created by the dsl starting from entry point
 * {@link <rootModelClass.className>Builder#create<rootModelClass.className>}
 * @return new <rootModelClass.className> instance with values from the the <rootModelClass.className>Builder.
@@ -476,30 +354,3 @@ javaDocBuilderConstructor(modelClass) ::= <<
 >>
 
 
-javaDocListScopeClass(classAttribute)::= <<
-
-/**
-* Scope Class for the <classAttribute.type> List attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
-<if(classAttribute.reference)>*The type of the list of attributes is defined by the model {@link <classAttribute.type>}<endif>
-*/
->>
-javaDocRefernceScopeClass(classAttribute)::= <<
-
-/**
-* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}.
-* The type of the attribute is defined by the model {@link <classAttribute.type>}
-*/
->>
-javaDocScopeClass(classAttribute)::= <<
-
-/**
-* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
-*/
->>
-
-javaDocOptOnlyScopeClass(modelClass)::= <<
-
-/**
-* Scope Class for setting optional attributes of <modelClass.className>
-*/
->>

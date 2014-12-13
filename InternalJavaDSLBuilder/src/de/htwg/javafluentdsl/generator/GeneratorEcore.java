@@ -60,10 +60,10 @@ public class GeneratorEcore implements IGenerator {
      */
     private static final String WRONG_OPTION_ECORE =
             "Not a valid templateOption given. "
-            + "For a genmodel source only:"
-            + SINGLE_BUILDER_OPTION
+            + "For a genmodel source only: "
+            + "\""+SINGLE_BUILDER_OPTION+"\""
             + " OR "
-            + MULTIPLE_BUILDER_OPTION + " allowed.";
+            + "\""+ MULTIPLE_BUILDER_OPTION + "\"allowed.";
 
     /**
      * Starts generation of files with given template.

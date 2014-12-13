@@ -1,0 +1,349 @@
+/**
+* This is the base template for creating Builder for ECore models.
+* It provides sub-templates for other ecore templates.
+* Another template can import this template using: import "ecoreBase.stg".
+* 
+*/
+
+/**
+* Creates an attribute for a ClassAttribute object.
+* With its JavaDoc.
+*/
+createClassAttribute(classAttribute, attach) ::= <<
+<if(classAttribute.list)>
+<javaDocListAttribute(classAttribute)>
+private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<
+else><if(classAttribute.optional)>
+<javaDocOptionalIsSetAttribute(classAttribute)>
+private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
+<javaDocClassAttribute(classAttribute)>
+private <classAttribute.type> <classAttribute.attributeName><attach>;
+<endif>
+>>
+
+/**
+* Creates the create<Model>Instance() Method for a ModelClass object.
+* this calls the factory to instantiate the EObject the ModelClass is
+* describing.
+*/
+generateEMFCreateModelInstance(modelClass) ::= <<
+/**
+* Creates an instance of the corresponding EObject by using 
+* the package factory {@link <modelClass.model.factoryName>} 
+* and fills it with the parameter of the <modelClass.className>Builder.
+* @param builder the builder created by the {@link #build<modelClass.className>} method
+* @return a new <modelClass.className> instance
+*
+*/
+private <modelClass.className> create<modelClass.className>Instance(final <modelClass.className>Builder builder) {
+    <modelClass.model.factoryName> factory = <modelClass.model.factoryName>.eINSTANCE;
+    <modelClass.className> instance = factory.create<modelClass.className>();
+    <modelClass.attributesToSet:{attribute|<if(!attribute.list)><transferValuesToEClass(attribute,"builder","instance")><
+                                           else><transferListValuesToEClass(attribute,"builder","instance")><endif>}>
+    <modelClass.simpleOptAttr:{attribute|<transferOptValuesToEClass(attribute,"builder","instance")>}>
+    return instance;
+}
+
+>>
+
+/**
+* Creates the BuildScope Class inside a Builder Class.
+* 
+*/
+emfBuildScopeClass(modelClass) ::= <<
+/**
+* Building scope class for <modelClass.className>.
+*/
+public final class <modelClass.className;format="cap">BuildScope {
+    <buildEMFObjectMethod(modelClass)>
+    <generateEMFCreateModelInstance(modelClass)>
+}
+>>
+
+/**
+* Creates a scope class which contains only simple optional setter methods.
+*/
+simpleOptionalsOnlyScopeClass(modelClass) ::= <<
+<javaDocOptOnlyScopeClass(modelClass)>
+public final class SimpleOptionalsOnlyScope {
+    <! foreach simple optional attribute. they must stay in the optioanalsOnly Scope. 
+    The build method is not in a seperate Scope so that it can be called anytime since alle attributes are optional!>
+    <modelClass.simpleOptAttr:{optAttr|<createSimpleOptAttrMethod("simpleOptionalsOnly", optAttr)>}>
+    <buildEMFObjectMethod(modelClass)>
+    <generateEMFCreateModelInstance(modelClass)>
+}
+>>
+
+/**
+* Creats a scope class for classAttribute inside a builder.
+*/
+createAttributeScopeClass(className,classAttribute) ::= <<
+<if(classAttribute.list)><javaDocListScopeClass(classAttribute)>
+<elseif(classAttribute.reference)><javaDocReferenceScopeClass(classAttribute)>
+<else><javaDocScopeClass(classAttribute)>
+<endif>
+public final class <classAttribute.attributeName;format="cap">Scope {
+    <createAttributeMethod(className,classAttribute)>
+    <! foreach simple optional attribute !>
+    <classAttribute.nextSimpleOptAttr:{optAttr|<createSimpleOptAttrMethod(classAttribute.attributeName, optAttr)>}>
+}
+>>
+
+/**
+* Decides which set method for the classAttibute should be created.
+*/
+createAttributeMethod(className,classAttribute) ::= <<
+<if(classAttribute.list)><createListMethod(classAttribute.className,classAttribute)>
+<else><createSimpleMethod(classAttribute.className,classAttribute)>
+<endif>
+>>
+
+/**
+* Creates a lists add and no<classAttribute>() method.
+*/
+createListMethod(className, classAttribute) ::= <<
+<! for list adding methods !>
+/**
+* Adds the given <classAttribute.type> object to the <classAttribute.attributeName> List.
+* Stays in the same Scope after adding an object so that more objects can be added.
+* @param val the <classAttribute.type> object to add
+* @return the next scope object 
+*/
+public <classAttribute.attributeName;format="cap">Scope add<classAttribute.attributeName;format="cap">(final <classAttribute.type> val) {
+    <className;format="cap">Builder.this.<classAttribute.attributeName>Value.add(val);
+    return <className;format="cap">Builder.this.<classAttribute.attributeName>Scope;
+}
+/**
+* Ends the adding of <classAttribute.type> objects to the <classAttribute.attributeName> List.
+* By calling this method before adding any objects leaves the <classAttribute.attributeName> List empty.
+<if(classAttribute.lastAttribute)>
+*@return {@link #<className;format="cap">BuildScope}
+*@see {@link #add<classAttribute.attributeName;format="cap">}
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}
+<else>*@return {@link #<className;format="cap">Scope}
+*@see {@link #add<classAttribute.attributeName;format="cap">}
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}<endif>
+
+>>
+
+/**
+* creates an usual add method for attributes inside a scope class.
+*/
+createSimpleMethod(className, classAttribute) ::= <<
+/**
+* Method for setting the <classAttribute.attributeName>Value in this builder.
+* @param val the <classAttribute.type> to set
+* @return the next scope object
+*/
+public <getNextScopeClass(className,classAttribute)> <classAttribute.attributeName>(final <classAttribute.type> val) {
+    <className;format="cap">Builder.this.<classAttribute.attributeName>Value = val;
+    <if(classAttribute.optional)><className;format="cap">Builder.this.<classAttribute.attributeName>ValueIsSet = true;<endif>
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}
+<if(classAttribute.optional)>
+/**
+* Method for skipping the optional <classAttribute.attributeName> Attribute.
+* @return the next scope object 
+*/
+public <getNextScopeClass(className,classAttribute)> no<classAttribute.attributeName;format="cap">() {
+    return <className;format="cap">Builder.this.<getNextScopeAttr(className,classAttribute)>;
+}<endif>
+>>
+
+
+/**
+* creates an optional set method. Used inside a mandatory scope class.
+*/
+createSimpleOptAttrMethod(scopeName, optionalAttribute) ::= <<
+/**
+* Setter method for the optional attribute <optionalAttribute.attributeName>.
+* @param val the <optionalAttribute.type> to set
+* @return the next scope object 
+*/
+public <scopeName;format="cap">Scope opt<optionalAttribute.attributeName;format="cap">(final <optionalAttribute.type> val) {
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>Value = val;
+    <optionalAttribute.className;format="cap">Builder.this.<optionalAttribute.attributeName>ValueIsSet = true;
+    return <optionalAttribute.className;format="cap">Builder.this.<scopeName>Scope;
+}
+
+>>
+
+
+/**
+* Transfers the value of the builders attribute to 
+* the EObject instance.
+* 
+*/
+transferValuesToEClass(classAttribute, builderName, eObjectInstance) ::= <<
+<if(classAttribute.optional)>if (<builderName>.<classAttribute.attributeName>ValueIsSet) {
+<endif><eObjectInstance>.set<classAttribute.attributeName;format="cap">(<builderName>.<classAttribute.attributeName>Value);
+<if(classAttribute.optional)>} <endif>
+>>
+
+/**
+* Transfers content of a list from the builders list attribute to 
+* the EObject instance.
+* 
+*/
+transferListValuesToEClass(classAttribute, builderName, eObjectInstance) ::= <<
+<eObjectInstance>.get<classAttribute.attributeName;format="cap">().addAll(<builderName>.<classAttribute.attributeName>Value);
+
+>>
+
+/**
+* Transfers the value from the builders optional attribute to 
+* the EObjects instances optional attribute if the value was set in the builder.
+* 
+*/
+transferOptValuesToEClass(classAttribute, builderName, eObjectInstance) ::= <<
+if (<builderName>.<classAttribute.attributeName>ValueIsSet) {
+    <eObjectInstance>.set<classAttribute.attributeName;format="cap">(<builderName>.<classAttribute.attributeName>Value);
+} 
+>>
+
+/**
+* Creates the build method.
+*/
+buildEMFObjectMethod(modelClass) ::= <<
+/**
+* Build Method for <modelClass.className> instances.
+* @return a new <modelClass.className> instance with attributes filled from this builder class.
+* @see #create<modelClass.className>Instance(builder)
+*/
+public <modelClass.className;format="cap"> build<modelClass.className;format="cap">() {
+    <modelClass.className>Builder builder = <modelClass.className>Builder.this;
+    return create<modelClass.className>Instance(builder);
+}
+>>
+
+/**
+* Creates final scope attribute of a builder.
+*/
+createScopeAttribute(classAttribute) ::= <<
+/**
+* Scope reference for the <classAttribute.attributeName;format="cap">Scope.
+* Is used for returning purpose (object scoping).
+*/
+private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
+
+>>
+
+/**
+* Instantiates final scope attribute of a builder.
+* Should be used in the constructor of the builder.
+*/
+instantiateScopeAttributes(classAttribute) ::= <<
+this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeName;format="cap">Scope();
+
+>>
+
+/**
+* Retrieves the next Scope Class for a Method header.
+*/
+getNextScopeClass(className,classAttribute) ::= <<
+<if(classAttribute.lastAttribute)><className;format="cap">BuildScope<
+else><classAttribute.nextAttribute.attributeName;format="cap">Scope<endif>
+>>
+
+/**
+* Retrieves the next Scope Attribute for Method return.
+*/
+getNextScopeAttr(className,classAttribute) ::= <<
+<if(classAttribute.lastAttribute)><className;format="lower">BuildScope<else><classAttribute.nextAttribute.attributeName>Scope<endif>
+>>
+
+
+//
+// JavaDocs Templates
+//
+
+/**
+* 
+* JavaDoc for a builders list attribute.
+*/
+javaDocListAttribute(classAttribute) ::= <<
+/**
+* List Attribute which holds the values added by the DSL Call for
+* the <classAttribute.attributeName> attribute in the model. 
+*/
+>>
+
+/**
+* 
+* JavaDoc for a builders optional IsSet attribute.
+*/
+javaDocOptionalIsSetAttribute(classAttribute) ::= <<
+/**
+* Indicates if the optional value for the <classAttribute.attributeName>
+* was set by the DSL call.
+*/
+>>
+
+/**
+* 
+* JavaDoc for a builders attribute.
+*/
+javaDocClassAttribute(classAttribute) ::= <<
+/**
+* Attribute which holds the values set by the DSL Call for
+* the <classAttribute.attributeName> in the model. 
+*/
+>>
+
+/**
+* 
+* JavaDoc for a builders constructor.
+*/
+javaDocBuilderConstructor(modelClass) ::= <<
+/**
+* Constructor for the builder class.
+* Should be instantiated by the Builders corresponding EntryPoint Method
+* {@code create<modelClass.className;format="cap">()}.
+*/
+>>
+
+javaDocListScopeClass(classAttribute)::= <<
+
+/**
+* Scope class for the <classAttribute.type> List attribute <classAttribute.attributeName>.
+<if(classAttribute.reference)>*The type of the list is defined by the model <classAttribute.type>. <endif>
+*/
+>>
+
+
+javaDocReferenceScopeClass(classAttribute)::= <<
+
+/**
+* Scope class for the <classAttribute.type> attribute <classAttribute.attributeName>.
+* The type of the attribute is defined by the model.
+*/
+>>
+
+
+javaDocScopeClass(classAttribute)::= <<
+
+/**
+* Scope class for the <classAttribute.type> attribute <classAttribute.attributeName>.
+*/
+>>
+
+javaDocBuildScopeClass(modelClass)::= <<
+
+/**
+* Scope class for the building method of the <modelClass.className> instance.
+*/
+>>
+
+javaDocOptOnlyScopeClass(modelClass)::= <<
+
+/**
+* Scope class for setting optional attributes of a <modelClass.className> instance.
+*/
+>>
+
