@@ -7,11 +7,11 @@ package de.htwg.javafluentdsl.main;
 public interface IStart {
 
     /**
-     * Starts the DSL generation process. With some kind of source (
-     * {@code source}) for dsl model description (e.g. File, description
-     * string...) and a defined template ({@code templateOption}). The classes
-     * generated are saved via the given targetPackages ({@code targetPackgage})
-     * path.
+     * Starts the DSL generation process. With some kind of source 
+     * ({@code source}) for dsl model description (e.g. File, description
+     * string...) and a defined template option({@code templateOption}). 
+     * The classes generated are saved in the given 
+     * target packages path ({@code targetPackgage}).
      * 
      * @param source
      *            the source for the dsl model description

@@ -81,8 +81,8 @@ public final class ClassAttribute {
      * atleast a name, a type and must be part of a {@link ModelClass}. The
      * Attribute is added to the given ModelClasses
      * {@link ModelClass#allAttributes} list. The {@link #attributeFullName} is
-     * the combined className and attributeName because this has to be unique in
-     * the {@link DSLGenerationModel}.
+     * the combined {@link ModelClass#className} and {@code name}.
+     * This should be unique in the {@link DSLGenerationModel} instance.
      * 
      * @param name
      *            the attributes name.

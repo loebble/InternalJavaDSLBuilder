@@ -11,14 +11,13 @@ import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 import de.htwg.javafluentdsl.parser.IParser;
 
 /**
- *Implementation of the {@link ITemplateGenerator} for generating
- *inner DSLs for Regex model instantiation.
- *All templateOption for Regex models should be declared
+ *Implementation of the {@link IGenerator} for generating
+ *internal DSLs for Regex model instantiation.
+ *All valid template options as well as their filenames should be declared
  *in static final fields which then can be used in the
  *{@link #generateDSL(IParser, String, String)} method.
- *
  */
-public class GeneratorRegex implements ITemplateGenerator {
+public class GeneratorRegex implements IGenerator {
 
     /*
      * Template options
@@ -73,7 +72,7 @@ public class GeneratorRegex implements ITemplateGenerator {
      * implemented method for the option.
      * 
      * @param parser
-     *            the {@link ParserRegex} which holds the DSLGenerationModel
+     *            the {@link IParser} which holds the DSLGenerationModel
      * @param templateOption
      *            which template to use
      * @param targetPackage
@@ -130,12 +129,9 @@ public class GeneratorRegex implements ITemplateGenerator {
     }
 
     /**
-     * Generates a DSL with a separated Model. This means the Builder is
-     * seperated from the Model (or vice versa) which can be desired in terms of
-     * separation of concerns. This method is created to be used with
-     * DSLGenerationModels created by a {@link ParserRegex} instance, but can be
-     * used with every DSLGenerationModel while it still generates a correct
-     * model for the template.
+     * Generates a DSL with a separated Model. This means the Builder is in
+     * a separate file than the Model, which can be desired in terms of
+     * separation of concerns.
      * 
      * @param dslModel
      *            {@link DSLGenerationModel}
@@ -163,15 +159,13 @@ public class GeneratorRegex implements ITemplateGenerator {
     }
 
     /**
-     * Generates a single model file for separated builder.
+     * Generates a single model file for separated builder option.
      * 
      * @param dslModel
      *            the generation model
      * @param targetPackage
      *            the target package the file is be written to
-     * @return @return path of DSL File which was created
-     * @see {@link #generateBuilderSeparateDSL(DSLGenerationModel,
-     *  String, List)}
+     * @return  path of DSL File which was created.
      */
     private String regexGenerateSeperatedModel(
             final DSLGenerationModel dslModel, final String targetPackage) {
@@ -193,9 +187,7 @@ public class GeneratorRegex implements ITemplateGenerator {
      *            the generation model
      * @param targetPackage
      *            the target package the file is be written to
-     * @return @return path of DSL File which was created
-     * @see {@link #generateBuilderSeparateDSL(DSLGenerationModel,
-     *  String, List)}
+     * @return path of DSL File which was created
      */
     private String regexGenerateBuilderSeperated(
             final DSLGenerationModel dslModel, final String targetPackage) {

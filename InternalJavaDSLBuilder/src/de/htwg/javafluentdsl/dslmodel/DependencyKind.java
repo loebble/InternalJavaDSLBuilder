@@ -7,11 +7,13 @@ package de.htwg.javafluentdsl.dslmodel;
 public enum DependencyKind {
     /**
      * ClassAttribute is a Attribute to set in the generated DSL.
-     * Either a mandatory or a reference attribute to another modeled Class.
+     * Either a mandatory attribute or a reference attribute 
+     * to another modeled Class.
      */
     ATTRIBUTE,
     /**
-     * ClassAttribute is optional to set.
+     * ClassAttribute is no reference attribute 
+     * to another modeled Class and is optional to set.
      */
 	OPTIONAL_ATTRIBUTE,
 	/**

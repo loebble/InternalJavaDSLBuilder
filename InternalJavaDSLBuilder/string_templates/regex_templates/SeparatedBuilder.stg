@@ -13,7 +13,7 @@ public class <genModel.modelName>{
 	<first(genModel.classes).allAttributes:{attribute|<createModelSetter(attribute)>}>
 	<! CONSTRUCTOR FOR ROOT MODEL CLASS !>
 	<javaDocConstructorRootModel(first(genModel.classes),packageName)>
-	public <genModel.modelName>(<genModel.modelName>Builder builder){
+	<genModel.modelName>(<genModel.modelName>Builder builder){
 	    <!do not try to transfer opposite attributes that are not creator of opposite relation !>
 		<first(genModel.classes).allAttributes:{attribute|<if((attribute.opposite)&&(!attribute.creatorOfOpposite))
 		  ><else><transferValues(attribute,"builder")><endif>}>
@@ -98,7 +98,7 @@ public static class <modelClass.className>{
     <modelClass.allAttributes:{attribute|<createClassAttribute(attribute,"")>}>
     <! constructor !>
     <javaDocConstructorModel(modelClass,packageName)>
-    public <modelClass.className>(<modelClass.className;format="cap">Builder builder){
+    <modelClass.className>(<modelClass.className;format="cap">Builder builder){
         <!do not try to transfer opposite attributes that are not creator of opposite relation !>
         <modelClass.allAttributes:{attribute|<if((attribute.opposite)&&(!attribute.creatorOfOpposite))
             ><else><transferValues(attribute,"builder")><endif>}>

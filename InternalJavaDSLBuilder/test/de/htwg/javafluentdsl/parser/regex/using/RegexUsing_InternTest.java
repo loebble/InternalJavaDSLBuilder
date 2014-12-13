@@ -196,13 +196,13 @@ public class RegexUsing_InternTest {
 		assertTrue(forum.getSections().get(0).getName().equals("mainSection"));
 		
 		// because the rating was created by a User object the opposite Reference to Post is null
-		assertTrue( forum.getUser().get(0).getRating().getForPost() == null);
-		assertTrue( forum.getUser().get(0).getRating().getForUser().getNickName()
+		assertTrue(forum.getUser().get(0).getRating().getForPost() == null);
+		assertTrue(forum.getUser().get(0).getRating().getForUser().getNickName()
 					.equals(forum.getUser().get(0).getNickName()));
 		
 		// Rating was created by PostObj
-		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForUser() == null);
-		assertTrue( forum.getUser().get(0).getPosts().get(0).getRating().getForPost().getText()
+		assertTrue(forum.getUser().get(0).getPosts().get(0).getRating().getForUser() == null);
+		assertTrue(forum.getUser().get(0).getPosts().get(0).getRating().getForPost().getText()
 					.equals(forum.getUser().get(0).getPosts().get(0).getText()));
 	}
 	

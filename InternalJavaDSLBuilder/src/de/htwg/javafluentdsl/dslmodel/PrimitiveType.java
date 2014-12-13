@@ -1,7 +1,9 @@
 package de.htwg.javafluentdsl.dslmodel;
 
 /**
- * Enum for all primitive types in the java Language.
+ * Holds all primitive types of the java language.
+ * They can be fetched through their java definition keywords.
+ * @see #getPrimitiveByKeyword(String)
  *
  */
 public enum PrimitiveType {
@@ -53,7 +55,7 @@ public enum PrimitiveType {
 	 * Constructor to initialize Primitive type with its keyword.
 	 * @param keywordInJava the keyword as used in the java language.
 	 */
-	PrimitiveType(final String keywordInJava) {
+	private PrimitiveType(final String keywordInJava) {
 		this.keyword = keywordInJava;
 	}
 	/**

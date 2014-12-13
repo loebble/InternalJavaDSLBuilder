@@ -17,16 +17,15 @@ import de.htwg.javafluentdsl.dslmodel.ModelClass;
 import de.htwg.javafluentdsl.dslmodel.PrimitiveType;
 
 /**
- * Class for Creating a {@link DSLGenerationModel} from EMFs Generator Model or
+ * Class for Creating a {@code DSLGenerationModel} from EMFs Generator Model or
  * more precisely the {@link EPackage} defined inside the Generator Model.
  * 
- * @see {@link IParser}
  */
 public final class ParserEcore extends AbstractIParserBasic {
 
     /**
      * Holds the {@link EPackage} of this ParserEcore. Which is received through
-     * a {@link GenModel}
+     * a {@code GenModel} Object.
      */
     private final EPackage ePackage;
 
@@ -35,9 +34,6 @@ public final class ParserEcore extends AbstractIParserBasic {
      */
     private final String packageName;
 
-    /*
-     * Exception Messages
-     */
     /**
      * Message for Wrong EClassifier.
      * 
@@ -65,7 +61,7 @@ public final class ParserEcore extends AbstractIParserBasic {
 
     /**
      * Used for lower Bound of an EStructuralFeature.
-     * Can be anything but 0,1,-1;
+     * Could be anything but 0,1,-1;
      */
     private static final int LOWERBOUND = -999;
     /**
@@ -97,27 +93,26 @@ public final class ParserEcore extends AbstractIParserBasic {
 
     /**
      * Creates an Instance of this class {@link ParserEcore} . An ParserEcore
-     * needs any kind of EPackage to analyze its attributes etc. All the
-     * necessary methods are called in this method so that after it the IParsers
-     * {@link IParser#genModel} can be used.
+     * needs any kind of EPackage to analyze its attributes etc. The complete
+     * {@code DSLGenerationModel} {@link #genModel} is created if this
+     * Method is called.
      * 
      * @param ePackage
      *            The {@link EPackage} to be analyzed
      * @param fullPackageName
      *            the full base package name of the corresponding
-     *            {@link GenPackage}. This is the location where the generated
+     *            EMFs GenPackage. This is the location where the generated
      *            EMF Models are located
      * @param factoryName
-     *            the Factory of the {@link GenPackage} which can be used to
+     *            the Factory of the GenPackage which can be used to
      *            instantiate the EMF Models
      * @return a new ParserEcore instance with the created
-     *         {@link DSLGenerationModel}
+     *         {@code DSLGenerationModel}
      */
     public static ParserEcore getInstance(final EPackage ePackage,
             final String fullPackageName, final String factoryName) {
-        EPackage eP = (EPackage) ePackage;
         ParserEcore parser = new ParserEcore(ePackage, fullPackageName);
-        parser.getGenerationModel().setModelName(eP.getName());
+        parser.getGenerationModel().setModelName(ePackage.getName());
         parser.getGenerationModel().setFactoryName(factoryName);
         parser.retrieveClassesAndAttributes();
         parser.createAttributeOrder();
@@ -126,7 +121,7 @@ public final class ParserEcore extends AbstractIParserBasic {
 
     /**
      * Analyzes the {@link #ePackage} for its defined classes and attributes to
-     * be able to generate a valid {@link DSLGenerationModel}.
+     * be able to generate a valid {@code DSLGenerationModel}.
      */
     private void retrieveClassesAndAttributes() {
         // check for no Classifier
@@ -254,6 +249,7 @@ public final class ParserEcore extends AbstractIParserBasic {
 
             lowerBound = attribute.getLowerBound();
         } else if (feature instanceof EReference) {
+            //references another EClass in the model
             EReference ref = (EReference) feature;
             type = ref.getEType().getName();
             modelClass.addImport(this.packageName + "." + type);
@@ -294,8 +290,7 @@ public final class ParserEcore extends AbstractIParserBasic {
         if (isOpposite) {
             handleOppositeRelation(attribute, oppositeClassName,
                     oppositeAttributeName);
-            // special case, isRequired is true in ecore if its an opposite attr
-            // & alist
+            // special case, isRequired is true in ecore if its an opposite
             // regardless of lowerBound. But for dsl lowerbound is stricter
             if (isList) {
                 if (lowerBound == 0) {
@@ -329,20 +324,20 @@ public final class ParserEcore extends AbstractIParserBasic {
     private void handleOppositeRelation(final ClassAttribute currentAttribute,
             final String oppositeClassName, 
             final String oppositeAttributeName) {
-        // check if other side of opposite relation is already in generation
-        // model
+        /* check if other side of opposite relation is already in generation
+         model */
         ClassAttribute oppositeAttr = this.getGenerationModel().findAttribute(
                 oppositeClassName, oppositeAttributeName);
         if (oppositeAttr == null) {
-            // Sets the start of an opposite relation
-            // the first attribute of an opp relation is the creator (i.e the
-            // setter) of the other one
+            /* Sets the start of an opposite relation
+             the first attribute of an opp relation is the creator (i.e the
+             setter) of the other one */
             currentAttribute.setCreatorOfOpposite(true);
         } else {
             // Sets both attributes as their opposite
             currentAttribute.setOpposite(oppositeAttr);
             oppositeAttr.setOpposite(currentAttribute);
-            // tells corresponding attribute class its opposite dependency
+            // tells corresponding attribute its opposite dependency
             oppositeAttr.getOpposite().setDependencyKind(
                     DependencyKind.OPPOSITE_ATTRIBUTE_TO_SET);
         }

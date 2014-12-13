@@ -5,10 +5,10 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 
+import de.htwg.javafluentdsl.parser.regex.creation.RegexCreationTest;
 /**
  * Suite class that runs all test classes created.
  */
-import de.htwg.javafluentdsl.parser.regex.creation.RegexCreationTest;
 @RunWith(Suite.class)
 @SuiteClasses({CreationTest.class, UsingTest.class,
 		RegexCreationTest.class})

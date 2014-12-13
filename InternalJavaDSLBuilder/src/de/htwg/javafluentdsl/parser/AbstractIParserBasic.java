@@ -52,15 +52,13 @@ public abstract class AbstractIParserBasic implements IParser {
 
     /**
      * Creates the order of ClassAttributes in a ModelClass by setting their
-     * nextAttribute value and nextSimpleOptAttr List. For each dependency kind
+     * {@code setNextAttribute(ClassAttribute)} and
+     * {@code setNextSimpleOptAttr(java.util.List)}. For each dependency kind
      * a list is available in the ModelClass and thus the attributes are added
      * to the suited list.
      * 
      * @param modelClass
      *            The ModelClass to order attributes in
-     *            
-     * @see {@link ClassAttribute#setNextAttribute()}
-     * @see {@link ClassAttribute#setNextSimpleOptAttr()}
      */
     private void createAttributeOrder(final ModelClass modelClass) {
         // a list for the case that the first attributes are optional

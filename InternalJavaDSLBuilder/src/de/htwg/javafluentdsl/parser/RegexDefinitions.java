@@ -76,7 +76,7 @@ public final class RegexDefinitions {
     public static final String IMPORT_PARAMETER = "(\\w+(\\.)?)+";
 
     /**
-     * Defines the start attribute of a class definition.
+     * Defines the attribute of a class definition.
      */
     public static final String SINGLE_ATTRIBUTE_WITHOUT_OP = 
             "((.A|.OA|.LA)=\\w+:\\w+)";
@@ -122,10 +122,6 @@ public final class RegexDefinitions {
      * Regular expression for the attributes in a class definition Defines that
      * the class has to start with an mandatory, optional attribute or a list of
      * attributes and that a opposite attribute has to be at the end.
-     * 
-     * @see {@link #SINGLE_ATTRIBUTE_WITHOUT_OP}
-     *      {@link#FOLLOWING_SINGLE_ATTRIBUTE}
-     *      {@link#FOLLOWING_OPPOSITE_ATTRIBUTE}
      */
     public static final String ALL_ATTR_DEFINITION = "\\{"
             + SINGLE_ATTRIBUTE_WITHOUT_OP + FOLLOWING_SINGLE_ATTRIBUTE + "*"

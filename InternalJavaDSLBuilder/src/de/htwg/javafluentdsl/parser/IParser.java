@@ -3,25 +3,24 @@ package de.htwg.javafluentdsl.parser;
 import de.htwg.javafluentdsl.dslmodel.DSLGenerationModel;
 
 /**
- * Interface to make sure a {@link DSLGenerationModel} can be received in a
- * Parser. The DSLGenerationModel should be fully created before the
- * get {@code getGenerationModel()} can be called.
- *
+ * Interface to make sure a {@link DSLGenerationModel} can be received 
+ * through a Parser. The DSLGenerationModel should be fully created 
+ * before the {@code getGenerationModel()} can be called.
  */
 public interface IParser {
 
     /**
      * Returns the created {@link DSLGenerationModel} for code generation.
-     * @return the complete created DSLGenerationModel.
+     * Make sure the Model is completely created before this Method can
+     * be called.
+     * @return the complete created DSLGenerationModel instance.
      */
     DSLGenerationModel getGenerationModel();
 
     /**
-     * Method that has to create the order the attributes will be set in the
-     * DSL. It therefore has to create a chain by using
-     * {@link ClassAttribute#setNextAttribute(ClassAttribute)} and
-     * {@link ClassAttribute#setNextSimpleOptAttr(java.util.List)} inside the
-     * ModelClasses.
+     * Method that has to create the order of the attributes. 
+     * This should decide how the correct chain of DSL method calls
+     * looks like.
      */
     void createAttributeOrder();
 

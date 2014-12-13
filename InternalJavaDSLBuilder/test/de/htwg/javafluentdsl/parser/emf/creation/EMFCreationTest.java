@@ -18,44 +18,53 @@ import org.junit.runners.Suite.SuiteClasses;
 		EMFCreation_MultipleBuilderTest.class, EMFCreation_WrongModels.class })
 public class EMFCreationTest {
 	/**
-	 * Holds the absolute Path to the current directory
+	 * Holds the absolute Path to the current directory.
 	 */
-	public static final String projectPath = Paths.get(".").toAbsolutePath()
+	public static final String projectPath = 
+	        Paths.get(".").toAbsolutePath()
 			.normalize().toString();
 	/**
-	 * Path to the ECore Models
+	 * Path to the ECore Models.
 	 */
-	public static final String EMFGenModelPath = projectPath + "/emfmodel/";
+	public static final String EMFGenModelPath = 
+	        projectPath + "/emfmodel/";
 	/**
-	 * Root package for all generated Ecore DSLs
+	 * Root package for all generated Ecore DSLs.
 	 */
-	public final static String PACKAGE_DEST = "de.htwg.generated.emf.dsl";
+	public static final String PACKAGE_DEST = 
+	        "de.htwg.generated.emf.dsl";
 
 	/**
-	 * Package for Forum DSL
+	 * Package for Forum DSL.
 	 */
-	public final static String FORUM_DEST = PACKAGE_DEST + ".forum";
+	public static final String FORUM_DEST = 
+	        PACKAGE_DEST + ".forum";
 	/**
-     * Package for complex Forum DSL
+     * Package for complex Forum DSL.
      */
-	public final static String COMPLEX_FORUM_DEST = PACKAGE_DEST + ".complexforum";
+	public static final String COMPLEX_FORUM_DEST = 
+	        PACKAGE_DEST + ".complexforum";
 	/**
-	 * Package for exception DSL
+	 * Package for exception DSL.
 	 */
-	public final static String EXCMODEL_DEST = PACKAGE_DEST + ".exceptionCase";
+	public static final  String EXCMODEL_DEST = 
+	        PACKAGE_DEST + ".exceptionCase";
 	/**
-	 * Package for exceptionList DSL
+	 * Package for exceptionList DSL.
 	 */
-	public static final String EXC_LISTMODEL_DEST = PACKAGE_DEST
+	public final static  String EXC_LISTMODEL_DEST = 
+	        PACKAGE_DEST
 			+ ".exceptionCaseList";
 	/**
-	 * Package for OptOnly DSL
+	 * Package for OptOnly DSL.
 	 */
-	public final static String OPTONLY_DEST = PACKAGE_DEST + ".optonly";
+	public static final  String OPTONLY_DEST = 
+	        PACKAGE_DEST + ".optonly";
 	/**
-	 * Package for SimpleType DSL
+	 * Package for SimpleType DSL.
 	 */
-	public final static String ENUM_DEST = PACKAGE_DEST + ".simplyType";
+	public static final  String ENUM_DEST = 
+	        PACKAGE_DEST + ".simplyType";
 
 	/**
 	 * Helper Method to check if a File is was actually generated.
@@ -64,8 +73,10 @@ public class EMFCreationTest {
 	 *            The absolute Path the generated File should be located at
 	 * @param ending
 	 *            the ending the file should have in this case most likely "java"
+	 * @return
+	 *         true if file could be created, false if not
 	 */
-	public static boolean fileExists(String path, String ending) {
+	public static boolean fileExists(final String path, final String ending) {
 		String modelPath = projectPath + "/generated/" + path.replace('.', '/')
 				+ "." + ending;
 		try {

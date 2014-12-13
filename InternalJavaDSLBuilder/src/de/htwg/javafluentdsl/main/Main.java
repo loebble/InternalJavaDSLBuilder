@@ -16,11 +16,11 @@ public final class Main {
     /**
      * File Ending for a EMF Generator Model file.
      */
-    public static final String GENMODEL_FILE = ".genmodel";
+    private static final String GENMODEL_FILE = ".genmodel";
     /**
      * Message that occurs if not a valid source was given.
      */
-    public static final String WRONG_SOURCE = 
+    static final String WRONG_SOURCE = 
             "The first Parameter is not a valid source. "
             + "It either has to the abolute path to a EMF GenModel "
             + "File or a String describing the dsl model "
@@ -30,7 +30,7 @@ public final class Main {
     /**
      * Defines the number of parameters the application requires.
      */
-    public static final int NUMBER_OF_PARAMETER = 3;
+    private static final int NUMBER_OF_PARAMETER = 3;
 
     /**
      * Requires three String parameters as arguments (Source, TemplateOption,
@@ -67,12 +67,12 @@ public final class Main {
     }
 
     /**
-     * Decides which IStart Implementation to use by the given source.
+     * Decides which IStart Implementation to use for the given source.
      * 
      * @param source
      *            The String which represents a source.
      * @return IStart Implementation to use for further processing or null
-     *         source was not a correct one
+     *         if source was not a correct one
      */
     static IStart getStartForSource(final String source) {
         if (source.endsWith(GENMODEL_FILE)) {

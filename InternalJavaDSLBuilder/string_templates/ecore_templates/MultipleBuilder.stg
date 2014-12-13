@@ -120,15 +120,17 @@ public final <modelClass.className;format="cap"> build<modelClass.className;form
 >>
 
 createClassAttribute(classAttribute, attach) ::= <<
-<if(classAttribute.optional)>
-private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
 <if(classAttribute.list)>
-private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<else>
-private <classAttribute.type> <classAttribute.attributeName><attach>;<endif>
+private List\<<classAttribute.type>\> <classAttribute.attributeName><attach> = new ArrayList\<<classAttribute.type>\>();<
+else>private <classAttribute.type> <classAttribute.attributeName><attach>;
+<if(classAttribute.optional)> 
+private boolean <classAttribute.attributeName><attach>IsSet = false;<endif>
+<endif>
 >>
 
 createScopeAttribute(classAttribute) ::= <<
 private final <classAttribute.attributeName;format="cap">Scope <classAttribute.attributeName>Scope;
+
 >>
 
 instantiateScopeAttributes(classAttribute) ::= <<
@@ -138,7 +140,7 @@ this.<classAttribute.attributeName>Scope = this.new <classAttribute.attributeNam
 
 createAttributeScopeClass(className,classAttribute) ::= <<
 <if(classAttribute.list)><javaDocListScopeClass(classAttribute)>
-<elseif(classAttribute.reference)><javaDocRefernceScopeClass(classAttribute)>
+<elseif(classAttribute.reference)><javaDocReferenceScopeClass(classAttribute)>
 <else><javaDocScopeClass(classAttribute)>
 <endif>
 public class <classAttribute.attributeName;format="cap">Scope {
@@ -249,23 +251,23 @@ javaDocListScopeClass(classAttribute)::= <<
 <if(classAttribute.reference)>*The type of the list of attributes is defined by the model {@link <classAttribute.type>}<endif>
 */
 >>
-javaDocRefernceScopeClass(classAttribute)::= <<
+javaDocReferenceScopeClass(classAttribute)::= <<
 
 /**
-* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}.
+* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName>.
 * The type of the attribute is defined by the model {@link <classAttribute.type>}
 */
 >>
 javaDocScopeClass(classAttribute)::= <<
 
 /**
-* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}
+* Scope Class for the <classAttribute.type> attribute <classAttribute.attributeName> {@link <classAttribute.className>Builder#get<classAttribute.attributeName;format="cap">}.
 */
 >>
 
 javaDocOptOnlyScopeClass(modelClass)::= <<
 
 /**
-* Scope Class for setting optional attributes of <modelClass.className>
+* Scope Class for setting optional attributes of a <modelClass.className> instance.
 */
 >>

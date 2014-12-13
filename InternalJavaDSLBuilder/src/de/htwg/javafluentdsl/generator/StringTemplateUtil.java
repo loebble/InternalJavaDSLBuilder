@@ -10,7 +10,7 @@ import org.stringtemplate.v4.STGroupFile;
 import org.stringtemplate.v4.StringRenderer;
 
 /**
- * Util class for generating.
+ * Utility class for generating java files with StringTemplate files.
  * 
  */
 public final class StringTemplateUtil {

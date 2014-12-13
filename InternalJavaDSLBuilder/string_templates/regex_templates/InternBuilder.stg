@@ -36,8 +36,12 @@ createModelClass(modelClass) ::= <<
 public static class <modelClass.className>{
 <endif>
     <modelClass.allAttributes:{attribute|<createClassAttribute(attribute,"")>}>
-    
-    <! constructor !>
+    /**
+    * Instantiation only through
+    * {@link <modelClass.className>Builder#create<modelClass.className>}.
+    */
+    private  <modelClass.className>(){};
+    <! constructor with builder!>
     <javaDocModelClassConstructor(modelClass)>
     private <modelClass.className> (<modelClass.className>Builder builder){
         <!do not try to transfer opposite attributes that are not creator of opposite relation !>

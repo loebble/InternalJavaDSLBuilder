@@ -19,7 +19,7 @@ public class ModelClass {
      * @param genModel
      *            The corresponding DSLGenerationModel
      */
-    public ModelClass(final String name, final DSLGenerationModel genModel) {
+    ModelClass(final String name, final DSLGenerationModel genModel) {
         this.model = genModel;
         this.className = name;
         this.allAttributes = new ArrayList<ClassAttribute>();

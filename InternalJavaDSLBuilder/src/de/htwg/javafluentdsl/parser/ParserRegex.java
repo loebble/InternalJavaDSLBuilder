@@ -12,12 +12,11 @@ import de.htwg.javafluentdsl.dslmodel.ClassAttribute;
 import de.htwg.javafluentdsl.dslmodel.ModelClass;
 
 /**
- * Class for Creating a {@link DSLGenerationModel} from a model description
+ * Class for Creating a {@code DSLGenerationModel} from a model description
  * defined by 
- * {@link de.htwg.javafluentdsl.parser.RegexDefinitions#MODEL_DESCRIPTION_REGEX
- * model description}.
+ * {@link de.htwg.javafluentdsl.parser.RegexDefinitions
+ *  #MODEL_DESCRIPTION_REGEX}.
  * 
- * @see {@link IParser}
  */
 public final class ParserRegex extends AbstractIParserBasic {
 
@@ -150,8 +149,9 @@ public final class ParserRegex extends AbstractIParserBasic {
      * {@link RegexDefinitions#NAMING_OPERATOR}.
      * 
      * @param def
-     *            the definition defined by {@link RegexDefinitions#REGEX}
-     * @return the defined Name as String, or "" if none found
+     *            the String definition
+     * @return the defined Name as String, or "" 
+     *  if none was found
      */
     private String getNameOfDefinition(final String def) {
         Matcher namingMatcher = RegexDefinitions.NAMING_PATTERN.matcher(def);
@@ -202,7 +202,7 @@ public final class ParserRegex extends AbstractIParserBasic {
 
     /**
      * Retrieves the classes and their attributes defined in the language
-     * description and adds them to the {@link DSLGenerationModel}. instance
+     * description and adds them to the {@link #genModel}.
      */
     private void retrieveDefinedClasses() {
         while (this.classDefinitionMatcher.find()) {
@@ -331,13 +331,13 @@ public final class ParserRegex extends AbstractIParserBasic {
 
     /**
      * Retrieves Opposite definitions and sets the corresponding opposite
-     * attribute to the given ClassAttribute.
+     * attribute to the given ClassAttribute {@code currentAttr}.
      * 
      * @param currentAttr
      *            the attribute which needs a opposite reference
      * @param attrDef
      *            String with attribute definition which is defined by
-     *            {@link REGEX_ATTRIBUTE}
+     *            {@link RegexDefinitions#SINGLE_ATTRIBUTE_WITHOUT_OP}
      */
     private void setOppositeAttribute(final ClassAttribute currentAttr,
             final String attrDef) {

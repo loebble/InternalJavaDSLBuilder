@@ -3,10 +3,11 @@ package de.htwg.javafluentdsl.generator;
 import de.htwg.javafluentdsl.parser.IParser;
 
 /**
- * Type Interface for defining a generator.
+ * Interface for defining a generator that uses a Template and
+ * a DSLGenerationmodel instance to generate an internal Java DSL.
  *
  */
-public interface ITemplateGenerator {
+public interface IGenerator {
 
     /**
      * Generating the Files needed for the DSL.

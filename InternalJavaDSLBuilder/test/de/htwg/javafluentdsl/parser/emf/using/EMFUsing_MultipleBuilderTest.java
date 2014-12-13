@@ -1,5 +1,10 @@
 package de.htwg.javafluentdsl.parser.emf.using;
 
+import static de.htwg.generated.emf.dsl.complexforum.multiBuilder.ComplexForumBuilder.createComplexForum;
+import static de.htwg.generated.emf.dsl.complexforum.multiBuilder.ComplexPostBuilder.createComplexPost;
+import static de.htwg.generated.emf.dsl.complexforum.multiBuilder.ComplexUserBuilder.createComplexUser;
+import static de.htwg.generated.emf.dsl.complexforum.multiBuilder.RatingBuilder.createRating;
+import static de.htwg.generated.emf.dsl.complexforum.multiBuilder.SectionBuilder.createSection;
 import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.ExceptionCaseBuilder.createExceptionCase;
 import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.OppositeOnlyBuilder.createOppositeOnly;
 import static de.htwg.generated.emf.dsl.exceptionCase.multiBuilder.OppositeWithMandBuilder.createOppositeWithMand;
@@ -21,6 +26,8 @@ import de.htwg.generated.emf.dsl.optonly.multiBuilder.RefBuilder;
 import de.htwg.generated.emf.dsl.forum.multiBuilder.PostBuilder;
 import de.htwg.generated.emf.dsl.forum.multiBuilder.ForumBuilder;
 import de.htwg.generated.emf.dsl.forum.multiBuilder.UserBuilder;
+import de.htwg.generated.emf.model.ComplexForum.ComplexForum;
+import de.htwg.generated.emf.model.ComplexForum.ComplexUser;
 import de.htwg.generated.emf.model.ExceptionCase.ExceptionCase;
 import de.htwg.generated.emf.model.ExceptionCaseList.ExceptionCaseList;
 import de.htwg.generated.emf.model.OptOnly.OptOnly;
@@ -33,9 +40,11 @@ import de.htwg.generated.emf.model.Forum.User;
 import de.htwg.javafluentdsl.parser.emf.creation.EMFCreation_SingleBuilderTest;
 
 /**
- * Test For Using the EMF DSL. If imports are not correct pls make sure emf
- * genmodel has created EMF models and {@link EMFCreation_SingleBuilderTest} was
- * run
+ * Test For Using the EMF DSL. The Testmethods
+ * have the names of the Ecore model and dsl they test. 
+ * If imports are not correct pls make sure emf
+ * genmodel has created EMF models 
+ * and {@link EMFCreation_SingleBuilderTest} was run
  *
  */
 public class EMFUsing_MultipleBuilderTest {
@@ -66,21 +75,23 @@ public class EMFUsing_MultipleBuilderTest {
 	String postText1 = "MyPostText";
 	String postTitle2 = "MySecondPost";
 	String postText2 = "MySecondPostText";
+    String postTitle3 = "MyThirdPost";
+    String postText3 = "MyThirdPostText";
 	String urlString = "http://MyForum.com";
 
 	@Test
 	public void forumMultiBuilderTest() throws MalformedURLException {
 		// No static import here to show that multiple Builders are used
 		User user1 = UserBuilder
-				.createUser()
-				.optFirstName(firstName)
-				.optLastName(lastName)
-				.optAge(age)
-				.email(email)
-				.addPosts(
-						PostBuilder.createPost().optText(postText1)
-								.optViews(5).title(postTitle1).buildPost())
-				.noPosts().buildUser();
+			.createUser()
+			.optFirstName(firstName)
+			.optLastName(lastName)
+			.optAge(age)
+			.email(email)
+			.addPosts(
+				PostBuilder.createPost().optText(postText1)
+					.optViews(5).title(postTitle1).buildPost())
+			.noPosts().buildUser();
 		Post post1 = user1.getPosts().get(0);
 		Post post2 = PostBuilder.createPost().optText(postText2)
 				.optViews(10).title(postTitle2).buildPost();
@@ -97,15 +108,15 @@ public class EMFUsing_MultipleBuilderTest {
 				.name(forumName).url(new URL(urlString)).addUsers(user1)
 				.addUsers(user2).noUsers().buildForum();
 
-		assertTrue(EMFUsingTest.validateObject(user1));
-		assertTrue(EMFUsingTest.validateObject(post1));
-		assertTrue(EMFUsingTest.validateObject(post2));
-		assertTrue(EMFUsingTest.validateObject(post3));
-		assertTrue(EMFUsingTest.validateObject(simpleForum));
+		assertTrue(EMFUsingTest.validateEObject(user1));
+		assertTrue(EMFUsingTest.validateEObject(post1));
+		assertTrue(EMFUsingTest.validateEObject(post2));
+		assertTrue(EMFUsingTest.validateEObject(post3));
+		assertTrue(EMFUsingTest.validateEObject(simpleForum));
 		// user2 has no posts, but at least one post is required
-		assertTrue(!EMFUsingTest.validateObject(user2));
+		assertTrue(!EMFUsingTest.validateEObject(user2));
 		user2.getPosts().add(post3);
-		assertTrue(EMFUsingTest.validateObject(user2));
+		assertTrue(EMFUsingTest.validateEObject(user2));
 
 		// check for list sizes
 		assertTrue(user1.getPosts().size() == 2);
@@ -120,10 +131,102 @@ public class EMFUsing_MultipleBuilderTest {
 		assertTrue(EcoreUtil.equals(simpleForum.getUsers().get(1), user2));
 	}
 	
-	@Test
-    public void complexForumMultiBuilderTest() throws MalformedURLException {
-	    //TODO
-	}
+    @Test
+    public void ComplexForumSingleBuilderTest() throws MalformedURLException {
+        ComplexForum complexForum = createComplexForum()
+                .name(forumName)
+                .url(new URL(urlString))
+                .addSections(createSection().addModerators(
+                        createComplexUser().email("dummy").nickName("dummy").rating(createRating().buildRating()).noPosts().buildComplexUser()
+                        ).noModerators()
+                        .buildSection()
+                )
+                .noSections()
+                .addUsers(
+                    createComplexUser()
+                        .optFirstName(firstName)
+                        .optLastName(lastName)
+                        .optAge(age)
+                        .email(email)
+                        .nickName(nickName)
+                        .rating(createRating().optUpps(5).buildRating())
+                        .addPosts(
+                            createComplexPost().title(postTitle1)
+                                .optViews(5).text(postText1)
+                                .noRepliers()
+                                .rating(createRating().buildRating())
+                                .buildComplexPost()
+                            )
+                        .addPosts(
+                            createComplexPost().title(postTitle2)
+                            .text(postText2)
+                            .noRepliers()
+                            .rating(createRating().buildRating())
+                            .buildComplexPost()
+                            )
+                         .noPosts()
+                         .buildComplexUser()
+                )
+                .addUsers(
+                    createComplexUser()
+                        .optFirstName(firstName2)
+                        .optLastName(lastName2)
+                        .optAge(age2)
+                        .email(email2)
+                        .nickName(nickName2)
+                        .rating(createRating().buildRating())
+                        .addPosts(
+                            createComplexPost().title(postTitle3)
+                            .optViews(1).text(postText3)
+                            .noRepliers()
+                            .rating(createRating().buildRating())
+                            .buildComplexPost()
+                        )
+                        .noPosts()
+                    .buildComplexUser()
+                )
+                .noUsers()
+        .buildComplexForum();
+
+        ComplexUser user1 = complexForum.getUsers().get(0);
+        ComplexUser user2 = complexForum.getUsers().get(1);
+        // check for list sizes
+        assertTrue(user1.getPosts().size() == 2);
+        assertTrue(user2.getPosts().size() == 1);
+        assertTrue(complexForum.getSections().size() == 1);
+        assertTrue(complexForum.getSections().get(0).getModerators().size() == 1);
+        assertTrue(complexForum.getUsers().size() == 2);
+        //some set values
+        assertTrue(user1.getFirstName().equals(firstName));
+        assertTrue(user2.getFirstName().equals(firstName2));
+        assertTrue(user1.getPosts().get(0).getTitle().equals(postTitle1));
+        assertTrue(user1.getPosts().get(1).getTitle().equals(postTitle2));
+        assertTrue(user2.getPosts().get(0).getTitle().equals(postTitle3));
+        // check for same opposite objects, regardless 
+        //from which side they were set
+        assertTrue(EcoreUtil.equals(complexForum.getUsers().get(0), user1));
+        assertTrue(EcoreUtil.equals(complexForum.getUsers().get(1), user2));
+        assertTrue(EcoreUtil
+                .equals(user1, user1.getPosts().get(0).getCreator()));
+        assertTrue(EcoreUtil
+                .equals(user1.getPosts().get(1).getCreator(), user1));
+        assertTrue(EcoreUtil
+                .equals(user2, user2.getPosts().get(0).getCreator()));
+        // Calling EMFs validateObject for validating
+        assertTrue(EMFUsingTest.validateEObject(complexForum));
+        complexForum.getSections().forEach(
+                s -> assertTrue(EMFUsingTest.validateEObject(s)));
+        complexForum.getUsers().forEach(
+                u -> assertTrue(EMFUsingTest.validateEObject(u)));
+        complexForum.getUsers().forEach(
+                u -> u.getPosts().forEach(
+                        p -> assertTrue(EMFUsingTest.validateEObject(p))));
+        complexForum.getUsers().forEach(
+                u -> u.getPosts().forEach(
+                        p -> assertTrue(EMFUsingTest.validateEObject(p.getRating()))));
+        complexForum.getUsers().forEach(
+                u -> assertTrue(EMFUsingTest.validateEObject(u.getRating())));
+    }
 
 	@Test
 	public void optOnlyMultiBuilderTest() {
@@ -152,11 +255,11 @@ public class EMFUsing_MultipleBuilderTest {
 				.c(createOppositeOnly().buildOppositeOnly())
 				.buildExceptionCase();
 
-		assertTrue(EMFUsingTest.validateObject(exCase));
-		assertTrue(EMFUsingTest.validateObject(exCase));
-		assertTrue(EMFUsingTest.validateObject(exCase.getA()));
-		assertTrue(EMFUsingTest.validateObject(exCase.getB()));
-		assertTrue(EMFUsingTest.validateObject(exCase.getC()));
+		assertTrue(EMFUsingTest.validateEObject(exCase));
+		assertTrue(EMFUsingTest.validateEObject(exCase));
+		assertTrue(EMFUsingTest.validateEObject(exCase.getA()));
+		assertTrue(EMFUsingTest.validateEObject(exCase.getB()));
+		assertTrue(EMFUsingTest.validateEObject(exCase.getC()));
 		// String values has been set
 		assertTrue("OptionalA".equals(exCase.getA().getStringValue()));
 		assertTrue("MandatoryString".equals(exCase.getB().getStringValue()));
@@ -177,10 +280,10 @@ public class EMFUsing_MultipleBuilderTest {
 				.addC(createOppositeOnlyList().buildOppositeOnlyList()).noC()
 				.buildExceptionCaseList();
 
-		assertTrue(EMFUsingTest.validateObject(exCaseList));
-		assertTrue(EMFUsingTest.validateObject(exCaseList.getA().get(0)));
-		assertTrue(EMFUsingTest.validateObject(exCaseList.getB().get(0)));
-		assertTrue(EMFUsingTest.validateObject(exCaseList.getC().get(0)));
+		assertTrue(EMFUsingTest.validateEObject(exCaseList));
+		assertTrue(EMFUsingTest.validateEObject(exCaseList.getA().get(0)));
+		assertTrue(EMFUsingTest.validateEObject(exCaseList.getB().get(0)));
+		assertTrue(EMFUsingTest.validateEObject(exCaseList.getC().get(0)));
 		// sizes of each list and opposites list
 		assertTrue(exCaseList.getA().size() == 1
 				&& exCaseList.getA().get(0).getAOPRef().size() == 1);

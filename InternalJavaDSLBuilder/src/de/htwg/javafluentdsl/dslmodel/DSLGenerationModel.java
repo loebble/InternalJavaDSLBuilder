@@ -96,11 +96,10 @@ public class DSLGenerationModel {
     }
 
     /**
-     * Adds a single import to the list of imports.
+     * Adds a single import to the list of {@link #imports}.
      * 
      * @param importString
      *            the full name of an import
-     * @see {@link #imports}
      */
     public final void addImport(final String importString) {
         if (!imports.contains(importString)) {

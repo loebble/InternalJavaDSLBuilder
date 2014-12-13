@@ -139,15 +139,14 @@ public class StartEMF implements IStart {
     }
 
     /**
-     * Retrieves the generation model {@link GenModel} from a Resource
-     * {@link Resource}. Make sure the resource has a valid Registry
-     * {@link Registry} for loading genmodel and ecore files from the resource.
+     * Retrieves the generation model {@link GenModel} from a Resource.
+     * Make sure the resource has a valid Registry
+     * for loading genmodel and ecore files from the resource.
      * 
      * @param resource
      *            the Resource object with valid Registry
      * @return the found GenModel
-     * @see for valid registry {@link #registerResourceSet()
-     */
+     * @see #registerResourceSet()     */
     private static GenModel getGenModelFromResourceSet(
             final Resource resource) {
         GenModel genModel = null;

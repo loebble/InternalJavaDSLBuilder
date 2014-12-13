@@ -13,7 +13,7 @@ import de.htwg.javafluentdsl.parser.emf.creation.EMFCreationTest;
 
 /**
  * Test class for Using the created DSLs by {@link EMFCreationTest}. Make sure
- * the DSLs where created bevore running this one.
+ * the ECore model code and the DSLs where created before running this test.
  *
  */
 @RunWith(Suite.class)
@@ -30,13 +30,13 @@ public class EMFUsingTest {
 	 *            EObject instance to validate
 	 * @return true if valid
 	 */
-	public static boolean validateObject(EObject eObject) {
+	public static boolean validateEObject(EObject eObject) {
 		Diagnostic diagnostic = Diagnostician.INSTANCE.validate(eObject);
 		if (diagnostic.getSeverity() == Diagnostic.ERROR
 				|| diagnostic.getSeverity() == Diagnostic.WARNING) {
 			System.err.println(diagnostic.getMessage());
-			for (Iterator<Diagnostic> i = diagnostic.getChildren().iterator(); i
-					.hasNext();) {
+			for (Iterator<Diagnostic> i = diagnostic.getChildren().iterator()
+			        ; i.hasNext();) {
 				Diagnostic childDiagnostic = (Diagnostic) i.next();
 				switch (childDiagnostic.getSeverity()) {
 				case Diagnostic.ERROR:

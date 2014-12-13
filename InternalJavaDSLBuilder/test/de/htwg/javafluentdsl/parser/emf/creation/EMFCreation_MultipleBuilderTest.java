@@ -8,7 +8,7 @@ import de.htwg.javafluentdsl.generator.GeneratorEcore;
 import de.htwg.javafluentdsl.main.StartEMF;
 
 /**
- * Test class for Ecore DSLs with template option multiBuilder.
+ * Test class to create Ecore DSLs with template option multiBuilder.
  *
  */
 public class EMFCreation_MultipleBuilderTest {

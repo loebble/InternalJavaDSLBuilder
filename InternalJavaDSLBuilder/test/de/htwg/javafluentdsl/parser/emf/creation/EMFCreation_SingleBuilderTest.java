@@ -8,7 +8,7 @@ import de.htwg.javafluentdsl.generator.GeneratorEcore;
 import de.htwg.javafluentdsl.main.StartEMF;
 
 /**
- * Test class for Ecore DSLs with template option singleBuilder.
+ * Test class for creating Ecore DSLs with template option singleBuilder.
  */
 public class EMFCreation_SingleBuilderTest {
 
@@ -45,7 +45,7 @@ public class EMFCreation_SingleBuilderTest {
 	/**
 	 * Method for testing a exception Model as described by the
 	 * ExceptionModel.ecore and ExceptionModel.genmodel files. This Model was
-	 * created for special cases.
+	 * created for testing special Attribute and Reference cases.
 	 */
 	@Test
 	public void exceptionModel_SingleBuilderTest() {
@@ -61,7 +61,7 @@ public class EMFCreation_SingleBuilderTest {
 	/**
 	 * Method for testing a ExceptionList Model as described by the
 	 * ExceptionList.ecore and ExceptionList.genmodel files. This Model was
-	 * created for special List cases.
+	 * created for testing special List cases.
 	 */
 	@Test
 	public void exceptionListModel_SingleBuilderTest() {
@@ -75,12 +75,12 @@ public class EMFCreation_SingleBuilderTest {
 	}
 
 	/**
-	 * Method for testing a OptOnly Model as described by the OptOnly.ecore and
+	 * Method for testing an OptOnly Model as described by the OptOnly.ecore and
 	 * OptOnly.genmodel files. This Model was created for testing the optional
 	 * only case if only simple optional attributes are in the ecore model.
 	 */
 	@Test
-	public void OptOnly_SingleBuilderTest() {
+	public void optOnly_SingleBuilderTest() {
 		String genModelPath = EMFCreationTest.EMFGenModelPath
 				+ "OptOnly.genmodel";
 		new StartEMF().startDSLGenerationProcess(genModelPath,
@@ -106,12 +106,4 @@ public class EMFCreation_SingleBuilderTest {
 		assertTrue(EMFCreationTest.fileExists(EMFCreationTest.ENUM_DEST
 				+ ".singleBuilder.SimpleTypesBuilder", "java"));
 	}
-	// @Test
-	// public void Expression_SingleBuilderTest(){
-	// String genModelPath = EMFGenModelPath + "Expression.genmodel";
-	// new StartEMF().startDSLGenerationProcess(genModelPath,
-	// GeneratorEcore.SINGLE_BUILDER_OPTION,"de.htwg.expression.dsl.singleBuilder");
-	// EMFCreation.fileExists("de.htwg.expression.dsl.singleBuilder.ExpressionBuilder","java");
-	// }
-
 }

@@ -1,5 +1,5 @@
 /**
-* This package contains the DSLModel Model Component.
+* This package contains the DSLModel component.
 * It is used to describe a internal DSL 
 * which can then be generated from the 
 * {@link de.htwg.javafluentdsl.dslmodel.DSLGenerationModel}.

@@ -1,5 +1,5 @@
 /**
-* This Package represents the Generator Component.
+* This package represents the generator component.
 * Generators which uses Templates to generate internal
 * DSLs are located in this package.
 * @author Steven B&ouml;ckle
